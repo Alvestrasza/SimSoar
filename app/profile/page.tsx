@@ -41,7 +41,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           <div className="formGrid">
             <div className="formGroup"><label>Benutzername</label><input value={session.user.name ?? "–"} readOnly aria-readonly="true" /></div>
             <div className="formGroup"><label>Email Adresse</label><input value={session.user.email ?? "–"} readOnly aria-readonly="true" /></div>
-            <div className="formGroup"><label>Callsign *</label><input name="callsign" defaultValue={profile?.callsign ?? ""} /></div>
+            <div className="formGroup"><label>Callsign</label><input value={profile?.callsign ?? "Wird von Keycloak übernommen"} readOnly /><p className="muted">Das Callsign wird in Keycloak gepflegt und beim Login automatisch nach SimSoar synchronisiert.</p></div>
             <div className="formGroup"><label>Heimatflugplatz</label><input name="homeAirfield" defaultValue={profile?.homeAirfield ?? ""} /></div>
             <div className="formGroup"><label>Lieblings-Simulator</label><select name="favoriteSim" defaultValue={profile?.favoriteSim ?? "MSFS 2024"}><option>MSFS 2024</option><option>MSFS 2020</option><option>Condor 2</option><option>X-Plane 12</option></select></div>
             <div className="formGroup"><label>Lieblingsflugzeug</label><input name="favoriteGlider" defaultValue={profile?.favoriteGlider ?? ""} /></div>
