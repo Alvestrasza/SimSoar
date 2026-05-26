@@ -26,6 +26,10 @@ function buildKeycloakLogoutUrl(idToken?: string | null): string {
   return logoutUrl.toString();
 }
 
+export async function signInWithKeycloak() {
+  await signIn("keycloak", { redirectTo: "/" });
+}
+
 export async function signOutWithKeycloak() {
   const session = await auth();
 

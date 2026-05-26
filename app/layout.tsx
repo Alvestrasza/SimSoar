@@ -3,6 +3,8 @@ import Link from "next/link";
 import { SITE_COPYRIGHT_HOLDER, SITE_VERSION } from "@/lib/site";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
+import { Suspense } from "react";
+import { AuthNav } from "@/app/components/AuthNav";
 
 export const metadata: Metadata = {
   title: "SimSoar – Virtual Gliding Community",
@@ -26,8 +28,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <Link href="/profile">Profil</Link>
           </div>
           <div className="navRight">
-            <Link className="btn btnSecondary" href="/profile">Mein Profil</Link>
-            <Link className="btn btnPrimary" href="/login">Anmelden</Link>
+            <Suspense fallback={null}>
+              <AuthNav />
+            </Suspense>
           </div>
         </nav>
         {children}
