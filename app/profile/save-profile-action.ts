@@ -4,8 +4,15 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { updateKeycloakUserCallsign } from "@/lib/keycloak-admin";
 
 const schema = z.object({
+  callsign: z
+    .string()
+    .trim()
+    .min(3, "Callsign must contain at least 3 characters.")
+    .max(32, "Callsign must contain at most 32 characters.")
+    .regex(/^[A-Za-z0-9_-]+$/, "Callsign may only contain letters, numbers, underscore and hyphen."),
   homeAirfield: z.string().max(120).optional(),
   favoriteSim: z.string().max(40).optional(),
   favoriteGlider: z.string().max(80).optional(),
@@ -19,6 +26,7 @@ export async function saveProfileAction(formData: FormData) {
   if (!session?.user?.id) throw new Error("Not authenticated.");
 
   const data = schema.parse({
+    callsign: formData.get("callsign"),
     homeAirfield: formData.get("homeAirfield") || undefined,
     favoriteSim: formData.get("favoriteSim") || undefined,
     favoriteGlider: formData.get("favoriteGlider") || undefined,
@@ -27,22 +35,41 @@ export async function saveProfileAction(formData: FormData) {
     showHomeAirfieldOnHome: formData.get("showHomeAirfieldOnHome") === "on"
   });
 
-  const existingProfile = await prisma.pilotProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { callsign: true }
+  const account = await prisma.account.findFirst({
+    where: {
+      userId: session.user.id,
+      provider: "keycloak"
+    },
+    select: {
+      providerAccountId: true
+    }
   });
 
-  if (!existingProfile?.callsign) {
-    throw new Error("No callsign found. Please update your Keycloak profile and sign in again.");
+  if (!account?.providerAccountId) {
+    throw new Error("No Keycloak account mapping found for this SimSoar user.");
   }
+
+  const callsignTaken = await prisma.pilotProfile.findFirst({
+    where: {
+      callsign: data.callsign,
+      NOT: {
+        userId: session.user.id
+      }
+    },
+    select: {
+      id: true
+    }
+  });
+
+  if (callsignTaken) {
+    throw new Error("This callsign is already used by another SimSoar pilot.");
+  }
+
+  await updateKeycloakUserCallsign(account.providerAccountId, data.callsign);
 
   await prisma.pilotProfile.upsert({
     where: { userId: session.user.id },
-    create: {
-      userId: session.user.id,
-      callsign: existingProfile.callsign,
-      ...data
-    },
+    create: { userId: session.user.id, ...data },
     update: data
   });
 
