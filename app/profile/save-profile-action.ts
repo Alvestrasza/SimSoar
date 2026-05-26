@@ -35,5 +35,5 @@ export async function saveProfileAction(formData: FormData) {
     update: data
   });
 
-  redirect("/profile");
+  redirect("/profile?saved=1");
 }

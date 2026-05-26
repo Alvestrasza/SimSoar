@@ -4,11 +4,21 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { saveProfileAction } from "./save-profile-action";
 import Link from "next/link";
+import { ProfileSaveNotice } from "./ProfileSaveNotice";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-export default async function ProfilePage() {
+type ProfilePageProps = {
+  searchParams?:
+    | Promise<Record<string, string | string[] | undefined>>
+    | Record<string, string | string[] | undefined>;
+};
+
+export default async function ProfilePage({ searchParams }: ProfilePageProps) {
+  const params = searchParams ? await searchParams : {};
+  const savedParam = Array.isArray(params.saved) ? params.saved[0] : params.saved;
+  const profileSaved = savedParam === "1";
   let session = null;
   try {
     session = await auth();
@@ -29,6 +39,8 @@ export default async function ProfilePage() {
         </div>
         <form className="cardBody" action={saveProfileAction}>
           <div className="formGrid">
+            <div className="formGroup"><label>Benutzername</label><input value={session.user.name ?? "–"} readOnly aria-readonly="true" /></div>
+            <div className="formGroup"><label>Email Adresse</label><input value={session.user.email ?? "–"} readOnly aria-readonly="true" /></div>
             <div className="formGroup"><label>Callsign *</label><input name="callsign" defaultValue={profile?.callsign ?? ""} required /></div>
             <div className="formGroup"><label>Heimatflugplatz</label><input name="homeAirfield" defaultValue={profile?.homeAirfield ?? ""} /></div>
             <div className="formGroup"><label>Lieblings-Simulator</label><select name="favoriteSim" defaultValue={profile?.favoriteSim ?? "MSFS 2024"}><option>MSFS 2024</option><option>MSFS 2020</option><option>Condor 2</option><option>X-Plane 12</option></select></div>
@@ -48,6 +60,7 @@ export default async function ProfilePage() {
             <div className="formGroup full"><label>Über mich</label><textarea name="bio" defaultValue={profile?.bio ?? ""} /></div>
           </div>
           <p><button className="btn btnSuccess" type="submit">✓ Profil speichern</button></p>
+          {profileSaved ? <ProfileSaveNotice /> : null}
         </form>
       </div>
 
