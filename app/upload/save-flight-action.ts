@@ -8,7 +8,6 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { parseIgc } from "@/lib/igc";
 import { safeFilename, sha256Buffer } from "@/lib/security";
-import { FlightVisibility } from "@prisma/client";
 
 const formSchema = z.object({
   pilotCallsign: z.string().min(2).max(40),
@@ -16,7 +15,7 @@ const formSchema = z.object({
   registration: z.string().max(40).optional(),
   glider: z.string().max(80).optional(),
   competitionClass: z.string().max(80).optional(),
-  visibility: z.nativeEnum(FlightVisibility),
+  visibility: z.enum(["PUBLIC", "PRIVATE", "UNLISTED"]),
   comment: z.string().max(2000).optional()
 });
 

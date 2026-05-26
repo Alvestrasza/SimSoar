@@ -1,44 +1,36 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db";
+import FlightsExplorer from "@/app/components/FlightsExplorer";
+
+export const dynamic = "force-dynamic";
 
 export default async function FlightsPage() {
   const flights = await prisma.flight.findMany({
     where: { visibility: "PUBLIC" },
     orderBy: [{ olcPoints: "desc" }, { distanceKm: "desc" }],
-    take: 100
+    take: 100,
+    include: { track: { orderBy: { seq: "asc" }, take: 220 } }
   });
 
   return (
     <main className="wrap">
-      <div className="twoCol">
-        <section className="card">
-          <div className="cardHead"><span className="cardTitle">🏆 Bestenliste – Virtuelle Flüge</span></div>
-          <div className="tableWrap">
-            <table>
-              <thead>
-                <tr><th>#</th><th>Pilot</th><th>Strecke</th><th>OLC</th><th>Ø km/h</th><th>Max ▲</th><th>Simulator</th><th></th></tr>
-              </thead>
-              <tbody>
-                {flights.map((f, i) => (
-                  <tr key={f.id}>
-                    <td><strong>{i + 1}</strong></td>
-                    <td>{f.pilotCallsign}</td>
-                    <td>{Math.round(f.distanceKm)} km</td>
-                    <td>{Math.round(f.olcPoints)}</td>
-                    <td>{Math.round(f.avgSpeedKmh)}</td>
-                    <td>{f.maxVarioMs.toFixed(1)} m/s</td>
-                    <td><span className="badge">{f.simulator}</span></td>
-                    <td><Link className="btn btnSecondary" href={`/flights/${f.id}`}>Details</Link></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-        <aside className="grid">
-          <div className="card"><div className="cardHead"><span className="cardTitle">ℹ️ Hinweis</span></div><div className="cardBody muted">Filter und Live-Karten sind als nächster Ausbaupunkt vorbereitet. Die Datenbasis ist bereits multi-user-fähig.</div></div>
-        </aside>
-      </div>
+      <div className="sectionHead"><span className="cardTitle">🏆 Bestenliste – Virtuelle Flüge</span></div>
+      <FlightsExplorer
+        flights={flights.map((f: any) => ({
+          id: f.id,
+          title: f.title,
+          pilotCallsign: f.pilotCallsign,
+          simulator: f.simulator,
+          glider: f.glider,
+          registration: f.registration,
+          distanceKm: f.distanceKm,
+          olcPoints: f.olcPoints,
+          avgSpeedKmh: f.avgSpeedKmh,
+          maxVarioMs: f.maxVarioMs,
+          durationSeconds: f.durationSeconds,
+          createdAt: f.createdAt.toISOString(),
+          track: f.track.map((p: any) => ({ lat: p.lat, lon: p.lon, altM: p.altM }))
+        }))}
+      />
     </main>
   );
 }

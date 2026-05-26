@@ -11,7 +11,8 @@ const schema = z.object({
   favoriteSim: z.string().max(40).optional(),
   favoriteGlider: z.string().max(80).optional(),
   country: z.string().max(80).optional(),
-  bio: z.string().max(2000).optional()
+  bio: z.string().max(2000).optional(),
+  showHomeAirfieldOnHome: z.boolean().default(false)
 });
 
 export async function saveProfileAction(formData: FormData) {
@@ -24,7 +25,8 @@ export async function saveProfileAction(formData: FormData) {
     favoriteSim: formData.get("favoriteSim") || undefined,
     favoriteGlider: formData.get("favoriteGlider") || undefined,
     country: formData.get("country") || undefined,
-    bio: formData.get("bio") || undefined
+    bio: formData.get("bio") || undefined,
+    showHomeAirfieldOnHome: formData.get("showHomeAirfieldOnHome") === "on"
   });
 
   await prisma.pilotProfile.upsert({

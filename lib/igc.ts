@@ -1,6 +1,7 @@
 export type TrackPointInput = {
   seq: number;
   time?: Date;
+  secondsOfDay: number;
   lat: number;
   lon: number;
   altM: number;
@@ -39,17 +40,37 @@ export type ParsedIgc = {
 const GLIDER_MAP: Record<string, string> = {
   ASK21: "ASK 21",
   "ASK-21": "ASK 21",
+  "ASK 21": "ASK 21",
+  ASK13: "ASK 13",
   ASG29: "ASG 29",
   "ASG-29": "ASG 29",
+  "ASG 29": "ASG 29",
   ASW28: "ASW 28",
   "ASW-28": "ASW 28",
+  ASW28E: "ASW 28e",
+  AS33: "AS 33 Me",
+  "AS-33": "AS 33 Me",
   DISCUS2C: "Discus 2c",
+  "DISCUS-2C": "Discus 2c",
+  DISCUS2: "Discus 2c",
+  VENTUS3: "Ventus 3",
+  "VENTUS-3": "Ventus 3",
+  VENTUS2: "Ventus 2",
   LS8: "LS8-18",
   "LS-8": "LS8-18",
+  LS4: "LS4",
+  "LS-4": "LS4",
   DG808: "DG808S",
   "DG-808": "DG808S",
+  DG1000: "DG-1000",
   ARCUS: "Arcus M",
-  NIMBUS: "Nimbus 4"
+  NIMBUS: "Nimbus 4",
+  BLANIK: "Blaník L-13",
+  SG38: "SG 38",
+  KA6: "Ka-6",
+  "KA-6": "Ka-6",
+  PIK20: "PIK-20",
+  "PIK-20": "PIK-20"
 };
 
 function haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -93,12 +114,22 @@ function detectGlider(lines: string[]): string | undefined {
 }
 
 function parseDate(lines: string[]): { day: number; month: number; year: number } | undefined {
-  const h = lines.find((line) => /^HFDTE/i.test(line));
-  if (!h) return undefined;
-  const m = h.match(/^HFDTE(\d{2})(\d{2})(\d{2})/i);
-  if (!m) return undefined;
-  const yy = Number(m[3]);
-  return { day: Number(m[1]), month: Number(m[2]), year: 2000 + yy };
+  const line = lines.find((candidate) => /^HFDTE/i.test(candidate));
+  if (!line) return undefined;
+
+  const match = line.match(/^HFDTE(?:DATE:)?(\d{2})(\d{2})(\d{2})/i);
+  if (!match) return undefined;
+
+  return {
+    day: Number(match[1]),
+    month: Number(match[2]),
+    year: 2000 + Number(match[3])
+  };
+}
+
+function secondsDelta(current: number, previous: number): number {
+  const delta = current - previous;
+  return delta < 0 ? delta + 86400 : delta;
 }
 
 export function parseIgc(text: string): ParsedIgc {
@@ -120,24 +151,28 @@ export function parseIgc(text: string): ParsedIgc {
   for (const line of lines) {
     if (!line.startsWith("B") || line.length < 35) continue;
 
+    const validFlag = line.slice(24, 25);
+    if (validFlag !== "A" && validFlag !== "V") continue;
+
     const hh = Number(line.slice(1, 3));
     const mm = Number(line.slice(3, 5));
     const ss = Number(line.slice(5, 7));
+    const secondsOfDay = hh * 3600 + mm * 60 + ss;
     const lat = parseIgcLat(line.slice(7, 14), line.slice(14, 15));
     const lon = parseIgcLon(line.slice(15, 23), line.slice(23, 24));
-    const altM = Number(line.slice(30, 35));
+    const pressureAlt = Number(line.slice(25, 30));
+    const gpsAlt = Number(line.slice(30, 35));
+    const altM = Number.isFinite(pressureAlt) && pressureAlt !== 0 ? pressureAlt : gpsAlt;
 
-    if (!Number.isFinite(lat) || !Number.isFinite(lon) || !Number.isFinite(altM)) continue;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || !Number.isFinite(altM) || !Number.isFinite(secondsOfDay)) continue;
 
     const time = date ? new Date(Date.UTC(date.year, date.month - 1, date.day, hh, mm, ss)) : undefined;
-    const point: TrackPointInput = { seq: points.length, time, lat, lon, altM };
+    const point: TrackPointInput = { seq: points.length, time, secondsOfDay, lat, lon, altM };
 
     if (previous) {
       totalMeters += haversine(previous.lat, previous.lon, lat, lon);
-      if (previous.time && time) {
-        const dt = (time.getTime() - previous.time.getTime()) / 1000;
-        if (dt > 0 && dt < 120) point.varioMs = (altM - previous.altM) / dt;
-      }
+      const dt = secondsDelta(secondsOfDay, previous.secondsOfDay);
+      if (dt > 0 && dt <= 30) point.varioMs = (altM - previous.altM) / dt;
     }
 
     points.push(point);
@@ -150,16 +185,12 @@ export function parseIgc(text: string): ParsedIgc {
 
   const first = points[0];
   const last = points[points.length - 1];
-  const durationSeconds =
-    first.time && last.time
-      ? Math.max(0, Math.round((last.time.getTime() - first.time.getTime()) / 1000))
-      : 0;
-
-  const altitudes = points.map((p) => p.altM);
+  const durationSeconds = secondsDelta(last.secondsOfDay, first.secondsOfDay);
+  const altitudes = points.map((p) => p.altM).filter((alt) => Number.isFinite(alt));
   const varios = points.map((p) => p.varioMs ?? 0);
   const distanceKm = totalMeters / 1000;
   const avgSpeedKmh = durationSeconds > 0 ? distanceKm / (durationSeconds / 3600) : 0;
-  const olcPoints = distanceKm * 2.5;
+  const olcPoints = distanceKm * 1.8;
 
   return {
     pilot,
@@ -181,35 +212,45 @@ export function parseIgc(text: string): ParsedIgc {
 
 function detectThermals(points: TrackPointInput[]): ThermalInput[] {
   const thermals: ThermalInput[] = [];
-  let start = -1;
+  if (points.length < 20) return thermals;
 
-  for (let i = 1; i < points.length; i++) {
-    const v = points[i].varioMs ?? 0;
-    if (v > 0.6 && start < 0) start = i - 1;
-    if ((v <= 0.2 || i === points.length - 1) && start >= 0) {
-      const segment = points.slice(start, i + 1);
-      const gain = segment[segment.length - 1].altM - segment[0].altM;
-      const durationSec =
-        segment[0].time && segment[segment.length - 1].time
-          ? Math.round((segment[segment.length - 1].time!.getTime() - segment[0].time!.getTime()) / 1000)
-          : segment.length;
+  let i = 0;
+  while (i < points.length - 10) {
+    let j = i;
+    while (j < points.length - 1 && secondsDelta(points[j].secondsOfDay, points[i].secondsOfDay) < 60) j += 1;
+    if (j === i) {
+      i += 1;
+      continue;
+    }
 
-      if (gain >= 80 && durationSec >= 45) {
+    const gain = points[j].altM - points[i].altM;
+    const durationSec = secondsDelta(points[j].secondsOfDay, points[i].secondsOfDay);
+    if (durationSec > 0 && gain > 30) {
+      const avgClimbMs = gain / durationSec;
+      if (avgClimbMs > 0.5) {
+        const segment = points.slice(i, j + 1);
         const varioValues = segment.map((p) => p.varioMs ?? 0);
+        const center = segment[Math.round(segment.length / 2)] ?? segment[0];
         thermals.push({
           seq: thermals.length + 1,
-          startTime: segment[0].time,
-          endTime: segment[segment.length - 1].time,
-          centerLat: segment.reduce((s, p) => s + p.lat, 0) / segment.length,
-          centerLon: segment.reduce((s, p) => s + p.lon, 0) / segment.length,
-          avgClimbMs: gain / durationSec,
+          startTime: points[i].time,
+          endTime: points[j].time,
+          centerLat: center.lat,
+          centerLon: center.lon,
+          avgClimbMs: Number(avgClimbMs.toFixed(1)),
           maxClimbMs: Math.max(...varioValues),
           gainM: Math.round(gain),
           durationSec
         });
+        i = j;
+      } else {
+        i += 1;
       }
-      start = -1;
+    } else {
+      i += 1;
     }
+
+    if (thermals.length >= 8) break;
   }
 
   return thermals;

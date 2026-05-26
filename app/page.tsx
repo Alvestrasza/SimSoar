@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import HomeMapPreview from "@/app/components/HomeMapPreview";
+
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const [totalFlights, totalPilots, best] = await Promise.all([
@@ -36,8 +39,11 @@ export default async function HomePage() {
               <div><span className="statValue">{best ? `${Math.round(best.distanceKm)} km` : "–"}</span><br /><span className="statLabel">Längster Flug</span></div>
             </div>
           </div>
-          <div className="card" style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0, height: 280 }}>
-            <div className="mapPlaceholder">Live-Kartenansicht nach dem ersten Upload</div>
+          <div className="card heroMapCard">
+            <HomeMapPreview
+              homeAirfield={null}
+              preferHomeAirfield={false}
+            />
           </div>
         </div>
       </section>
@@ -52,7 +58,7 @@ export default async function HomePage() {
         <div className="card">
           <div className="cardHead"><span className="cardTitle">🕐 Aktuelle Flüge</span><Link className="muted" href="/flights">Alle ansehen →</Link></div>
           <div className="cardBody grid grid3">
-            {recent.length === 0 ? <p className="muted">Noch keine Flüge vorhanden.</p> : recent.map((f) => (
+            {recent.length === 0 ? <p className="muted">Noch keine Flüge vorhanden.</p> : recent.map((f: any) => (
               <Link key={f.id} className="card featureTile" href={`/flights/${f.id}`}>
                 <strong>{f.title}</strong>
                 <p className="muted">{f.pilotCallsign} · {f.simulator}</p>

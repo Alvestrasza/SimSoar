@@ -2,9 +2,18 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { saveFlightAction } from "./save-flight-action";
+import UploadIgcPreview from "@/app/components/UploadIgcPreview";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export default async function UploadPage() {
-  const session = await auth();
+  let session = null;
+  try {
+    session = await auth();
+  } catch (error) {
+    console.error("SimSoar upload auth session could not be loaded:", error);
+  }
   if (!session?.user?.id) redirect("/login");
 
   const profile = await prisma.pilotProfile.findUnique({ where: { userId: session.user.id } });
@@ -17,12 +26,7 @@ export default async function UploadPage() {
           <span className="muted">Max. 10 MB · .igc</span>
         </div>
         <form className="cardBody" action={saveFlightAction}>
-          <div className="dropZone">
-            <div style={{ fontSize: 44 }}>📁</div>
-            <strong>IGC-Datei auswählen</strong>
-            <p className="muted">MSFS 2020/2024, Condor 2 oder X-Plane</p>
-            <input name="igc" type="file" accept=".igc" required />
-          </div>
+          <UploadIgcPreview />
 
           <div className="formGrid" style={{ marginTop: 20 }}>
             <div className="formGroup">

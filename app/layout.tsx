@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { auth, signIn, signOut } from "@/auth";
+import { SITE_COPYRIGHT_HOLDER, SITE_VERSION } from "@/lib/site";
+import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -8,9 +9,7 @@ export const metadata: Metadata = {
   description: "Multi-user virtual gliding community for MSFS, Condor and X-Plane IGC flights."
 };
 
-export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const session = await auth();
-
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="de">
       <body>
@@ -27,21 +26,15 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             <Link href="/profile">Profil</Link>
           </div>
           <div className="navRight">
-            {session?.user ? (
-              <>
-                <Link className="btn btnSecondary" href="/profile">{session.user.name ?? "Mein Profil"}</Link>
-                <form action={async () => { "use server"; await signOut(); }}>
-                  <button className="btn btnSecondary" type="submit">Abmelden</button>
-                </form>
-              </>
-            ) : (
-              <form action={async () => { "use server"; await signIn("keycloak"); }}>
-                <button className="btn btnPrimary" type="submit">Anmelden</button>
-              </form>
-            )}
+            <Link className="btn btnSecondary" href="/profile">Mein Profil</Link>
+            <Link className="btn btnPrimary" href="/login">Anmelden</Link>
           </div>
         </nav>
         {children}
+        <footer className="siteFooter">
+          <span>© {new Date().getFullYear()} {SITE_COPYRIGHT_HOLDER}. Alle Rechte vorbehalten.</span>
+          <span>SimSoar v{SITE_VERSION}</span>
+        </footer>
       </body>
     </html>
   );

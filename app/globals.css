@@ -102,3 +102,155 @@ textarea { min-height: 120px; resize: vertical; }
   .formGrid { grid-template-columns: 1fr; }
   .nav { padding: 0 16px; }
 }
+
+/* SimSoar restored interactive views from original index.html */
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); overflow-x: auto; width: 100%; }
+.tab { border: 0; background: transparent; color: var(--muted); padding: 12px 18px; border-bottom: 2px solid transparent; font-weight: 800; cursor: pointer; white-space: nowrap; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.sectionHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.sortButton { border: 0; background: transparent; color: inherit; cursor: pointer; padding: 0; font: inherit; text-transform: inherit; letter-spacing: inherit; }
+.emptyTable { text-align: center; color: var(--muted); padding: 40px !important; }
+.textGreen { color: var(--green); font-weight: 800; }
+.lineHeight { line-height: 1.7; }
+
+.simBadge { display: inline-flex; align-items: center; padding: 4px 9px; border-radius: 8px; font-size: 12px; font-weight: 900; }
+.simBadge.msfs { background: #dbeafe; color: #1d4ed8; }
+.simBadge.condor { background: #ffedd5; color: #c2410c; }
+.simBadge.xplane { background: #ede9fe; color: #6d28d9; }
+.simBadge.other { background: #f1f5f9; color: #475569; }
+
+.flightGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+.flightCard { display: block; overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); transition: .15s box-shadow, .15s border-color; }
+.flightCard:hover { box-shadow: 0 8px 32px rgba(0,0,0,.10); border-color: #bfdbfe; }
+.flightCardMap { position: relative; height: 140px; overflow: hidden; background: linear-gradient(160deg,#e8f0fe,#f0f5ff); }
+.flightCardMap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.flightCardMap .simBadge { position: absolute; top: 8px; right: 8px; font-size: 10.5px; }
+.mapDots { position: absolute; inset: 0; background-image: radial-gradient(circle,rgba(31,111,235,.07) 1px,transparent 1px); background-size: 18px 18px; }
+.flightPath { fill: none; stroke: #1f6feb; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.flightCardBody { padding: 16px; }
+.flightCardBody p { margin: 6px 0; }
+.flightCardStats { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; font-weight: 800; margin-top: 12px; }
+
+.simChart { width: 100%; display: block; }
+.chartLegend { display: grid; gap: 8px; margin-top: 10px; }
+.chartLegend div { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+
+.flightDetailHeader { display: flex; align-items: center; gap: 16px; padding: 18px 22px; margin-bottom: 18px; }
+.flightDetailTitleBlock { min-width: 0; }
+.flightDetailTitle { font-size: 23px; font-weight: 900; letter-spacing: -.3px; }
+.flightStatsBar { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin-bottom: 22px; overflow: hidden; }
+.flightStatsBar > div { padding: 18px; border-right: 1px solid var(--border); }
+.flightStatsBar > div:last-child { border-right: 0; }
+.detailMainCard { overflow: hidden; }
+.detailTabs { margin-bottom: 0; }
+.tabPane.hidden { display: none; }
+.tabPane.padded { padding: 22px 24px; }
+.leafletMap { width: 100%; height: 460px; background: #e8f0fe; }
+.altitudeCanvas { width: 100%; display: block; border-radius: 12px; background: #f8fafc; }
+.smallStats { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 14px; color: var(--muted); font-size: 13px; }
+.thermalList { display: grid; gap: 10px; margin-top: 14px; }
+.thermalItem { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.thermalBubble { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: white; font-weight: 900; background: var(--green); flex-shrink: 0; }
+.emptyInline { text-align: center; padding: 28px; }
+.detailRows { display: grid; gap: 0; }
+.detailRows > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+.detailRows > div:last-child { border-bottom: 0; }
+.detailRows span { color: var(--muted); }
+.detailRows strong { text-align: right; }
+.detailRows.compact { padding-top: 4px; padding-bottom: 4px; }
+.commentBox { line-height: 1.65; font-style: italic; }
+.wxGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.wxGrid div { background: var(--bg); border-radius: 12px; padding: 12px; text-align: center; }
+.wxGrid strong { display: block; font-size: 18px; }
+.wxGrid span { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; }
+
+.uploadPreview .dropZone { position: relative; }
+.uploadPreview .dropZone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.fileOk { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; padding: 12px 16px; border: 1px solid #86efac; border-radius: 12px; background: #f0fdf4; }
+.parsedBox { margin-top: 14px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: #f8fafc; display: grid; gap: 7px; font-size: 13px; }
+.parsedBox > div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+.parsedBox > div:last-of-type { border-bottom: none; }
+.parsedBox span { color: var(--muted); }
+.parsedBox.warn { color: var(--orange); display: block; }
+.uploadAltCanvas { width: 100%; display: block; border-radius: 10px; background: #fff; margin-top: 8px; }
+
+@media (max-width: 960px) {
+  .flightStatsBar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flightStatsBar > div { border-bottom: 1px solid var(--border); }
+}
+
+/* SimSoar v0.1.4: footer and home location map */
+.siteFooter {
+  max-width: 1200px;
+  margin: 18px auto 0;
+  padding: 22px 28px 30px;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 12.5px;
+  border-top: 1px solid var(--border);
+}
+
+.heroMapCard {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  height: 300px;
+  min-height: 300px;
+}
+
+.homeMapPreview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  background: linear-gradient(160deg, #e8f0fe, #f5f7fb);
+}
+
+.homeMap {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+}
+
+.homeMapPreview .leaflet-popup,
+.homeMapPreview .leaflet-control-attribution {
+  display: none !important;
+}
+
+
+.btnSmall {
+  padding: 6px 10px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+
+.btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.checkboxGroup label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+}
+
+.checkboxGroup input[type="checkbox"] {
+  width: auto;
+  min-width: 18px;
+  height: 18px;
+  padding: 0;
+}
+
+.checkboxGroup p {
+  margin: -2px 0 0 28px;
+  font-size: 12.5px;
+}
+
+@media (max-width: 960px) {
+  .heroMapCard, .homeMapPreview, .homeMap { min-height: 280px; height: 280px; }
+}

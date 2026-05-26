@@ -1,49 +1,58 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import FlightDetailClient from "@/app/components/FlightDetailClient";
+
+export const dynamic = "force-dynamic";
 
 export default async function FlightDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const flight = await prisma.flight.findUnique({
     where: { id },
-    include: { track: { orderBy: { seq: "asc" }, take: 800 }, thermals: { orderBy: { seq: "asc" } } }
+    include: {
+      track: { orderBy: { seq: "asc" } },
+      thermals: { orderBy: { seq: "asc" } }
+    }
   });
+
   if (!flight || flight.visibility !== "PUBLIC") notFound();
 
   return (
-    <main className="wrap">
-      <div className="card" style={{ marginBottom: 18 }}>
-        <div className="cardHead">
-          <div>
-            <div className="cardTitle">{flight.title}</div>
-            <div className="muted">{flight.pilotCallsign} · {flight.simulator} · {flight.glider ?? "Unbekanntes Muster"}</div>
-          </div>
-        </div>
-        <div className="cardBody grid grid3">
-          <div><span className="statValue">{Math.round(flight.distanceKm)} km</span><br /><span className="statLabel">Strecke</span></div>
-          <div><span className="statValue">{Math.round(flight.olcPoints)}</span><br /><span className="statLabel">OLC</span></div>
-          <div><span className="statValue">{flight.maxVarioMs.toFixed(1)} m/s</span><br /><span className="statLabel">Max Steigen</span></div>
-        </div>
-      </div>
-
-      <div className="twoCol">
-        <section className="card">
-          <div className="cardHead"><span className="cardTitle">🗺️ Trackdaten</span></div>
-          <div className="cardBody">
-            <div className="mapPlaceholder">Leaflet-Komponente kann hier clientseitig ergänzt werden. {flight.track.length} Punkte geladen.</div>
-          </div>
-        </section>
-        <aside className="grid">
-          <div className="card">
-            <div className="cardHead"><span className="cardTitle">🌡️ Thermiken</span></div>
-            <div className="cardBody">
-              {flight.thermals.length === 0 ? <p className="muted">Keine Thermiken erkannt.</p> : flight.thermals.map((t) => (
-                <p key={t.id}><strong>#{t.seq}</strong> · Ø {t.avgClimbMs.toFixed(1)} m/s · +{t.gainM} m</p>
-              ))}
-            </div>
-          </div>
-          {flight.comment && <div className="card"><div className="cardHead"><span className="cardTitle">💬 Kommentar</span></div><div className="cardBody muted">{flight.comment}</div></div>}
-        </aside>
-      </div>
-    </main>
+    <FlightDetailClient
+      flight={{
+        id: flight.id,
+        title: flight.title,
+        pilotCallsign: flight.pilotCallsign,
+        simulator: flight.simulator,
+        glider: flight.glider,
+        registration: flight.registration,
+        competitionClass: flight.competitionClass,
+        comment: flight.comment,
+        startTime: flight.startTime?.toISOString() ?? null,
+        durationSeconds: flight.durationSeconds,
+        distanceKm: flight.distanceKm,
+        olcPoints: flight.olcPoints,
+        avgSpeedKmh: flight.avgSpeedKmh,
+        maxAltitudeM: flight.maxAltitudeM,
+        minAltitudeM: flight.minAltitudeM,
+        maxVarioMs: flight.maxVarioMs,
+        track: flight.track.map((p: any) => ({
+          seq: p.seq,
+          lat: p.lat,
+          lon: p.lon,
+          altM: p.altM,
+          varioMs: p.varioMs
+        })),
+        thermals: flight.thermals.map((t: any) => ({
+          id: t.id,
+          seq: t.seq,
+          centerLat: t.centerLat,
+          centerLon: t.centerLon,
+          avgClimbMs: t.avgClimbMs,
+          maxClimbMs: t.maxClimbMs,
+          gainM: t.gainM,
+          durationSec: t.durationSec
+        }))
+      }}
+    />
   );
 }
