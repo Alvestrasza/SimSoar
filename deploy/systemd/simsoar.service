@@ -1,0 +1,31 @@
+[Unit]
+Description=SimSoar Next.js Application
+Documentation=/opt/simsoar/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=simsoar
+Group=simsoar
+WorkingDirectory=/opt/simsoar
+EnvironmentFile=/etc/simsoar/simsoar.env
+ExecStart=/usr/bin/npm run start:prod
+Restart=always
+RestartSec=10
+TimeoutStartSec=120
+SyslogIdentifier=simsoar
+
+# Runtime hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
+ReadWritePaths=/var/lib/simsoar /var/log/simsoar /opt/simsoar/.next
+CapabilityBoundingSet=
+AmbientCapabilities=
+LockPersonality=true
+MemoryDenyWriteExecute=false
+
+[Install]
+WantedBy=multi-user.target

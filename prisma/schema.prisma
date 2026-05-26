@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum FlightVisibility {
+  PUBLIC
+  PRIVATE
+  UNLISTED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+
+  accounts      Account[]
+  sessions      Session[]
+  profile       PilotProfile?
+  flights       Flight[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PilotProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  callsign    String   @unique
+  homeAirfield String?
+  country     String?
+  favoriteSim String?
+  favoriteGlider String?
+  bio         String?  @db.Text
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Flight {
+  id              String   @id @default(cuid())
+  userId          String
+  pilotCallsign   String
+  title           String
+  simulator       String
+  glider          String?
+  registration    String?
+  competitionClass String?
+  weatherMode     String?
+  realismMode     String?
+  comment         String? @db.Text
+  visibility      FlightVisibility @default(PUBLIC)
+
+  igcObjectPath   String
+  igcSha256       String
+  startTime       DateTime?
+  durationSeconds Int
+  distanceKm      Float
+  olcPoints       Float
+  avgSpeedKmh     Float
+  maxAltitudeM    Int
+  minAltitudeM    Int
+  maxVarioMs      Float
+  startLat        Float?
+  startLon        Float?
+  finishLat       Float?
+  finishLon       Float?
+
+  track           TrackPoint[]
+  thermals        Thermal[]
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([olcPoints])
+  @@index([distanceKm])
+  @@index([userId])
+}
+
+model TrackPoint {
+  id        String  @id @default(cuid())
+  flightId  String
+  seq       Int
+  time      DateTime?
+  lat       Float
+  lon       Float
+  altM      Int
+  varioMs   Float?
+
+  flight    Flight  @relation(fields: [flightId], references: [id], onDelete: Cascade)
+
+  @@unique([flightId, seq])
+  @@index([flightId])
+}
+
+model Thermal {
+  id            String @id @default(cuid())
+  flightId      String
+  seq           Int
+  startTime     DateTime?
+  endTime       DateTime?
+  centerLat     Float?
+  centerLon     Float?
+  avgClimbMs    Float
+  maxClimbMs    Float
+  gainM         Int
+  durationSec   Int
+
+  flight        Flight @relation(fields: [flightId], references: [id], onDelete: Cascade)
+
+  @@index([flightId])
+}
