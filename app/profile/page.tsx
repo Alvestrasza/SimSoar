@@ -1,3 +1,5 @@
+import { auth } from "@/auth";
+import { signOutWithKeycloak } from "@/app/auth-actions";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { saveProfileAction } from "./save-profile-action";
