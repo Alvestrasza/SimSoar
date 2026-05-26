@@ -1,4 +1,5 @@
-import { auth, signOut } from "@/auth";
+import { auth } from "@/auth";
+import { signOutWithKeycloak } from "@/app/auth-actions";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { saveProfileAction } from "./save-profile-action";
@@ -24,7 +25,11 @@ export default async function ProfilePage() {
   return (
     <main className="wrap" style={{ maxWidth: 960 }}>
       <div className="card" style={{ marginBottom: 20 }}>
-        <div className="cardHead"><span className="cardTitle">Mein Profil</span><form action={async () => { "use server"; await signOut({ redirectTo: "/" }); }}><button className="btn btnSecondary" type="submit">Abmelden</button></form></div>
+        <div className="cardHead"><span className="cardTitle">Mein Profil</span>
+          <form action={signOutWithKeycloak}>
+            <button className="btn btnSecondary" type="submit">Abmelden</button>
+          </form>
+        </div>
         <form className="cardBody" action={saveProfileAction}>
           <div className="formGrid">
             <div className="formGroup"><label>Callsign *</label><input name="callsign" defaultValue={profile?.callsign ?? ""} required /></div>
