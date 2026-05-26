@@ -1,209 +1,184 @@
-# SimSoar – Multi-User Virtual Gliding Portal
+# SimSoar
 
-<!--
-doc_type: Installation Documentation
-template_version: v0.1.0
-document_version: v0.1.1
-created: 2026-05-14
-last_updated: 2026-05-14
-status: Draft
-classification: Internal
-owner: FlightClub / Alvestrasza Corporation
-technical_owner: Internal IT
-service_area: simsoar / flightclub
-system_scope: Next.js, Keycloak, PostgreSQL, IGC upload and analysis
-review_cycle: 6 months
-ai_readable: true
-source_of_truth: Git / Wiki.js
-language: de-DE
--->
+**SimSoar** is a virtual gliding portal for simulator pilots who want to record, analyze, compare, and share their soaring flights.
 
-## 1. Zweck
+The project is designed as a dedicated community platform for virtual glider pilots using modern flight simulators such as Microsoft Flight Simulator, Condor, X-Plane, and compatible soaring tools.
 
-Dieses Projekt migriert die vorhandene einzelne `index.html` in ein robustes Multi-User-Grundgerüst auf Basis von Next.js App Router, Auth.js/Keycloak, Prisma und PostgreSQL.
+SimSoar is not meant to be just another file upload page. Its long-term goal is to become a structured, multi-user flight logbook and ranking platform for virtual soaring — with meaningful flight analysis, pilot profiles, public leaderboards, and a clean foundation for future community features.
 
-Diese Variante ist ausdrücklich **ohne Docker** vorbereitet und kann klassisch auf einem Ubuntu Server mit Node.js, systemd, NGINX und PostgreSQL betrieben werden.
+---
 
-## 2. Zielarchitektur
+## Purpose
 
-```text
-Internet
-  → Sophos WAF / TLS Termination
-  → SimSoar Webserver in DMZ
-  → Next.js App auf localhost:3000
-  → PostgreSQL in Services
-  → Keycloak Realm: flightclub
-  → Upload Storage: /var/lib/simsoar/uploads
-```
+SimSoar exists to give virtual glider pilots a place where their flights can be collected, understood, and compared in a more meaningful way.
 
-## 3. Enthaltene Funktionen
+A glider flight is more than a distance value. It contains route decisions, climb phases, thermal use, altitude management, weather interpretation, risk, patience, and pilot skill. SimSoar aims to make these elements visible.
 
-- Keycloak/OIDC Login über Auth.js
-- Benutzerprofile mit Callsign
-- IGC Upload mit serverseitiger Prüfung
-- IGC Parser mit Strecke, Höhenprofil-Basisdaten, Vario und Thermikerkennung
-- Persistenz in PostgreSQL via Prisma
-- öffentliche Bestenliste
-- persönliche Flugliste
-- vorbereitet für Leaflet-Kartenintegration
-- systemd-Servicevorlage
-- optionale NGINX-Reverse-Proxy-Vorlage
+The platform is intended to support:
 
-## 4. Voraussetzungen
+- upload and analysis of IGC flight logs
+- personal pilot profiles and callsigns
+- individual flight histories
+- public flight listings and leaderboards
+- basic soaring performance analysis
+- thermal and climb detection
+- altitude and route visualization
+- simulator-based virtual gliding communities
 
-- Ubuntu Server 24.04 LTS oder 22.04 LTS
-- Node.js 22 LTS
-- npm
-- Zugriff auf PostgreSQL
-- Keycloak Realm `flightclub`
-- Sophos WAF oder anderer Reverse Proxy für externen HTTPS-Zugriff
+---
 
-## 5. Keycloak Client
+## Vision
 
-Empfohlene Einstellungen:
+The long-term vision of SimSoar is to become a reliable and enjoyable home for virtual soaring.
 
-```text
-Realm: flightclub
-Client ID: simsoar
-Client Type: OpenID Connect
-Client Authentication: On / Confidential
-Valid Redirect URI: https://simsoar.example.com/api/auth/callback/keycloak
-Web Origins: https://simsoar.example.com
-```
+SimSoar should allow pilots to:
 
-## 6. Installation ohne Docker
+- document their virtual flights over time
+- compare flights with other pilots
+- review altitude profiles and climb behavior
+- identify strong thermals and key route decisions
+- build a recognizable pilot profile
+- participate in rankings, events, and future competitions
+- share flights without relying on temporary screenshots or disconnected tools
 
-### 6.1 System vorbereiten
+The project should stay focused, clean, and practical. It should serve the flying experience, not bury it under unnecessary complexity.
 
-```bash
-sudo bash scripts/install-ubuntu-systemd.sh
-```
+---
 
-### 6.2 Anwendung nach `/opt/simsoar` kopieren
+## Core Features
 
-```bash
-sudo rsync -a --delete ./ /opt/simsoar/
-sudo chown -R simsoar:simsoar /opt/simsoar
-```
+Planned and partially implemented core features include:
 
-### 6.3 Environment-Datei erstellen
+- multi-user platform for virtual glider pilots
+- login through an external identity provider
+- pilot profile with callsign and personal flight history
+- IGC file upload
+- server-side IGC validation
+- flight distance calculation
+- altitude profile extraction
+- basic vario and climb analysis
+- thermal detection
+- public flight overview
+- public leaderboard
+- prepared map-based flight visualization
 
-```bash
-sudo mkdir -p /etc/simsoar
-sudo cp /opt/simsoar/.env.example /etc/simsoar/simsoar.env
-sudo nano /etc/simsoar/simsoar.env
-sudo chown root:simsoar /etc/simsoar/simsoar.env
-sudo chmod 640 /etc/simsoar/simsoar.env
-```
+---
 
-Wichtige Werte:
+## Target Audience
 
-```text
-NEXTAUTH_URL=https://simsoar.example.com
-AUTH_SECRET=<openssl-rand-base64-32>
-AUTH_KEYCLOAK_ID=simsoar
-AUTH_KEYCLOAK_SECRET=<keycloak-client-secret>
-AUTH_KEYCLOAK_ISSUER=https://login.academy.alvestrasza.com/realms/flightclub
-DATABASE_URL=postgresql://simsoar_app:<password>@<pgsql-fqdn>:5432/simsoar?schema=public
-UPLOAD_DIR=/var/lib/simsoar/uploads
-SERVER_ACTION_ALLOWED_ORIGINS=simsoar.example.com
-```
+SimSoar is intended for:
 
-Secret erzeugen:
+- virtual glider pilots
+- flight simulator communities
+- soaring clubs using simulators
+- pilots who want to compare and analyze IGC files
+- users of MSFS, Condor, X-Plane, and similar platforms
+- small communities that want their own independent soaring portal
 
-```bash
-openssl rand -base64 32
-```
+---
 
-### 6.4 Abhängigkeiten installieren und Build erstellen
+## Design Principles
 
-```bash
-cd /opt/simsoar
-sudo -u simsoar npm ci
-sudo -u simsoar npx prisma generate
-sudo -u simsoar npx prisma migrate deploy
-sudo -u simsoar npm run build
-```
+SimSoar follows a few simple principles:
 
-### 6.5 systemd-Service aktivieren
+1. **Flights first**  
+   The uploaded flight and its analysis are the center of the platform.
 
-```bash
-sudo cp /opt/simsoar/deploy/systemd/simsoar.service /etc/systemd/system/simsoar.service
-sudo systemctl daemon-reload
-sudo systemctl enable simsoar
-sudo systemctl start simsoar
-sudo systemctl status simsoar
-```
+2. **Community without clutter**  
+   The platform should support pilots and rankings without becoming overloaded.
 
-### 6.6 Optional: lokales NGINX aktivieren
+3. **Readable flight data**  
+   Distance, altitude, climb behavior, and thermal phases should be understandable at a glance.
 
-Nur verwenden, wenn der Host selbst zusätzlich einen lokalen Reverse Proxy benötigt.
+4. **Independent operation**  
+   SimSoar should be able to run on self-hosted infrastructure.
 
-```bash
-sudo cp /opt/simsoar/deploy/nginx/simsoar.conf /etc/nginx/sites-available/simsoar.conf
-sudo ln -s /etc/nginx/sites-available/simsoar.conf /etc/nginx/sites-enabled/simsoar.conf
-sudo nginx -t
-sudo systemctl reload nginx
-```
+5. **Clean separation of code and runtime data**  
+   Source code belongs in Git. Secrets, uploads, logs, and operational data belong outside the repository.
 
-## 7. Betrieb
+6. **Extensible architecture**  
+   Future features such as events, moderation, advanced scoring, or object storage should be possible without redesigning the entire system.
 
-### Dienststatus
+---
 
-```bash
-systemctl status simsoar
-journalctl -u simsoar -f
-```
+## Technical Direction
 
-### Neustart
+SimSoar is developed as a modern web application based on:
 
-```bash
-sudo systemctl restart simsoar
-```
+- Next.js
+- Node.js
+- Prisma
+- PostgreSQL
+- external authentication through OpenID Connect / Keycloak
+- server-side IGC processing
+- optional reverse proxy deployment
 
-### Update / neuer Build
+The project is prepared for classic self-hosted operation on Linux servers. It is intentionally not limited to a specific cloud provider.
 
-```bash
-cd /opt/simsoar
-sudo systemctl stop simsoar
-sudo -u simsoar npm ci
-sudo -u simsoar npx prisma migrate deploy
-sudo -u simsoar npm run build
-sudo systemctl start simsoar
-```
+Operational configuration, secrets, uploaded flight files, certificates, logs, and environment files are not part of the source repository.
 
-## 8. Backup
+---
 
-Sichern:
+## Repository Scope
 
-- PostgreSQL Datenbank `simsoar`
-- `/var/lib/simsoar/uploads`
-- `/etc/simsoar/simsoar.env`
-- `/opt/simsoar` oder Git-Repository
+This repository contains the application source code and project files required to develop SimSoar.
 
-## 9. Sicherheit
+It should contain:
 
-- `.env` und `/etc/simsoar/simsoar.env` dürfen nicht ins Git-Repository.
-- Secrets gehören in den Passwortsafe.
-- PostgreSQL darf nicht aus dem Internet erreichbar sein.
-- Keycloak Client Secret darf nicht im Wiki stehen.
-- Uploadgröße muss zusätzlich auf der WAF begrenzt werden.
-- Für Produktivbetrieb sollte ein Virenscan oder Upload-Scanner ergänzt werden.
+- application source code
+- UI components
+- server-side logic
+- database schema and migrations
+- public static assets
+- deployment templates where useful
+- documentation relevant to development
 
-## 10. Prüfung
+It must not contain:
 
-```bash
-curl -I http://127.0.0.1:3000
-curl -I https://simsoar.example.com
-systemctl status simsoar
-journalctl -u simsoar --no-pager -n 100
-```
+- production secrets
+- environment files with real values
+- private keys or certificates
+- uploaded user files
+- runtime logs
+- build artifacts
+- dependency directories such as `node_modules`
 
-## 11. Nächste Ausbaustufen
+---
 
-1. Leaflet-Clientkomponente für echte Trackanzeige.
-2. Admin-Rollen aus Keycloak Realm Roles.
-3. Moderationsworkflow für öffentliche Flüge.
-4. Object Storage statt lokalem Upload-Verzeichnis.
-5. API-Rate-Limiting und Audit-Logging.
-6. Import alter Supabase-Daten, falls gewünscht.
+## Current Project Status
+
+SimSoar is currently in active development.
+
+The foundation is being prepared for a proper multi-user architecture, persistent database storage, authenticated access, and future public flight comparison features.
+
+The project is not yet considered a finished production platform. Interfaces, data models, and deployment details may still change while the core system is being stabilized.
+
+---
+
+## Planned Roadmap
+
+Possible next development stages include:
+
+- stable pilot profile system
+- improved IGC parser and validation
+- proper track visualization on interactive maps
+- detailed altitude and climb charts
+- improved thermal detection
+- public and private flight visibility options
+- moderation workflow for public uploads
+- event and competition support
+- role-based administration
+- audit logging
+- optional object storage for uploaded files
+- improved scoring and leaderboard logic
+
+---
+
+## Project Goal
+
+The goal of SimSoar is simple:
+
+> Build a clean, independent, community-oriented platform where virtual glider flights can be uploaded, analyzed, compared, and remembered.
+
+SimSoar should make virtual soaring more visible, more structured, and more rewarding — without losing the calm, focused nature of gliding itself.
+
