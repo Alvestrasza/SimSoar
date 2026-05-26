@@ -27,6 +27,12 @@ function getKeycloakRealmBaseUrl(): string {
 }
 
 function getKeycloakAdminBaseUrl(): string {
+  const explicitAdminRealmUrl = process.env.KEYCLOAK_ADMIN_REALM_URL?.replace(/\/$/, "");
+
+  if (explicitAdminRealmUrl) {
+    return explicitAdminRealmUrl;
+  }
+
   const issuer = getKeycloakRealmBaseUrl();
   const [baseUrl, realm] = issuer.split("/realms/");
 
