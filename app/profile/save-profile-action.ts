@@ -6,7 +6,6 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 
 const schema = z.object({
-  callsign: z.string().min(2).max(40),
   homeAirfield: z.string().max(120).optional(),
   favoriteSim: z.string().max(40).optional(),
   favoriteGlider: z.string().max(80).optional(),
@@ -20,7 +19,6 @@ export async function saveProfileAction(formData: FormData) {
   if (!session?.user?.id) throw new Error("Not authenticated.");
 
   const data = schema.parse({
-    callsign: formData.get("callsign"),
     homeAirfield: formData.get("homeAirfield") || undefined,
     favoriteSim: formData.get("favoriteSim") || undefined,
     favoriteGlider: formData.get("favoriteGlider") || undefined,
@@ -29,9 +27,22 @@ export async function saveProfileAction(formData: FormData) {
     showHomeAirfieldOnHome: formData.get("showHomeAirfieldOnHome") === "on"
   });
 
+  const existingProfile = await prisma.pilotProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { callsign: true }
+  });
+
+  if (!existingProfile?.callsign) {
+    throw new Error("No callsign found. Please update your Keycloak profile and sign in again.");
+  }
+
   await prisma.pilotProfile.upsert({
     where: { userId: session.user.id },
-    create: { userId: session.user.id, ...data },
+    create: {
+      userId: session.user.id,
+      callsign: existingProfile.callsign,
+      ...data
+    },
     update: data
   });
 
