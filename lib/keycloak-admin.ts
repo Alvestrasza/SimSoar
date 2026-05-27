@@ -120,6 +120,11 @@ export async function updateKeycloakUserCallsign(
     body: JSON.stringify(updatedUser)
   });
 
+  if (!putResponse.ok) {
+    const text = await putResponse.text();
+    throw new Error(`Keycloak user update failed: ${putResponse.status} ${text}`);
+  }
+
   const verifyResponse = await fetch(userUrl, {
     method: "GET",
     headers: {
@@ -147,10 +152,5 @@ export async function updateKeycloakUserCallsign(
     throw new Error(
       `Keycloak callsign sync verification failed. Expected "${callsign}", got "${storedCallsign ?? "<empty>"}".`
     );
-  }
-
-  if (!putResponse.ok) {
-    const text = await putResponse.text();
-    throw new Error(`Keycloak user update failed: ${putResponse.status} ${text}`);
   }
 }
