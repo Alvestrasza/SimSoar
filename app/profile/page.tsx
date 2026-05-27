@@ -1,8 +1,6 @@
 import { auth } from "@/auth";
-import { signOutWithKeycloak } from "@/app/auth-actions";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { saveProfileAction } from "./save-profile-action";
 import Link from "next/link";
 import { ProfileSaveNotice } from "./ProfileSaveNotice";
 
@@ -37,7 +35,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
       <div className="card" style={{ marginBottom: 20 }}>
         <div className="cardHead"><span className="cardTitle">Mein Profil</span>
         </div>
-        <form className="cardBody" action={saveProfileAction}>
+        <form className="cardBody" action="/profile/save" method="post">
           <div className="formGrid">
             <div className="formGroup"><label>Benutzername</label><input value={session.user.name ?? "–"} readOnly aria-readonly="true" /></div>
             <div className="formGroup"><label>Email Adresse</label><input value={session.user.email ?? "–"} readOnly aria-readonly="true" /></div>
