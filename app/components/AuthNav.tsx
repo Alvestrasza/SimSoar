@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { auth } from "@/auth";
 import { signInWithKeycloak, signOutWithKeycloak } from "@/app/auth-actions";
 
@@ -16,9 +17,9 @@ export async function AuthNav() {
 
   return (
     <>
-      <a className="btn btnSecondary" href="/profile">
+      <Link className="btn btnSecondary" href="/profile">
         Mein Profil
-      </a>
+      </Link>
 
       <form action={signOutWithKeycloak}>
         <button className="btn btnSecondary" type="submit">
