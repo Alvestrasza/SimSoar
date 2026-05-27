@@ -105,6 +105,12 @@ export async function updateKeycloakUserCallsign(
     }
   };
 
+  console.info("SimSoar Keycloak callsign update request:", {
+    keycloakUserId,
+    attributeName,
+    callsign
+  });
+
   const putResponse = await fetch(userUrl, {
     method: "PUT",
     headers: {
@@ -113,6 +119,35 @@ export async function updateKeycloakUserCallsign(
     },
     body: JSON.stringify(updatedUser)
   });
+
+  const verifyResponse = await fetch(userUrl, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json"
+    }
+  });
+
+  if (!verifyResponse.ok) {
+    const text = await verifyResponse.text();
+    throw new Error(`Keycloak user verify read failed: ${verifyResponse.status} ${text}`);
+  }
+
+  const verifiedUser = (await verifyResponse.json()) as KeycloakUserRepresentation;
+  const storedCallsign = verifiedUser.attributes?.[attributeName]?.[0] ?? null;
+
+  console.info("SimSoar Keycloak callsign update verification:", {
+    keycloakUserId,
+    attributeName,
+    expected: callsign,
+    stored: storedCallsign
+  });
+
+  if (storedCallsign !== callsign) {
+    throw new Error(
+      `Keycloak callsign sync verification failed. Expected "${callsign}", got "${storedCallsign ?? "<empty>"}".`
+    );
+  }
 
   if (!putResponse.ok) {
     const text = await putResponse.text();

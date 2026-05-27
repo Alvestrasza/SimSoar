@@ -65,7 +65,19 @@ export async function saveProfileAction(formData: FormData) {
     throw new Error("This callsign is already used by another SimSoar pilot.");
   }
 
+  console.info("SimSoar profile save callsign sync:", {
+    simsoarUserId: session.user.id,
+    keycloakUserId: account.providerAccountId,
+    callsign: data.callsign
+  });
+
   await updateKeycloakUserCallsign(account.providerAccountId, data.callsign);
+
+  console.info("SimSoar profile save callsign sync completed:", {
+    simsoarUserId: session.user.id,
+    keycloakUserId: account.providerAccountId,
+    callsign: data.callsign
+  });
 
   await prisma.pilotProfile.upsert({
     where: { userId: session.user.id },
