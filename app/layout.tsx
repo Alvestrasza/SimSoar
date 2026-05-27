@@ -15,6 +15,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="de">
       <body>
+        {process.env.NEXT_PUBLIC_SIMSOAR_ENV === "dev" ? (
+          <div className="devBanner">
+            DEV ENVIRONMENT – SimSoar Development
+          </div>
+        ) : null}
         <nav className="nav">
           <Link className="logo" href="/">
             <span className="logoMark">🛩</span>

@@ -254,3 +254,17 @@ textarea { min-height: 120px; resize: vertical; }
 @media (max-width: 960px) {
   .heroMapCard, .homeMapPreview, .homeMap { min-height: 280px; height: 280px; }
 }
+
+.devBanner {
+  position: sticky;
+  top: 0;
+  z-index: 999999;
+  background: #b00020;
+  color: #ffffff;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
