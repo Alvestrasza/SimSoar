@@ -1,19 +1,38 @@
-import { prisma } from "@/lib/db";
+import {prisma} from "@/lib/db";
 import FlightsExplorer from "@/app/components/FlightsExplorer";
+import {getTranslations, setRequestLocale} from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function FlightsPage() {
+type FlightsPageProps = {
+  params: Promise<{locale: string}>;
+};
+
+export default async function FlightsPage({params}: FlightsPageProps) {
+  const {locale} = await params;
+
+  setRequestLocale(locale);
+
+  const t = await getTranslations({locale, namespace: "Flights"});
+
   const flights = await prisma.flight.findMany({
-    where: { visibility: "PUBLIC" },
-    orderBy: [{ olcPoints: "desc" }, { distanceKm: "desc" }],
+    where: {visibility: "PUBLIC"},
+    orderBy: [{olcPoints: "desc"}, {distanceKm: "desc"}],
     take: 100,
-    include: { track: { orderBy: { seq: "asc" }, take: 220 } }
+    include: {
+      track: {
+        orderBy: {seq: "asc"},
+        take: 220
+      }
+    }
   });
 
   return (
     <main className="wrap">
-      <div className="sectionHead"><span className="cardTitle">🏆 Bestenliste – Virtuelle Flüge</span></div>
+      <div className="sectionHead">
+        <span className="cardTitle">{t("pageTitle")}</span>
+      </div>
+
       <FlightsExplorer
         flights={flights.map((f: any) => ({
           id: f.id,
@@ -28,7 +47,11 @@ export default async function FlightsPage() {
           maxVarioMs: f.maxVarioMs,
           durationSeconds: f.durationSeconds,
           createdAt: f.createdAt.toISOString(),
-          track: f.track.map((p: any) => ({ lat: p.lat, lon: p.lon, altM: p.altM }))
+          track: f.track.map((p: any) => ({
+            lat: p.lat,
+            lon: p.lon,
+            altM: p.altM
+          }))
         }))}
       />
     </main>
