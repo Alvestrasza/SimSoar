@@ -15,5 +15,25 @@
   },
   "Footer": {
     "rights": "Alle Rechte vorbehalten."
+  },
+  "Home": {
+    "kicker": "🖥️ Simulator-Segelflug-Community",
+    "heroTitleLine1": "Virtuelle Flüge.",
+    "heroTitleLine2": "Real analysiert.",
+    "heroSubtitle": "Lade IGC-Dateien aus MSFS 2020/2024, Condor oder X-Plane hoch. Analysiere Strecke, Höhenprofil, Thermiken und OLC-Punkte in einer Multi-User-Plattform.",
+    "uploadButton": "↑ Flug hochladen",
+    "leaderboardButton": "Bestenliste ansehen",
+    "statsFlights": "Virtuelle Flüge",
+    "statsPilots": "Sim-Piloten",
+    "statsBestDistance": "Längster Flug",
+    "featureUploadTitle": "IGC Upload & Analyse",
+    "featureUploadText": "Serverseitige Validierung, Hashing und persistente Speicherung.",
+    "featureThermalTitle": "Thermikanalyse",
+    "featureThermalText": "Erkennung von Steigphasen und Aufwindzonen aus Trackdaten.",
+    "featureMultiUserTitle": "Multi-User & Keycloak",
+    "featureMultiUserText": "OIDC-Anmeldung über zentralen Keycloak Realm „flightclub“.",
+    "recentFlights": "🕐 Aktuelle Flüge",
+    "viewAll": "Alle ansehen →",
+    "noFlights": "Noch keine Flüge vorhanden."
   }
 }

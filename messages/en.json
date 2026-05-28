@@ -15,5 +15,25 @@
   },
   "Footer": {
     "rights": "All rights reserved."
+  },
+  "Home": {
+    "kicker": "🖥️ Simulator Gliding Community",
+    "heroTitleLine1": "Virtual flights.",
+    "heroTitleLine2": "Real analysis.",
+    "heroSubtitle": "Upload IGC files from MSFS 2020/2024, Condor or X-Plane. Analyze distance, altitude profile, thermals and OLC points in a multi-user platform.",
+    "uploadButton": "↑ Upload flight",
+    "leaderboardButton": "View leaderboard",
+    "statsFlights": "Virtual flights",
+    "statsPilots": "Sim pilots",
+    "statsBestDistance": "Longest flight",
+    "featureUploadTitle": "IGC Upload & Analysis",
+    "featureUploadText": "Server-side validation, hashing and persistent storage.",
+    "featureThermalTitle": "Thermal analysis",
+    "featureThermalText": "Detection of climb phases and thermal zones from track data.",
+    "featureMultiUserTitle": "Multi-user & Keycloak",
+    "featureMultiUserText": "OIDC sign-in via the central Keycloak realm “flightclub”.",
+    "recentFlights": "🕐 Recent flights",
+    "viewAll": "View all →",
+    "noFlights": "No flights available yet."
   }
 }
