@@ -1,0 +1,19 @@
+{
+  "Metadata": {
+    "title": "SimSoar – Virtuelle Segelflug-Community",
+    "description": "Multi-User-Plattform für virtuelle Segelflüge aus MSFS, Condor und X-Plane."
+  },
+  "Nav": {
+    "home": "Home",
+    "flights": "Flüge",
+    "upload": "Upload",
+    "pilots": "Piloten",
+    "profile": "Profil",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "myProfile": "Mein Profil"
+  },
+  "Footer": {
+    "rights": "Alle Rechte vorbehalten."
+  }
+}

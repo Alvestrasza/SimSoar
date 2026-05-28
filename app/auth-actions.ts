@@ -1,7 +1,7 @@
 "use server";
 
-import { auth, signIn, signOut } from "@/auth";
-import { prisma } from "@/lib/db";
+import {auth, signIn, signOut} from "@/auth";
+import {prisma} from "@/lib/db";
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -9,7 +9,12 @@ function requiredEnv(name: string): string {
   return value;
 }
 
-function buildKeycloakLogoutUrl(idToken?: string | null): string {
+function getLocaleFromFormData(formData?: FormData): "de" | "en" {
+  const value = formData?.get("locale");
+  return value === "en" ? "en" : "de";
+}
+
+function buildKeycloakLogoutUrl(locale: "de" | "en", idToken?: string | null): string {
   const issuer = requiredEnv("AUTH_KEYCLOAK_ISSUER").replace(/\/$/, "");
   const clientId = requiredEnv("AUTH_KEYCLOAK_ID");
   const appUrl = requiredEnv("AUTH_URL").replace(/\/$/, "");
@@ -17,7 +22,7 @@ function buildKeycloakLogoutUrl(idToken?: string | null): string {
   const logoutUrl = new URL(`${issuer}/protocol/openid-connect/logout`);
 
   logoutUrl.searchParams.set("client_id", clientId);
-  logoutUrl.searchParams.set("post_logout_redirect_uri", `${appUrl}/`);
+  logoutUrl.searchParams.set("post_logout_redirect_uri", `${appUrl}/${locale}`);
 
   if (idToken) {
     logoutUrl.searchParams.set("id_token_hint", idToken);
@@ -26,14 +31,16 @@ function buildKeycloakLogoutUrl(idToken?: string | null): string {
   return logoutUrl.toString();
 }
 
-export async function signInWithKeycloak() {
-  await signIn("keycloak", { redirectTo: "/" });
+export async function signInWithKeycloak(formData?: FormData) {
+  const locale = getLocaleFromFormData(formData);
+  await signIn("keycloak", {redirectTo: `/${locale}`});
 }
 
-export async function signOutWithKeycloak() {
+export async function signOutWithKeycloak(formData?: FormData) {
+  const locale = getLocaleFromFormData(formData);
   const session = await auth();
 
-  let redirectTo = "/";
+  let redirectTo = `/${locale}`;
 
   if (session?.user?.id) {
     const account = await prisma.account.findFirst({
@@ -46,8 +53,8 @@ export async function signOutWithKeycloak() {
       }
     });
 
-    redirectTo = buildKeycloakLogoutUrl(account?.id_token);
+    redirectTo = buildKeycloakLogoutUrl(locale, account?.id_token);
   }
 
-  await signOut({ redirectTo });
+  await signOut({redirectTo});
 }
