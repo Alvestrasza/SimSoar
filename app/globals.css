@@ -274,3 +274,24 @@ textarea { min-height: 120px; resize: vertical; }
 body {
   padding-top: 32px;
 }
+
+.flightManagementCard {
+  display: grid;
+  gap: 14px;
+}
+
+.ownerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.ownerActions form {
+  margin: 0;
+}
+
+.ownerActions .btn {
+  padding: 8px 12px;
+  font-size: 13px;
+}

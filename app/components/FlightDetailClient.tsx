@@ -4,6 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import AltitudeChart from "./AltitudeChart";
 import FlightTrackMap from "./FlightTrackMap";
+import FlightOwnerActions from "./FlightOwnerActions";
+
+{flight.canManage ? (
+  <FlightOwnerActions
+    flightId={flight.id}
+    visibility={flight.visibility}
+    returnTo={`/flights/${flight.id}`}
+  />
+) : null}
 
 type TrackPoint = {
   seq: number;
@@ -41,6 +50,8 @@ type FlightDetail = {
   maxAltitudeM: number;
   minAltitudeM: number;
   maxVarioMs: number;
+  visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
+  canManage: boolean;
   track: TrackPoint[];
   thermals: Thermal[];
 };

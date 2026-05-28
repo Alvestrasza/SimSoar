@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { saveProfileAction } from "./save-profile-action";
 import Link from "next/link";
 import { ProfileSaveNotice } from "./ProfileSaveNotice";
+import FlightOwnerActions from "@/app/components/FlightOwnerActions";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -67,12 +68,30 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
       <div className="card">
         <div className="cardHead"><span className="cardTitle">Meine Flüge</span></div>
         <div className="cardBody grid grid2">
-          {flights.length === 0 ? <p className="muted">Noch keine Flüge hochgeladen.</p> : flights.map((f: any) => (
-            <Link className="card featureTile" key={f.id} href={`/flights/${f.id}`}>
-              <strong>{f.title}</strong>
-              <p className="muted">{f.simulator} · {f.visibility}</p>
-              <p>{Math.round(f.distanceKm)} km · {Math.round(f.olcPoints)} OLC</p>
-            </Link>
+          {flights.length === 0 ? (
+            <p className="muted">Noch keine Flüge hochgeladen.</p>
+          ) : flights.map((f: any) => (
+            <div className="card featureTile flightManagementCard" key={f.id}>
+              <div>
+                <Link href={`/flights/${f.id}`}>
+                  <strong>{f.title}</strong>
+                </Link>
+
+                <p className="muted">
+                  {f.simulator} · {f.visibility}
+                </p>
+
+                <p>
+                  {Math.round(f.distanceKm)} km · {Math.round(f.olcPoints)} OLC
+                </p>
+              </div>
+
+              <FlightOwnerActions
+                flightId={f.id}
+                visibility={f.visibility}
+                returnTo="/profile"
+              />
+            </div>
           ))}
         </div>
       </div>

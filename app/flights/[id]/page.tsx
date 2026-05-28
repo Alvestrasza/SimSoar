@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { auth } from "@/auth";
 import FlightDetailClient from "@/app/components/FlightDetailClient";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +15,21 @@ export default async function FlightDetailPage({ params }: { params: Promise<{ i
     }
   });
 
-  if (!flight || flight.visibility !== "PUBLIC") notFound();
+  if (!flight) notFound();
+
+  let session = null;
+
+  try {
+    session = await auth();
+  } catch (error) {
+    console.error("SimSoar flight detail auth session could not be loaded:", error);
+  }
+
+  const isOwner = session?.user?.id === flight.userId;
+
+  if (flight.visibility === "PRIVATE" && !isOwner) {
+    notFound();
+  }
 
   return (
     <FlightDetailClient
@@ -35,6 +50,8 @@ export default async function FlightDetailPage({ params }: { params: Promise<{ i
         maxAltitudeM: flight.maxAltitudeM,
         minAltitudeM: flight.minAltitudeM,
         maxVarioMs: flight.maxVarioMs,
+        visibility: flight.visibility,
+        canManage: isOwner,
         track: flight.track.map((p: any) => ({
           seq: p.seq,
           lat: p.lat,
