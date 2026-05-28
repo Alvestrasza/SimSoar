@@ -1,10 +1,10 @@
 "use server";
 
-import { redirect } from "next/navigation";
-import { z } from "zod";
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
-import { updateKeycloakUserCallsign } from "@/lib/keycloak-admin";
+import {redirect} from "next/navigation";
+import {z} from "zod";
+import {auth} from "@/auth";
+import {prisma} from "@/lib/db";
+import {updateKeycloakUserCallsign} from "@/lib/keycloak-admin";
 
 const schema = z.object({
   callsign: z
@@ -12,7 +12,10 @@ const schema = z.object({
     .trim()
     .min(3, "Callsign must contain at least 3 characters.")
     .max(32, "Callsign must contain at most 32 characters.")
-    .regex(/^[A-Za-z0-9_-]+$/, "Callsign may only contain letters, numbers, underscore and hyphen."),
+    .regex(
+      /^[A-Za-z0-9_-]+$/,
+      "Callsign may only contain letters, numbers, underscore and hyphen."
+    ),
   homeAirfield: z.string().max(120).optional(),
   favoriteSim: z.string().max(40).optional(),
   favoriteGlider: z.string().max(80).optional(),
@@ -24,7 +27,10 @@ const schema = z.object({
 
 export async function saveProfileAction(formData: FormData) {
   const session = await auth();
-  if (!session?.user?.id) throw new Error("Not authenticated.");
+
+  if (!session?.user?.id) {
+    throw new Error("Not authenticated.");
+  }
 
   const data = schema.parse({
     callsign: formData.get("callsign"),
@@ -36,6 +42,8 @@ export async function saveProfileAction(formData: FormData) {
     showHomeAirfieldOnHome: formData.get("showHomeAirfieldOnHome") === "on",
     locale: formData.get("locale") || "de"
   });
+
+  const {locale, ...profileData} = data;
 
   const account = await prisma.account.findFirst({
     where: {
@@ -53,7 +61,7 @@ export async function saveProfileAction(formData: FormData) {
 
   const callsignTaken = await prisma.pilotProfile.findFirst({
     where: {
-      callsign: data.callsign,
+      callsign: profileData.callsign,
       NOT: {
         userId: session.user.id
       }
@@ -70,22 +78,30 @@ export async function saveProfileAction(formData: FormData) {
   console.info("SimSoar profile save callsign sync:", {
     simsoarUserId: session.user.id,
     keycloakUserId: account.providerAccountId,
-    callsign: data.callsign
+    callsign: profileData.callsign
   });
 
-  await updateKeycloakUserCallsign(account.providerAccountId, data.callsign);
+  await updateKeycloakUserCallsign(
+    account.providerAccountId,
+    profileData.callsign
+  );
 
   console.info("SimSoar profile save callsign sync completed:", {
     simsoarUserId: session.user.id,
     keycloakUserId: account.providerAccountId,
-    callsign: data.callsign
+    callsign: profileData.callsign
   });
 
   await prisma.pilotProfile.upsert({
-    where: { userId: session.user.id },
-    create: { userId: session.user.id, ...data },
-    update: data
+    where: {
+      userId: session.user.id
+    },
+    create: {
+      userId: session.user.id,
+      ...profileData
+    },
+    update: profileData
   });
 
-  redirect(`/${data.locale}/profile?saved=1`);
+  redirect(`/${locale}/profile?saved=1`);
 }

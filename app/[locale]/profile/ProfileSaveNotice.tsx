@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
+import {useTranslations} from "next-intl";
 
 export function ProfileSaveNotice() {
+  const t = useTranslations("Profile");
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export function ProfileSaveNotice() {
         fontWeight: 600
       }}
     >
-      ✓ Profil wurde erfolgreich gespeichert.
+      {t("saved")}
     </p>
   );
 }

@@ -100,5 +100,32 @@
     "class18m": "18 m class",
     "classOpen": "Open class",
     "classTwoSeater": "Two-seater"
+  },
+  "Profile": {
+    "pageTitle": "My Profile",
+    "username": "Username",
+    "email": "Email address",
+    "callsign": "Callsign",
+    "callsignTitle": "Only letters, numbers, underscore and hyphen. 3 to 32 characters.",
+    "homeAirfield": "Home airfield",
+    "favoriteSim": "Favorite simulator",
+    "favoriteGlider": "Favorite aircraft",
+    "country": "Country",
+    "showHomeAirfield": "Prefer home airfield on the home page map",
+    "showHomeAirfieldHint": "When enabled, the home page shows your home airfield first. Otherwise, the browser location is requested first.",
+    "bio": "About me",
+    "save": "✓ Save profile",
+    "saved": "✓ Profile saved successfully.",
+    "myFlights": "My flights",
+    "noFlights": "No flights uploaded yet.",
+    "visibilityPublic": "Public",
+    "visibilityPrivate": "Private",
+    "visibilityUnlisted": "Unlisted"
+  },
+  "FlightOwnerActions": {
+    "hide": "🙈 Hide",
+    "show": "👁️ Make visible",
+    "delete": "🗑️ Delete",
+    "deleteConfirm": "Really delete this flight? This action cannot be undone."
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import {useParams, usePathname} from "next/navigation";
+import {useTranslations} from "next-intl";
 import {
   deleteFlightAction,
   setFlightVisibilityAction
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export default function FlightOwnerActions({flightId, visibility}: Props) {
+  const t = useTranslations("FlightOwnerActions");
   const params = useParams<{locale?: string}>();
   const pathname = usePathname();
 
@@ -22,7 +24,7 @@ export default function FlightOwnerActions({flightId, visibility}: Props) {
 
   const nextVisibility = visibility === "PUBLIC" ? "PRIVATE" : "PUBLIC";
   const visibilityLabel =
-    visibility === "PUBLIC" ? "🙈 Nicht sichtbar machen" : "👁️ Sichtbar machen";
+    visibility === "PUBLIC" ? t("hide") : t("show");
 
   return (
     <div className="ownerActions">
@@ -30,6 +32,7 @@ export default function FlightOwnerActions({flightId, visibility}: Props) {
         <input type="hidden" name="flightId" value={flightId} />
         <input type="hidden" name="visibility" value={nextVisibility} />
         <input type="hidden" name="returnTo" value={currentPath} />
+
         <button className="btn btnSecondary" type="submit">
           {visibilityLabel}
         </button>
@@ -38,9 +41,7 @@ export default function FlightOwnerActions({flightId, visibility}: Props) {
       <form
         action={deleteFlightAction}
         onSubmit={(event) => {
-          const ok = window.confirm(
-            "Diesen Flug wirklich löschen? Die Aktion kann nicht rückgängig gemacht werden."
-          );
+          const ok = window.confirm(t("deleteConfirm"));
 
           if (!ok) {
             event.preventDefault();
@@ -49,8 +50,9 @@ export default function FlightOwnerActions({flightId, visibility}: Props) {
       >
         <input type="hidden" name="flightId" value={flightId} />
         <input type="hidden" name="returnTo" value={`/${locale}/profile`} />
+
         <button className="btn btnDanger" type="submit">
-          🗑️ Löschen
+          {t("delete")}
         </button>
       </form>
     </div>

@@ -100,5 +100,32 @@
     "class18m": "18 m Klasse",
     "classOpen": "Offene Klasse",
     "classTwoSeater": "Doppelsitzer"
+  },
+  "Profile": {
+    "pageTitle": "Mein Profil",
+    "username": "Benutzername",
+    "email": "E-Mail-Adresse",
+    "callsign": "Callsign",
+    "callsignTitle": "Nur Buchstaben, Zahlen, Unterstrich und Bindestrich. 3 bis 32 Zeichen.",
+    "homeAirfield": "Heimatflugplatz",
+    "favoriteSim": "Lieblings-Simulator",
+    "favoriteGlider": "Lieblingsflugzeug",
+    "country": "Land",
+    "showHomeAirfield": "Heimatflugplatz auf der Startseiten-Karte bevorzugen",
+    "showHomeAirfieldHint": "Wenn aktiviert, zeigt die Startseite zuerst deinen Heimatflugplatz. Andernfalls wird zuerst der Browser-Standort angefragt.",
+    "bio": "Über mich",
+    "save": "✓ Profil speichern",
+    "saved": "✓ Profil wurde erfolgreich gespeichert.",
+    "myFlights": "Meine Flüge",
+    "noFlights": "Noch keine Flüge hochgeladen.",
+    "visibilityPublic": "Öffentlich",
+    "visibilityPrivate": "Privat",
+    "visibilityUnlisted": "Nicht gelistet"
+  },
+  "FlightOwnerActions": {
+    "hide": "🙈 Nicht sichtbar machen",
+    "show": "👁️ Sichtbar machen",
+    "delete": "🗑️ Löschen",
+    "deleteConfirm": "Diesen Flug wirklich löschen? Die Aktion kann nicht rückgängig gemacht werden."
   }
 }
