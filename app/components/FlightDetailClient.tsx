@@ -91,7 +91,6 @@ export default function FlightDetailClient({ flight }: Props) {
           <FlightOwnerActions
             flightId={flight.id}
             visibility={flight.visibility}
-            returnTo={`/flights/${flight.id}`}
           />
         ) : null}
       </div>
