@@ -23,7 +23,11 @@ function buildKeycloakLogoutUrl(locale: "de" | "en", idToken?: string | null): s
 
   logoutUrl.searchParams.set("client_id", clientId);
   logoutUrl.searchParams.set("post_logout_redirect_uri", `${appUrl}/${locale}`);
+
+  // OIDC-konform
   logoutUrl.searchParams.set("ui_locales", locale);
+
+  // Keycloak-spezifisch, wichtig für Theme-/Cookie-Locale
   logoutUrl.searchParams.set("kc_locale", locale);
 
   if (idToken) {
