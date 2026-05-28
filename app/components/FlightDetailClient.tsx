@@ -79,6 +79,53 @@ function isoDateLabel(value: string | null | undefined, locale: string) {
   return date.toLocaleDateString(locale === "en" ? "en-US" : "de-DE");
 }
 
+function competitionClassLabel(
+  value: string | null | undefined,
+  t: ReturnType<typeof useTranslations>
+) {
+  if (!value) return "–";
+
+  const normalized = value.trim().toLowerCase();
+
+  if (
+    normalized === "club klasse" ||
+    normalized === "club class"
+  ) {
+    return t("classClub");
+  }
+
+  if (
+    normalized === "15 m klasse" ||
+    normalized === "15 m class"
+  ) {
+    return t("class15m");
+  }
+
+  if (
+    normalized === "18 m klasse" ||
+    normalized === "18 m class"
+  ) {
+    return t("class18m");
+  }
+
+  if (
+    normalized === "offene klasse" ||
+    normalized === "open class"
+  ) {
+    return t("classOpen");
+  }
+
+  if (
+    normalized === "doppelsitzer" ||
+    normalized === "two-seater" ||
+    normalized === "two seater"
+  ) {
+    return t("classTwoSeater");
+  }
+
+  return value;
+}
+
 function tabClass(tab: Tab, current: Tab) {
   return `tab ${tab === current ? "active" : ""}`;
 }
@@ -318,7 +365,7 @@ export default function FlightDetailClient({flight}: Props) {
 
               <div>
                 <span>{t("class")}</span>
-                <strong>{flight.competitionClass ?? "–"}</strong>
+                <strong>{competitionClassLabel(flight.competitionClass, t)}</strong>
               </div>
 
               <div>

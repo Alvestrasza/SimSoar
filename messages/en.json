@@ -182,6 +182,11 @@
     "temperature": "Temperature",
     "wind": "Wind",
     "pressure": "Pressure",
-    "cloudbase": "Cloudbase"
+    "cloudbase": "Cloudbase",
+    "classClub": "Club class",
+    "class15m": "15 m class",
+    "class18m": "18 m class",
+    "classOpen": "Open class",
+    "classTwoSeater": "Two-seater"
   }
 }
