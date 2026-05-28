@@ -127,5 +127,18 @@
     "show": "👁️ Sichtbar machen",
     "delete": "🗑️ Löschen",
     "deleteConfirm": "Diesen Flug wirklich löschen? Die Aktion kann nicht rückgängig gemacht werden."
+  },
+  "Pilots": {
+    "pageTitle": "👨‍✈️ Pilot-Rangliste",
+    "rank": "#",
+    "pilot": "Pilot",
+    "flights": "Flüge",
+    "totalDistance": "Gesamtstrecke",
+    "bestDistance": "Beste Strecke",
+    "totalOlc": "Gesamt OLC",
+    "favoriteSim": "Lieblings-Sim",
+    "unknownPilot": "Unbekannter Pilot",
+    "loadError": "Die Pilotenliste konnte nicht geladen werden. Bitte Server-Log prüfen.",
+    "noPublicFlights": "Noch keine öffentlichen Flüge vorhanden."
   }
 }

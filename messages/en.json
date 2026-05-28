@@ -127,5 +127,18 @@
     "show": "👁️ Make visible",
     "delete": "🗑️ Delete",
     "deleteConfirm": "Really delete this flight? This action cannot be undone."
+  },
+  "Pilots": {
+    "pageTitle": "👨‍✈️ Pilot ranking",
+    "rank": "#",
+    "pilot": "Pilot",
+    "flights": "Flights",
+    "totalDistance": "Total distance",
+    "bestDistance": "Best distance",
+    "totalOlc": "Total OLC",
+    "favoriteSim": "Favorite sim",
+    "unknownPilot": "Unknown pilot",
+    "loadError": "The pilot ranking could not be loaded. Please check the server log.",
+    "noPublicFlights": "No public flights available yet."
   }
 }
