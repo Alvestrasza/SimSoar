@@ -6,14 +6,6 @@ import AltitudeChart from "./AltitudeChart";
 import FlightTrackMap from "./FlightTrackMap";
 import FlightOwnerActions from "./FlightOwnerActions";
 
-{flight.canManage ? (
-  <FlightOwnerActions
-    flightId={flight.id}
-    visibility={flight.visibility}
-    returnTo={`/flights/${flight.id}`}
-  />
-) : null}
-
 type TrackPoint = {
   seq: number;
   lat: number;
@@ -86,6 +78,7 @@ export default function FlightDetailClient({ flight }: Props) {
     <main className="wrap">
       <div className="flightDetailHeader card">
         <Link className="btn btnSecondary" href="/flights">← Zurück</Link>
+
         <div className="flightDetailTitleBlock">
           <div className="flightDetailTitle">{flight.title}</div>
           <div className="muted">
@@ -93,6 +86,14 @@ export default function FlightDetailClient({ flight }: Props) {
             {flight.registration ? ` · ${flight.registration}` : ""}
           </div>
         </div>
+
+        {flight.canManage ? (
+          <FlightOwnerActions
+            flightId={flight.id}
+            visibility={flight.visibility}
+            returnTo={`/flights/${flight.id}`}
+          />
+        ) : null}
       </div>
 
       <div className="flightStatsBar card">
