@@ -312,3 +312,10 @@ body {
 .localeSwitcher a:hover {
   color: var(--accent);
 }
+
+.localeSwitcher a.active {
+  color: var(--accent);
+  background: var(--accent-lt);
+  border-radius: 8px;
+  padding: 3px 7px;
+}

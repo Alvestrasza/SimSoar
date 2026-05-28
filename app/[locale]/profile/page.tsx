@@ -36,12 +36,28 @@ export default async function ProfilePage({
 
   const t = await getTranslations({locale, namespace: "Profile"});
 
-  const queryParams = searchParams ? await searchParams : {};
-  const savedParam = Array.isArray(queryParams.saved)
-    ? queryParams.saved[0]
-    : queryParams.saved;
+const queryParams = searchParams ? await searchParams : {};
 
-  const profileSaved = savedParam === "1";
+const savedParam = Array.isArray(queryParams.saved)
+  ? queryParams.saved[0]
+  : queryParams.saved;
+
+const flightUpdatedParam = Array.isArray(queryParams.flightUpdated)
+  ? queryParams.flightUpdated[0]
+  : queryParams.flightUpdated;
+
+const flightDeletedParam = Array.isArray(queryParams.flightDeleted)
+  ? queryParams.flightDeleted[0]
+  : queryParams.flightDeleted;
+
+const noticeStatus =
+  savedParam === "1"
+    ? "saved"
+    : flightUpdatedParam === "1"
+      ? "flightUpdated"
+      : flightDeletedParam === "1"
+        ? "flightDeleted"
+        : null;
 
   let session = null;
 
@@ -181,7 +197,7 @@ export default async function ProfilePage({
             </button>
           </p>
 
-          {profileSaved ? <ProfileSaveNotice /> : null}
+          {noticeStatus ? <ProfileSaveNotice status={noticeStatus} /> : null}
         </form>
       </div>
 

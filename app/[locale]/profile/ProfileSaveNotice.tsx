@@ -3,7 +3,13 @@
 import {useEffect, useState} from "react";
 import {useTranslations} from "next-intl";
 
-export function ProfileSaveNotice() {
+type ProfileNoticeStatus = "saved" | "flightUpdated" | "flightDeleted";
+
+type ProfileSaveNoticeProps = {
+  status: ProfileNoticeStatus;
+};
+
+export function ProfileSaveNotice({status}: ProfileSaveNoticeProps) {
   const t = useTranslations("Profile");
   const [visible, setVisible] = useState(true);
 
@@ -13,6 +19,8 @@ export function ProfileSaveNotice() {
 
       const url = new URL(window.location.href);
       url.searchParams.delete("saved");
+      url.searchParams.delete("flightUpdated");
+      url.searchParams.delete("flightDeleted");
       window.history.replaceState({}, "", url.toString());
     }, 10_000);
 
@@ -30,7 +38,7 @@ export function ProfileSaveNotice() {
         fontWeight: 600
       }}
     >
-      {t("saved")}
+      {t(status)}
     </p>
   );
 }

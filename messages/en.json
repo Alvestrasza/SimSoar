@@ -116,6 +116,8 @@
     "bio": "About me",
     "save": "✓ Save profile",
     "saved": "✓ Profile saved successfully.",
+    "flightUpdated": "✓ Flight updated.",
+    "flightDeleted": "✓ Flight deleted.",    
     "myFlights": "My flights",
     "noFlights": "No flights uploaded yet.",
     "visibilityPublic": "Public",
@@ -188,5 +190,13 @@
     "class18m": "18 m class",
     "classOpen": "Open class",
     "classTwoSeater": "Two-seater"
+  },
+  "Login": {
+    "title": "🔐 Sign in",
+    "description": "SimSoar uses Keycloak/OIDC. User management, MFA and password policies remain centralized.",
+    "button": "Sign in with Keycloak"
+  },
+  "LocaleSwitcher": {
+    "label": "Change language"
   }
 }
