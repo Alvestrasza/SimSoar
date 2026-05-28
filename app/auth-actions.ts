@@ -23,6 +23,8 @@ function buildKeycloakLogoutUrl(locale: "de" | "en", idToken?: string | null): s
 
   logoutUrl.searchParams.set("client_id", clientId);
   logoutUrl.searchParams.set("post_logout_redirect_uri", `${appUrl}/${locale}`);
+  logoutUrl.searchParams.set("ui_locales", locale);
+  logoutUrl.searchParams.set("kc_locale", locale);
 
   if (idToken) {
     logoutUrl.searchParams.set("id_token_hint", idToken);
@@ -33,7 +35,17 @@ function buildKeycloakLogoutUrl(locale: "de" | "en", idToken?: string | null): s
 
 export async function signInWithKeycloak(formData?: FormData) {
   const locale = getLocaleFromFormData(formData);
-  await signIn("keycloak", {redirectTo: `/${locale}`});
+
+  await signIn(
+    "keycloak",
+    {
+      redirectTo: `/${locale}`
+    },
+    {
+      ui_locales: locale,
+      kc_locale: locale
+    }
+  );
 }
 
 export async function signOutWithKeycloak(formData?: FormData) {

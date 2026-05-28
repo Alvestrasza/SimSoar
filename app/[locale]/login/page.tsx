@@ -15,10 +15,20 @@ export default async function LoginPage({params}: LoginPageProps) {
     namespace: "Login"
   });
 
-  async function loginAction() {
-    "use server";
-    await signIn("keycloak", {redirectTo: `/${locale}`});
-  }
+async function loginAction() {
+  "use server";
+
+  await signIn(
+    "keycloak",
+    {
+      redirectTo: `/${locale}`
+    },
+    {
+      ui_locales: locale,
+      kc_locale: locale
+    }
+  );
+}
 
   return (
     <main className="wrap" style={{maxWidth: 560}}>
