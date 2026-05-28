@@ -1,21 +1,46 @@
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { auth } from "@/auth";
+import {notFound} from "next/navigation";
+import {auth} from "@/auth";
+import {prisma} from "@/lib/db";
 import FlightDetailClient from "@/app/components/FlightDetailClient";
+import {setRequestLocale} from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function FlightDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+type FlightDetailPageProps = {
+  params: Promise<{
+    locale: string;
+    id: string;
+  }>;
+};
+
+export default async function FlightDetailPage({
+  params
+}: FlightDetailPageProps) {
+  const {locale, id} = await params;
+
+  setRequestLocale(locale);
+
   const flight = await prisma.flight.findUnique({
-    where: { id },
+    where: {
+      id
+    },
     include: {
-      track: { orderBy: { seq: "asc" } },
-      thermals: { orderBy: { seq: "asc" } }
+      track: {
+        orderBy: {
+          seq: "asc"
+        }
+      },
+      thermals: {
+        orderBy: {
+          seq: "asc"
+        }
+      }
     }
   });
 
-  if (!flight) notFound();
+  if (!flight) {
+    notFound();
+  }
 
   let session = null;
 
