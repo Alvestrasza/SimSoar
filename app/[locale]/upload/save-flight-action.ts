@@ -10,6 +10,7 @@ import { parseIgc } from "@/lib/igc";
 import { safeFilename, sha256Buffer } from "@/lib/security";
 
 const formSchema = z.object({
+  locale: z.enum(["de", "en"]).default("de"),
   pilotCallsign: z.string().min(2).max(40),
   simulator: z.string().min(2).max(40),
   registration: z.string().max(40).optional(),
@@ -31,6 +32,7 @@ export async function saveFlightAction(formData: FormData) {
   if (!file.name.toLowerCase().endsWith(".igc")) throw new Error("Only .igc files are allowed.");
 
   const fields = formSchema.parse({
+    locale: formData.get("locale") || "de",
     pilotCallsign: formData.get("pilotCallsign"),
     simulator: formData.get("simulator"),
     registration: formData.get("registration") || undefined,
@@ -101,5 +103,5 @@ export async function saveFlightAction(formData: FormData) {
     }
   });
 
-  redirect(`/flights/${flight.id}`);
+  redirect(`/${fields.locale}/flights/${flight.id}`);
 }

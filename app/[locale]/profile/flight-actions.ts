@@ -1,20 +1,20 @@
 "use server";
 
 import fs from "node:fs/promises";
-import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
+import {redirect} from "next/navigation";
+import {revalidatePath} from "next/cache";
+import {z} from "zod";
+import {auth} from "@/auth";
+import {prisma} from "@/lib/db";
 
 const flightIdSchema = z.string().min(1);
 const visibilitySchema = z.enum(["PUBLIC", "PRIVATE", "UNLISTED"]);
 
 function safeReturnTo(value: FormDataEntryValue | null) {
-  const returnTo = typeof value === "string" ? value : "/profile";
+  const returnTo = typeof value === "string" ? value : "/de/profile";
 
   if (!returnTo.startsWith("/") || returnTo.startsWith("//")) {
-    return "/profile";
+    return "/de/profile";
   }
 
   return returnTo;
@@ -22,14 +22,21 @@ function safeReturnTo(value: FormDataEntryValue | null) {
 
 function revalidateFlightViews(flightId: string) {
   revalidatePath("/");
-  revalidatePath("/flights");
-  revalidatePath("/pilots");
-  revalidatePath("/profile");
-  revalidatePath(`/flights/${flightId}`);
+  revalidatePath("/de");
+  revalidatePath("/en");
+  revalidatePath("/de/flights");
+  revalidatePath("/en/flights");
+  revalidatePath("/de/pilots");
+  revalidatePath("/en/pilots");
+  revalidatePath("/de/profile");
+  revalidatePath("/en/profile");
+  revalidatePath(`/de/flights/${flightId}`);
+  revalidatePath(`/en/flights/${flightId}`);
 }
 
 export async function setFlightVisibilityAction(formData: FormData) {
   const session = await auth();
+
   if (!session?.user?.id) {
     throw new Error("Not authenticated.");
   }
@@ -58,11 +65,13 @@ export async function setFlightVisibilityAction(formData: FormData) {
 
 export async function deleteFlightAction(formData: FormData) {
   const session = await auth();
+
   if (!session?.user?.id) {
     throw new Error("Not authenticated.");
   }
 
   const flightId = flightIdSchema.parse(formData.get("flightId"));
+  const returnTo = safeReturnTo(formData.get("returnTo"));
 
   const flight = await prisma.flight.findFirst({
     where: {
@@ -100,5 +109,5 @@ export async function deleteFlightAction(formData: FormData) {
   }
 
   revalidateFlightViews(flightId);
-  redirect("/profile?flightDeleted=1");
+  redirect(`${returnTo}?flightDeleted=1`);
 }

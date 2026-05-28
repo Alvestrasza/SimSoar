@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, useEffect } from "react";
-import Link from "next/link";
+import {Link} from "@/i18n/navigation";
 
 type TrackPoint = { lat: number; lon: number; altM: number };
 type FlightListItem = {

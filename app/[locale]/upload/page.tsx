@@ -4,17 +4,22 @@ import { prisma } from "@/lib/db";
 import { saveFlightAction } from "./save-flight-action";
 import UploadIgcPreview from "@/app/components/UploadIgcPreview";
 
+type UploadPageProps = {
+  params: Promise<{locale: string}>;
+};
+
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-export default async function UploadPage() {
+export default async function UploadPage({params}: UploadPageProps) {
+  const {locale} = await params;
   let session = null;
   try {
     session = await auth();
   } catch (error) {
     console.error("SimSoar upload auth session could not be loaded:", error);
   }
-  if (!session?.user?.id) redirect("/login");
+  if (!session?.user?.id) redirect(`/${locale}/login`);
 
   const profile = await prisma.pilotProfile.findUnique({ where: { userId: session.user.id } });
 
@@ -26,6 +31,7 @@ export default async function UploadPage() {
           <span className="muted">Max. 10 MB · .igc</span>
         </div>
         <form className="cardBody" action={saveFlightAction}>
+          <input type="hidden" name="locale" value={locale} />
           <UploadIgcPreview />
 
           <div className="formGrid" style={{ marginTop: 20 }}>

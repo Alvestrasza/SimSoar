@@ -1,0 +1,19 @@
+{
+  "Metadata": {
+    "title": "SimSoar – Virtual Gliding Community",
+    "description": "Multi-user platform for virtual gliding flights from MSFS, Condor and X-Plane."
+  },
+  "Nav": {
+    "home": "Home",
+    "flights": "Flights",
+    "upload": "Upload",
+    "pilots": "Pilots",
+    "profile": "Profile",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "myProfile": "My Profile"
+  },
+  "Footer": {
+    "rights": "All rights reserved."
+  }
+}

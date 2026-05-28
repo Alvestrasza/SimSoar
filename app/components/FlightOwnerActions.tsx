@@ -1,23 +1,25 @@
 "use client";
 
+import {useParams, usePathname} from "next/navigation";
 import {
   deleteFlightAction,
   setFlightVisibilityAction
-} from "@/app/profile/flight-actions";
+} from "@/app/[locale]/profile/flight-actions";
 
 type Visibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
 
 type Props = {
   flightId: string;
   visibility: Visibility;
-  returnTo?: string;
 };
 
-export default function FlightOwnerActions({
-  flightId,
-  visibility,
-  returnTo = "/profile"
-}: Props) {
+export default function FlightOwnerActions({flightId, visibility}: Props) {
+  const params = useParams<{locale?: string}>();
+  const pathname = usePathname();
+
+  const locale = params.locale === "en" ? "en" : "de";
+  const currentPath = pathname || `/${locale}/profile`;
+
   const nextVisibility = visibility === "PUBLIC" ? "PRIVATE" : "PUBLIC";
   const visibilityLabel =
     visibility === "PUBLIC" ? "🙈 Nicht sichtbar machen" : "👁️ Sichtbar machen";
@@ -27,7 +29,7 @@ export default function FlightOwnerActions({
       <form action={setFlightVisibilityAction}>
         <input type="hidden" name="flightId" value={flightId} />
         <input type="hidden" name="visibility" value={nextVisibility} />
-        <input type="hidden" name="returnTo" value={returnTo} />
+        <input type="hidden" name="returnTo" value={currentPath} />
         <button className="btn btnSecondary" type="submit">
           {visibilityLabel}
         </button>
@@ -46,6 +48,7 @@ export default function FlightOwnerActions({
         }}
       >
         <input type="hidden" name="flightId" value={flightId} />
+        <input type="hidden" name="returnTo" value={`/${locale}/profile`} />
         <button className="btn btnDanger" type="submit">
           🗑️ Löschen
         </button>

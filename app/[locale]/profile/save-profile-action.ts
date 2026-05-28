@@ -18,7 +18,8 @@ const schema = z.object({
   favoriteGlider: z.string().max(80).optional(),
   country: z.string().max(80).optional(),
   bio: z.string().max(2000).optional(),
-  showHomeAirfieldOnHome: z.boolean().default(false)
+  showHomeAirfieldOnHome: z.boolean().default(false),
+  locale: z.enum(["de", "en"]).default("de")
 });
 
 export async function saveProfileAction(formData: FormData) {
@@ -32,7 +33,8 @@ export async function saveProfileAction(formData: FormData) {
     favoriteGlider: formData.get("favoriteGlider") || undefined,
     country: formData.get("country") || undefined,
     bio: formData.get("bio") || undefined,
-    showHomeAirfieldOnHome: formData.get("showHomeAirfieldOnHome") === "on"
+    showHomeAirfieldOnHome: formData.get("showHomeAirfieldOnHome") === "on",
+    locale: formData.get("locale") || "de"
   });
 
   const account = await prisma.account.findFirst({
@@ -85,5 +87,5 @@ export async function saveProfileAction(formData: FormData) {
     update: data
   });
 
-  redirect("/profile?saved=1");
+  redirect(`/${data.locale}/profile?saved=1`);
 }

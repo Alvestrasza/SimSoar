@@ -295,3 +295,20 @@ body {
   padding: 8px 12px;
   font-size: 13px;
 }
+
+.localeSwitcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.localeSwitcher a {
+  color: var(--muted);
+}
+
+.localeSwitcher a:hover {
+  color: var(--accent);
+}

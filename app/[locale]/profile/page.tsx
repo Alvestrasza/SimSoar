@@ -3,7 +3,7 @@ import { signOutWithKeycloak } from "@/app/auth-actions";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { saveProfileAction } from "./save-profile-action";
-import Link from "next/link";
+import {Link} from "@/i18n/navigation";
 import { ProfileSaveNotice } from "./ProfileSaveNotice";
 import FlightOwnerActions from "@/app/components/FlightOwnerActions";
 
@@ -11,12 +11,14 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 type ProfilePageProps = {
+  params: Promise<{locale: string}>;
   searchParams?:
     | Promise<Record<string, string | string[] | undefined>>
     | Record<string, string | string[] | undefined>;
 };
 
-export default async function ProfilePage({ searchParams }: ProfilePageProps) {
+export default async function ProfilePage({params, searchParams}: ProfilePageProps) {
+  const {locale} = await params;
   const params = searchParams ? await searchParams : {};
   const savedParam = Array.isArray(params.saved) ? params.saved[0] : params.saved;
   const profileSaved = savedParam === "1";
@@ -26,7 +28,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   } catch (error) {
     console.error("SimSoar profile auth session could not be loaded:", error);
   }
-  if (!session?.user?.id) redirect("/login");
+  if (!session?.user?.id) redirect(`/${locale}/login`);
 
   const [profile, flights] = await Promise.all([
     prisma.pilotProfile.findUnique({ where: { userId: session.user.id } }),
@@ -39,6 +41,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
         <div className="cardHead"><span className="cardTitle">Mein Profil</span>
         </div>
         <form className="cardBody" action={saveProfileAction}>
+          <input type="hidden" name="locale" value={locale} />
           <div className="formGrid">
             <div className="formGroup"><label>Benutzername</label><input value={session.user.name ?? "–"} readOnly aria-readonly="true" /></div>
             <div className="formGroup"><label>Email Adresse</label><input value={session.user.email ?? "–"} readOnly aria-readonly="true" /></div>
@@ -89,7 +92,6 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               <FlightOwnerActions
                 flightId={f.id}
                 visibility={f.visibility}
-                returnTo="/profile"
               />
             </div>
           ))}
