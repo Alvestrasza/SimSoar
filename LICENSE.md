@@ -1,5 +1,8 @@
 Copyright (c) 2026 - SimSoar Project Team
+
 Copyright (c) 2026 - Tim Richter
+
+
 
 All rights reserved.
 
