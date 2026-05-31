@@ -16,7 +16,7 @@ body:
     attributes:
       label: Bug summary
       description: Briefly describe what went wrong.
-      placeholder: Example: The upload page crashes after selecting an IGC file.
+      placeholder: "Example: The upload page crashes after selecting an IGC file."
     validations:
       required: true
 
