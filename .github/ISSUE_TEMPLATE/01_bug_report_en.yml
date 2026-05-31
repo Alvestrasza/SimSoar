@@ -1,0 +1,124 @@
+name: Bug Report
+description: Report a reproducible bug in SimSoar.
+title: '[Bug]: '
+labels:
+- bug
+- triage
+body:
+- type: markdown
+  attributes:
+    value: 'Thank you for reporting a bug in SimSoar.
+
+
+      Please provide enough information so we can reproduce and investigate the issue.
+
+      Do not publish secrets, private keys, tokens, passwords, or personal data.'
+- type: checkboxes
+  id: duplicate_check
+  attributes:
+    label: Duplicate check
+    options:
+    - label: I have searched existing issues and did not find a duplicate.
+      required: true
+    description: Please search the existing issues before creating a new one.
+- type: textarea
+  id: summary
+  attributes:
+    label: Bug summary
+    description: Briefly describe what went wrong.
+    placeholder: 'Example: The upload page crashes after selecting an IGC file.'
+  validations:
+    required: true
+- type: textarea
+  id: steps
+  attributes:
+    label: Steps to reproduce
+    description: Please describe exactly how we can reproduce the problem.
+    placeholder: '1. Go to ...
+
+      2. Click on ...
+
+      3. Upload ...
+
+      4. See error ...'
+  validations:
+    required: true
+- type: textarea
+  id: expected
+  attributes:
+    label: Expected behavior
+    description: What should have happened instead?
+  validations:
+    required: true
+- type: textarea
+  id: actual
+  attributes:
+    label: Actual behavior
+    description: What actually happened?
+  validations:
+    required: true
+- type: dropdown
+  id: environment
+  attributes:
+    label: Environment
+    options:
+    - Production
+    - Development
+    - Local setup
+    - Unknown
+    description: Where did the bug occur?
+  validations:
+    required: true
+- type: dropdown
+  id: browser
+  attributes:
+    label: Browser
+    options:
+    - Chrome
+    - Microsoft Edge
+    - Firefox
+    - Safari
+    - Other
+    description: Which browser did you use?
+  validations:
+    required: true
+- type: input
+  id: operating_system
+  attributes:
+    label: Operating system
+    description: Which operating system did you use?
+    placeholder: 'Example: Windows 11, Ubuntu 24.04 LTS, macOS'
+  validations:
+    required: false
+- type: input
+  id: version
+  attributes:
+    label: SimSoar version / commit
+    description: If known, enter the version, release, or commit hash.
+    placeholder: 'Example: v0.1.6 or commit hash'
+  validations:
+    required: false
+- type: textarea
+  id: logs
+  attributes:
+    label: Relevant logs or error messages
+    description: Paste relevant logs, browser console output, or server errors here.
+    render: shell
+  validations:
+    required: false
+- type: textarea
+  id: attachments
+  attributes:
+    label: Screenshots or files
+    description: You can attach screenshots or sample files by clicking into this field and dragging files into it. Do not upload private or sensitive data.
+  validations:
+    required: false
+- type: checkboxes
+  id: confirmation
+  attributes:
+    label: Confirmation
+    options:
+    - label: I have removed secrets, passwords, private keys, tokens, and personal data from this report.
+      required: true
+    - label: I have provided enough information to reproduce or investigate the issue.
+      required: true

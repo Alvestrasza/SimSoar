@@ -1,0 +1,96 @@
+name: Feature Request
+description: Suggest an improvement or new feature for SimSoar.
+title: '[Feature]: '
+labels:
+- enhancement
+- triage
+body:
+- type: markdown
+  attributes:
+    value: 'Thank you for suggesting a feature for SimSoar.
+
+
+      Please describe the problem, the proposed solution, and the expected benefit.
+
+      Clear feature requests are easier to evaluate, prioritize, and implement.'
+- type: checkboxes
+  id: duplicate_check
+  attributes:
+    label: Duplicate check
+    options:
+    - label: I have searched existing issues and did not find a duplicate feature request.
+      required: true
+    description: Please search the existing issues before creating a new feature request.
+- type: textarea
+  id: problem
+  attributes:
+    label: Problem or use case
+    description: What problem should this feature solve?
+    placeholder: 'Example: Admins currently cannot delete users or uploaded flights from the web interface.'
+  validations:
+    required: true
+- type: textarea
+  id: proposed_solution
+  attributes:
+    label: Proposed solution
+    description: Describe the feature or behavior you would like to see.
+    placeholder: 'Example: Add an admin page where authorized admins can delete users and flights.'
+  validations:
+    required: true
+- type: dropdown
+  id: feature_area
+  attributes:
+    label: Feature area
+    options:
+    - Authentication / User Management
+    - Flight Upload
+    - Flight Analysis
+    - Flight Details
+    - Leaderboards / Rankings
+    - Admin Area
+    - UI / UX
+    - Dark Mode / Appearance
+    - Documentation
+    - Deployment / Operations
+    - Other
+    description: Which part of SimSoar is affected?
+  validations:
+    required: true
+- type: dropdown
+  id: priority
+  attributes:
+    label: Suggested priority
+    options:
+    - Low
+    - Medium
+    - High
+    - Critical
+    description: How important is this feature from your perspective?
+  validations:
+    required: true
+- type: textarea
+  id: acceptance_criteria
+  attributes:
+    label: Acceptance criteria
+    description: What must be true for this feature to be considered complete?
+    placeholder: '- Admins can see a list of users.
+
+      - Admins can delete a selected user after confirmation.
+
+      - Admin actions are logged.'
+  validations:
+    required: true
+- type: textarea
+  id: alternatives
+  attributes:
+    label: Alternatives considered
+    description: Describe any alternative solutions or workarounds you considered.
+  validations:
+    required: false
+- type: textarea
+  id: additional_context
+  attributes:
+    label: Additional context
+    description: Add anything else that may help us evaluate this request.
+  validations:
+    required: false

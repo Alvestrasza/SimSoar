@@ -1,0 +1,124 @@
+name: Fehler melden
+description: Melde einen reproduzierbaren Fehler in SimSoar.
+title: '[Fehler]: '
+labels:
+- bug
+- triage
+body:
+- type: markdown
+  attributes:
+    value: 'Danke, dass du einen Fehler in SimSoar meldest.
+
+
+      Bitte gib genug Informationen an, damit wir den Fehler reproduzieren und untersuchen können.
+
+      Veröffentliche keine Geheimnisse, privaten Schlüssel, Tokens, Passwörter oder personenbezogenen Daten.'
+- type: checkboxes
+  id: duplicate_check
+  attributes:
+    label: Prüfung auf Duplikate
+    options:
+    - label: Ich habe die bestehenden Issues durchsucht und kein Duplikat gefunden.
+      required: true
+    description: Bitte prüfe vor dem Erstellen, ob es bereits ein passendes Issue gibt.
+- type: textarea
+  id: summary
+  attributes:
+    label: Kurze Fehlerbeschreibung
+    description: Beschreibe kurz, was schiefgelaufen ist.
+    placeholder: 'Beispiel: Die Upload-Seite stürzt nach Auswahl einer IGC-Datei ab.'
+  validations:
+    required: true
+- type: textarea
+  id: steps
+  attributes:
+    label: Schritte zur Reproduktion
+    description: Beschreibe genau, wie der Fehler reproduziert werden kann.
+    placeholder: '1. Gehe zu ...
+
+      2. Klicke auf ...
+
+      3. Lade ... hoch
+
+      4. Fehler erscheint ...'
+  validations:
+    required: true
+- type: textarea
+  id: expected
+  attributes:
+    label: Erwartetes Verhalten
+    description: Was hätte stattdessen passieren sollen?
+  validations:
+    required: true
+- type: textarea
+  id: actual
+  attributes:
+    label: Tatsächliches Verhalten
+    description: Was ist tatsächlich passiert?
+  validations:
+    required: true
+- type: dropdown
+  id: environment
+  attributes:
+    label: Umgebung
+    options:
+    - Produktion
+    - Entwicklung
+    - Lokale Installation
+    - Unbekannt
+    description: Wo ist der Fehler aufgetreten?
+  validations:
+    required: true
+- type: dropdown
+  id: browser
+  attributes:
+    label: Browser
+    options:
+    - Chrome
+    - Microsoft Edge
+    - Firefox
+    - Safari
+    - Anderer
+    description: Welchen Browser hast du verwendet?
+  validations:
+    required: true
+- type: input
+  id: operating_system
+  attributes:
+    label: Betriebssystem
+    description: Welches Betriebssystem hast du verwendet?
+    placeholder: 'Beispiel: Windows 11, Ubuntu 24.04 LTS, macOS'
+  validations:
+    required: false
+- type: input
+  id: version
+  attributes:
+    label: SimSoar-Version / Commit
+    description: Falls bekannt, gib Version, Release oder Commit-Hash an.
+    placeholder: 'Beispiel: v0.1.6 oder Commit-Hash'
+  validations:
+    required: false
+- type: textarea
+  id: logs
+  attributes:
+    label: Relevante Logs oder Fehlermeldungen
+    description: Füge relevante Logs, Browser-Konsolenausgaben oder Serverfehler ein.
+    render: shell
+  validations:
+    required: false
+- type: textarea
+  id: attachments
+  attributes:
+    label: Screenshots oder Dateien
+    description: Du kannst Screenshots oder Beispieldateien anhängen, indem du in dieses Feld klickst und Dateien hineinziehst. Lade keine privaten oder sensiblen Daten hoch.
+  validations:
+    required: false
+- type: checkboxes
+  id: confirmation
+  attributes:
+    label: Bestätigung
+    options:
+    - label: Ich habe Geheimnisse, Passwörter, private Schlüssel, Tokens und personenbezogene Daten aus diesem Bericht entfernt.
+      required: true
+    - label: Ich habe genug Informationen angegeben, um den Fehler zu reproduzieren oder zu untersuchen.
+      required: true

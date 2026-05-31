@@ -1,0 +1,79 @@
+name: Dokumentationswunsch
+description: Fordere neue oder verbesserte Dokumentation für SimSoar an.
+title: '[Doku]: '
+labels:
+- documentation
+- triage
+body:
+- type: markdown
+  attributes:
+    value: 'Danke, dass du hilfst, die SimSoar-Dokumentation zu verbessern.
+
+
+      Bitte beschreibe, was fehlt, unklar, veraltet oder falsch ist.'
+- type: checkboxes
+  id: duplicate_check
+  attributes:
+    label: Prüfung auf Duplikate
+    options:
+    - label: Ich habe die bestehenden Issues durchsucht und keinen doppelten Dokumentationswunsch gefunden.
+      required: true
+    description: Bitte prüfe vor dem Erstellen, ob es bereits einen passenden Dokumentationswunsch gibt.
+- type: dropdown
+  id: documentation_area
+  attributes:
+    label: Dokumentationsbereich
+    options:
+    - Installation
+    - Konfiguration
+    - Deployment
+    - Betrieb
+    - Benutzerhandbuch
+    - Administratorhandbuch
+    - Entwicklerhandbuch
+    - API / Schnittstellen
+    - Sicherheit
+    - Fehleranalyse
+    - Anderer Bereich
+    description: Welcher Bereich benötigt Dokumentation?
+  validations:
+    required: true
+- type: textarea
+  id: requested_change
+  attributes:
+    label: Was soll dokumentiert oder geändert werden?
+    description: Beschreibe die fehlende, unklare, veraltete oder falsche Dokumentation.
+    placeholder: 'Beispiel: Die Produktions-Deployment-Schritte erklären nicht, wie ein systemd-Service-Override konfiguriert wird.'
+  validations:
+    required: true
+- type: textarea
+  id: expected_documentation
+  attributes:
+    label: Erwartete Dokumentation
+    description: Was soll die Dokumentation erklären?
+    placeholder: 'Die Dokumentation soll enthalten:
+
+      - Benötigte Pfade
+
+      - Erforderliche Umgebungsvariablen
+
+      - Exakte Kommandos
+
+      - Prüfschritte'
+  validations:
+    required: true
+- type: textarea
+  id: affected_files
+  attributes:
+    label: Betroffene Dokumentationsdateien oder Seiten
+    description: Verlinke oder benenne bekannte betroffene Dateien oder Seiten.
+    placeholder: 'Beispiel: README.md, docs/deployment/production.md, Wiki-Seite'
+  validations:
+    required: false
+- type: textarea
+  id: additional_context
+  attributes:
+    label: Zusätzlicher Kontext
+    description: Ergänze alles, was bei der Verbesserung der Dokumentation helfen kann.
+  validations:
+    required: false

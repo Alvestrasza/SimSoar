@@ -1,0 +1,96 @@
+name: Funktionswunsch
+description: Schlage eine Verbesserung oder neue Funktion für SimSoar vor.
+title: '[Feature]: '
+labels:
+- enhancement
+- triage
+body:
+- type: markdown
+  attributes:
+    value: 'Danke, dass du eine Verbesserung für SimSoar vorschlägst.
+
+
+      Bitte beschreibe das Problem, die gewünschte Lösung und den erwarteten Nutzen.
+
+      Klare Funktionswünsche lassen sich leichter bewerten, priorisieren und umsetzen.'
+- type: checkboxes
+  id: duplicate_check
+  attributes:
+    label: Prüfung auf Duplikate
+    options:
+    - label: Ich habe die bestehenden Issues durchsucht und keinen doppelten Funktionswunsch gefunden.
+      required: true
+    description: Bitte prüfe vor dem Erstellen, ob es bereits einen passenden Funktionswunsch gibt.
+- type: textarea
+  id: problem
+  attributes:
+    label: Problem oder Anwendungsfall
+    description: Welches Problem soll diese Funktion lösen?
+    placeholder: 'Beispiel: Administratoren können aktuell keine Benutzer oder hochgeladenen Flüge über die Weboberfläche löschen.'
+  validations:
+    required: true
+- type: textarea
+  id: proposed_solution
+  attributes:
+    label: Vorgeschlagene Lösung
+    description: Beschreibe die gewünschte Funktion oder das gewünschte Verhalten.
+    placeholder: 'Beispiel: Eine Admin-Seite, auf der berechtigte Administratoren Benutzer und Flüge löschen können.'
+  validations:
+    required: true
+- type: dropdown
+  id: feature_area
+  attributes:
+    label: Funktionsbereich
+    options:
+    - Authentifizierung / Benutzerverwaltung
+    - Flug-Upload
+    - Fluganalyse
+    - Flugdetails
+    - Bestenlisten / Ranglisten
+    - Admin-Bereich
+    - UI / UX
+    - Dark Mode / Darstellung
+    - Dokumentation
+    - Deployment / Betrieb
+    - Anderer Bereich
+    description: Welcher Teil von SimSoar ist betroffen?
+  validations:
+    required: true
+- type: dropdown
+  id: priority
+  attributes:
+    label: Vorgeschlagene Priorität
+    options:
+    - Niedrig
+    - Mittel
+    - Hoch
+    - Kritisch
+    description: Wie wichtig ist diese Funktion aus deiner Sicht?
+  validations:
+    required: true
+- type: textarea
+  id: acceptance_criteria
+  attributes:
+    label: Akzeptanzkriterien
+    description: Was muss erfüllt sein, damit diese Funktion als abgeschlossen gilt?
+    placeholder: '- Administratoren können eine Benutzerliste sehen.
+
+      - Administratoren können einen ausgewählten Benutzer nach Bestätigung löschen.
+
+      - Admin-Aktionen werden protokolliert.'
+  validations:
+    required: true
+- type: textarea
+  id: alternatives
+  attributes:
+    label: Betrachtete Alternativen
+    description: Beschreibe alternative Lösungen oder Workarounds, die du geprüft hast.
+  validations:
+    required: false
+- type: textarea
+  id: additional_context
+  attributes:
+    label: Zusätzlicher Kontext
+    description: Ergänze alles, was bei der Bewertung dieses Vorschlags helfen kann.
+  validations:
+    required: false
