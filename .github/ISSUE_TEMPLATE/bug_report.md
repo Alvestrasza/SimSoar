@@ -1,38 +1,88 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
-
+name: Bug Report
+about: Report a reproducible bug in SimSoar.
+title: "[Bug]: "
+labels: bug, triage
+assignees: ""
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## Duplicate check
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+- [ ] I have searched the existing issues and did not find a duplicate.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## Bug summary
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+Briefly describe what went wrong.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+Example: The upload page crashes after selecting an IGC file.
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+## Environment
 
-**Additional context**
-Add any other context about the problem here.
+Where did the bug occur?
+
+- [ ] Production
+- [ ] Development
+- [ ] Local setup
+- [ ] Unknown
+
+## SimSoar version or commit
+
+Enter the release, tag, or commit hash if known.
+
+Example: `v0.1.6` or `4f3a2b1`
+
+## Browser
+
+Select the browser where the issue occurred.
+
+- [ ] Chrome
+- [ ] Microsoft Edge
+- [ ] Firefox
+- [ ] Safari
+- [ ] Other
+
+## Operating system
+
+Which operating system did you use?
+
+Example: Windows 11, Ubuntu 24.04 LTS, macOS
+
+## Steps to reproduce
+
+Please describe exactly how we can reproduce the problem.
+
+1. Go to ...
+2. Click on ...
+3. Upload ...
+4. See error ...
+
+## Expected behavior
+
+What should have happened?
+
+## Actual behavior
+
+What actually happened?
+
+## Relevant logs or error messages
+
+Paste relevant browser console output, server logs, or error messages here.
+
+```text
+
+```
+
+## Screenshots or sample files
+
+Upload screenshots or sample files if they help explain the issue.
+
+Do not upload private or sensitive data.
+
+## Additional context
+
+Add any other context that may help us understand the problem.
+
+## Confirmation
+
+- [ ] I have removed secrets, passwords, private keys, tokens, and personal data from this report.
+- [ ] I have provided enough information to reproduce or investigate the issue.
