@@ -1,15 +1,25 @@
 name: Bug Report
-description: Report a bug in SimSoar
+description: Report a reproducible bug in SimSoar.
 title: "[Bug]: "
 labels: ["bug", "triage"]
-type: bug
 
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting a bug.
-        Please fill out the required fields so we can reproduce the issue.
+        Thank you for reporting a bug in SimSoar.
+
+        Please fill out the required fields so we can reproduce and investigate the issue.
+        Do not publish secrets, private keys, tokens, passwords, or personal data.
+
+  - type: checkboxes
+    id: duplicate_check
+    attributes:
+      label: Duplicate check
+      description: Please search the existing issues before creating a new one.
+      options:
+        - label: I have searched existing issues and did not find a duplicate.
+          required: true
 
   - type: textarea
     id: summary
@@ -68,12 +78,21 @@ body:
       label: Browser
       options:
         - Chrome
-        - Edge
+        - Microsoft Edge
         - Firefox
         - Safari
         - Other
     validations:
       required: true
+
+  - type: input
+    id: operating_system
+    attributes:
+      label: Operating system
+      description: Which operating system did you use?
+      placeholder: "Example: Windows 11, Ubuntu 24.04 LTS, macOS"
+    validations:
+      required: false
 
   - type: input
     id: version
@@ -93,11 +112,11 @@ body:
     validations:
       required: false
 
-  - type: upload
+  - type: textarea
     id: screenshots
     attributes:
       label: Screenshots or files
-      description: Upload screenshots or sample files if helpful.
+      description: You can attach screenshots or sample files by clicking into this field and dragging files into it. Do not upload private or sensitive data.
     validations:
       required: false
 
@@ -106,7 +125,7 @@ body:
     attributes:
       label: Confirmation
       options:
-        - label: I have searched existing issues and did not find a duplicate.
+        - label: I have removed secrets, passwords, private keys, tokens, and personal data from this report.
           required: true
-        - label: I have provided enough information to reproduce the issue.
+        - label: I have provided enough information to reproduce or investigate the issue.
           required: true
