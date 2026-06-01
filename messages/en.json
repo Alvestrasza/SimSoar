@@ -14,7 +14,12 @@
     "myProfile": "My Profile"
   },
   "Footer": {
-    "rights": "All rights reserved."
+    "copyright": "© {year} {holder1} / {holder2}. All rights reserved.",
+    "imprint": "Legal Notice",
+    "privacy": "Privacy Policy",
+    "github": "GitHub",
+    "issues": "Issues",
+    "version": "SimSoar v{version}"
   },
   "Home": {
     "kicker": "🖥️ Simulator Gliding Community",

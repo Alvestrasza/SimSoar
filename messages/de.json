@@ -14,7 +14,12 @@
     "myProfile": "Mein Profil"
   },
   "Footer": {
-    "rights": "Alle Rechte vorbehalten."
+    "copyright": "© {year} {holder1} / {holder2}. Alle Rechte vorbehalten.",
+    "imprint": "Impressum",
+    "privacy": "Datenschutz",
+    "github": "GitHub",
+    "issues": "Issues",
+    "version": "SimSoar v{version}"
   },
   "Home": {
     "kicker": "🖥️ Simulator-Segelflug-Community",

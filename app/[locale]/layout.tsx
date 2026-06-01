@@ -5,7 +5,13 @@ import {getMessages, getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 import {routing} from "@/i18n/routing";
 import {Link} from "@/i18n/navigation";
-import {SITE_COPYRIGHT_HOLDER, SITE_VERSION} from "@/lib/site";
+import {
+  SITE_COPYRIGHT_HOLDER1,
+  SITE_COPYRIGHT_HOLDER2,
+  SITE_COPYRIGHT_YEAR,
+  SITE_LINKS,
+  SITE_VERSION
+} from "@/lib/site";
 import "leaflet/dist/leaflet.css";
 import "../globals.css";
 import {AuthNav} from "@/app/components/AuthNav";
@@ -86,9 +92,27 @@ export default async function LocaleLayout({
 
           <footer className="siteFooter">
             <span>
-              © {new Date().getFullYear()} {SITE_COPYRIGHT_HOLDER}. {footer("rights")}
+              {t("copyright", {
+                year: SITE_COPYRIGHT_YEAR,
+                holder1: SITE_COPYRIGHT_HOLDER1,
+                holder2: SITE_COPYRIGHT_HOLDER2
+              })}
             </span>
-            <span>SimSoar v{SITE_VERSION}</span>
+
+            <span className="footerLinks">
+              <Link href={SITE_LINKS.imprint}>{t("imprint")}</Link>
+              <Link href={SITE_LINKS.privacy}>{t("privacy")}</Link>
+
+              <a href={SITE_LINKS.github} target="_blank" rel="noreferrer">
+                {t("github")}
+              </a>
+
+              <a href={SITE_LINKS.issues} target="_blank" rel="noreferrer">
+                {t("issues")}
+              </a>
+            </span>
+
+            <span>{t("version", { version: SITE_VERSION })}</span>
           </footer>
         </NextIntlClientProvider>
       </body>
