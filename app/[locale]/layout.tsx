@@ -100,19 +100,19 @@ export default async function LocaleLayout({
             </span>
 
             <span className="footerLinks">
-              <Link href={SITE_LINKS.imprint}>{t("imprint")}</Link>
-              <Link href={SITE_LINKS.privacy}>{t("privacy")}</Link>
+              <Link href={SITE_LINKS.imprint}>{footer("imprint")}</Link>
+              <Link href={SITE_LINKS.privacy}>{footer("privacy")}</Link>
 
               <a href={SITE_LINKS.github} target="_blank" rel="noreferrer">
-                {t("github")}
+                {footer("github")}
               </a>
 
               <a href={SITE_LINKS.issues} target="_blank" rel="noreferrer">
-                {t("issues")}
+                {footer("issues")}
               </a>
             </span>
 
-            <span>{t("version", { version: SITE_VERSION })}</span>
+            <span>{footer("version", { version: SITE_VERSION })}</span>
           </footer>
         </NextIntlClientProvider>
       </body>
