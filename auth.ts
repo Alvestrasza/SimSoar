@@ -2,6 +2,10 @@ import NextAuth from "next-auth";
 import Keycloak from "next-auth/providers/keycloak";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
+import {
+  extractKeycloakRoleValues,
+  normalizeSimSoarRoles
+} from "@/lib/rbac";
 
 type KeycloakProfileWithCallsign = {
   simsoar_callsign?: unknown;
@@ -52,20 +56,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     })
   ],
   callbacks: {
-    async session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
+  async session({ session, user }) {
+    if (session.user) {
+      session.user.id = user.id;
 
-        const profile = await prisma.pilotProfile.findUnique({
-          where: { userId: user.id },
-          select: { callsign: true }
-        });
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: {
+          roles: true,
+          profile: {
+            select: {
+              callsign: true
+            }
+          }
+        }
+      });
 
-        session.user.callsign = profile?.callsign ?? null;
-      }
+      session.user.callsign = dbUser?.profile?.callsign ?? null;
+      session.user.roles = dbUser?.roles ?? ["USER"];
+    }
 
-      return session;
-    },
+    return session;
+  },
 
     async redirect({ url, baseUrl }) {
       if (url.startsWith("/")) return `${baseUrl}${url}`;
@@ -98,7 +110,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (account?.provider !== "keycloak") return;
       if (!user.id) return;
 
+      const roleValues = extractKeycloakRoleValues(
+        profile,
+        process.env.AUTH_KEYCLOAK_ID
+      );
+
+      const roles = normalizeSimSoarRoles(roleValues);
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { roles }
+      });
+
       const callsign = getSimSoarCallsign(profile);
+
       if (!callsign) return;
 
       await prisma.pilotProfile.upsert({
