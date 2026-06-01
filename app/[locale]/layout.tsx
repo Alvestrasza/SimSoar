@@ -92,7 +92,7 @@ export default async function LocaleLayout({
 
           <footer className="siteFooter">
             <span>
-              {t("copyright", {
+              {footer("copyright", {
                 year: SITE_COPYRIGHT_YEAR,
                 holder1: SITE_COPYRIGHT_HOLDER1,
                 holder2: SITE_COPYRIGHT_HOLDER2
