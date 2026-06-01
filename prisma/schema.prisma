@@ -22,6 +22,13 @@ enum SimSoarRole {
   OWNER
 }
 
+enum FlightModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  HIDDEN
+}
+
 enum AuditAction {
   USER_ROLE_SYNC
   USER_UPDATE
@@ -128,6 +135,12 @@ model Flight {
   competitionClass String?
   comment          String?
   visibility       FlightVisibility @default(PUBLIC)
+  moderationStatus   FlightModerationStatus   @default(APPROVED)
+  moderatedByUserId  String?
+  moderatedAt        DateTime?
+  moderationNote     String?
+  deletedAt          DateTime?
+  deletedByUserId    String?
   igcObjectPath    String
   igcSha256        String
   startTime        DateTime?
@@ -150,7 +163,10 @@ model Flight {
   thermals Thermal[]
 
   @@index([visibility, createdAt])
-  @@index([visibility, olcPoints])
+  @@index([visibility, moderationStatus, createdAt])
+  @@index([visibility, moderationStatus, olcPoints])
+  @@index([moderationStatus, createdAt])
+  @@index([deletedAt])
   @@index([userId, createdAt])
 }
 

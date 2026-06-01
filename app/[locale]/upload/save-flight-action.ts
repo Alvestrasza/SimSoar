@@ -8,6 +8,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { parseIgc } from "@/lib/igc";
 import { safeFilename, sha256Buffer } from "@/lib/security";
+import { writeAuditLog } from "@/lib/audit";
 
 const formSchema = z.object({
   locale: z.enum(["de", "en"]).default("de"),
@@ -102,6 +103,24 @@ export async function saveFlightAction(formData: FormData) {
       }
     }
   });
+
+    await writeAuditLog({
+      actorUserId: session.user.id,
+      actorEmail: session.user.email,
+      action: "FLIGHT_UPLOAD",
+      targetType: "Flight",
+      targetId: flight.id,
+      summary: "Flight uploaded and queued for moderation.",
+      metadata: {
+        title: flight.title,
+        visibility: fields.visibility,
+        moderationStatus: "PENDING",
+        simulator: fields.simulator,
+        distanceKm: parsed.distanceKm,
+        olcPoints: parsed.olcPoints,
+        igcSha256: sha
+      }
+    });
 
   redirect(`/${fields.locale}/flights/${flight.id}`);
 }
