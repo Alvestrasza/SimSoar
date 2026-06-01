@@ -125,38 +125,38 @@ model PilotProfile {
 }
 
 model Flight {
-  id               String           @id @default(cuid())
-  userId           String
-  pilotCallsign    String
-  title            String
-  simulator        String
-  glider           String?
-  registration     String?
-  competitionClass String?
-  comment          String?
-  visibility       FlightVisibility @default(PUBLIC)
-  moderationStatus   FlightModerationStatus   @default(APPROVED)
-  moderatedByUserId  String?
-  moderatedAt        DateTime?
-  moderationNote     String?
-  deletedAt          DateTime?
-  deletedByUserId    String?
-  igcObjectPath    String
-  igcSha256        String
-  startTime        DateTime?
-  durationSeconds  Int
-  distanceKm       Float
-  olcPoints        Float
-  avgSpeedKmh      Float
-  maxAltitudeM     Int
-  minAltitudeM     Int
-  maxVarioMs       Float
-  startLat         Float?
-  startLon         Float?
-  finishLat        Float?
-  finishLon        Float?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id                String                 @id @default(cuid())
+  userId            String
+  pilotCallsign     String
+  title             String
+  simulator         String
+  glider            String?
+  registration      String?
+  competitionClass  String?
+  comment           String?
+  visibility        FlightVisibility       @default(PUBLIC)
+  moderationStatus  FlightModerationStatus @default(APPROVED)
+  moderatedByUserId String?
+  moderatedAt       DateTime?
+  moderationNote    String?
+  deletedAt         DateTime?
+  deletedByUserId   String?
+  igcObjectPath     String
+  igcSha256         String
+  startTime         DateTime?
+  durationSeconds   Int
+  distanceKm        Float
+  olcPoints         Float
+  avgSpeedKmh       Float
+  maxAltitudeM      Int
+  minAltitudeM      Int
+  maxVarioMs        Float
+  startLat          Float?
+  startLon          Float?
+  finishLat         Float?
+  finishLon         Float?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
 
   user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   track    TrackPoint[]
