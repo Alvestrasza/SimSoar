@@ -26,20 +26,20 @@
     "subtitle": "Provider identification for SimSoar",
     "legalBasis": "Information according to Section 5 German Digital Services Act (DDG)",
     "operatorTitle": "Operator",
-    "operatorName": "Tim Richter / SimSoar Project Team",
+    "operatorName": "SimSoar Project Team",
     "addressTitle": "Postal address",
     "addressLines": [
-      "TODO: Insert street and house number",
-      "TODO: Insert postal code and city",
-      "Germany"
+      " ",
+      " ",
+      " "
     ],
     "contactTitle": "Contact",
     "emailLabel": "Email",
-    "emailValue": "TODO: contact-address@domain.example",
+    "emailValue": "simsoar@alvestrasza.com",
     "githubLabel": "GitHub",
     "githubValue": "https://github.com/Alvestrasza/simsoar",
     "responsibleTitle": "Responsible for content",
-    "responsibleText": "Tim Richter, address as stated above. If editorial content within the meaning of German media law is published, this information must be legally reviewed and completed before public production use.",
+    "responsibleText": "SimSoar Project Team, address as stated above. If editorial content within the meaning of German media law is published, this information must be legally reviewed and completed before public production use.",
     "projectTitle": "Project description",
     "projectText": "SimSoar is a platform for virtual glider pilots. Users can upload, analyze and compare IGC flight files. The platform is currently under active development.",
     "userContentTitle": "User-generated content",
@@ -56,13 +56,13 @@
     "intro": "This privacy policy describes which personal data is processed when using SimSoar. The platform is currently under active development. Before public production use, this policy must be legally reviewed and adapted to the actual infrastructure.",
     "controllerTitle": "1. Controller",
     "controllerLines": [
-      "Tim Richter / SimSoar Project Team",
-      "TODO: insert full postal address",
-      "TODO: insert contact address"
+      "SimSoar Project Team",
+      " ",
+      " "
     ],
     "dataTitle": "2. Processed data",
     "dataItems": [
-      "user account data from Keycloak, for example user ID, username, display name and email address",
+      "user account data, for example user ID, username, display name and email address",
       "profile information within SimSoar, for example callsign, home airfield, preferred simulator, preferred aircraft, country and profile description",
       "uploaded IGC files and calculated flight data, for example distance, altitude, speed, thermal data, flight time and track points",
       "technical operational data, for example server logs, timestamps, IP address, browser data and error logs",
@@ -71,7 +71,7 @@
     "purposeTitle": "3. Purposes of processing",
     "purposeItems": [
       "providing the SimSoar platform",
-      "authentication and user management through Keycloak",
+      "authentication and user management",
       "storing and analyzing virtual gliding flights",
       "displaying public leaderboards and flight details",
       "operation, security, troubleshooting and abuse prevention",
@@ -79,14 +79,14 @@
     ],
     "legalBasisTitle": "4. Legal bases",
     "legalBasisText": "Depending on the feature, processing is based on Art. 6(1)(b) GDPR for providing the platform, Art. 6(1)(f) GDPR due to legitimate interests in secure and stable operation, and, where required for optional features, Art. 6(1)(a) GDPR based on consent.",
-    "keycloakTitle": "5. Authentication through Keycloak",
-    "keycloakText": "SimSoar uses Keycloak and OpenID Connect for sign-in. The actual user identity, password policies, MFA settings and central role management are handled by the identity service. SimSoar only processes token information required for sign-in, role checks and user mapping.",
+    "keycloakTitle": "5. Authentication",
+    "keycloakText": "SimSoar uses OpenID Connect for sign-in. The actual user identity, password policies, MFA settings and central role management are handled by the identity service. SimSoar only processes token information required for sign-in, role checks and user mapping.",
     "uploadsTitle": "6. IGC uploads and public flight data",
     "uploadsText": "Uploaded IGC files may contain personal or person-related data, especially if callsigns, names, registrations or position data are included. Public flights may be visible to other users. Private or unlisted flights should only be processed and displayed according to their visibility setting.",
     "logsTitle": "7. Server logs and security",
     "logsText": "During platform operation, technical log data may be processed. This includes IP addresses, timestamps, requested URLs, status codes, error messages and security-relevant events. These data are used for secure operation, troubleshooting and abuse prevention.",
     "recipientsTitle": "8. Recipients and infrastructure",
-    "recipientsText": "The application is intended for self-hosted infrastructure. Depending on the operating model, web servers, database servers, Keycloak, reverse proxy, load balancer, firewall, email systems and storage components may be involved. Specific service providers and processors must be added before production use.",
+    "recipientsText": "The application is intended for self-hosted infrastructure. Depending on the operating model, web servers, database servers, user management systems, reverse proxy, load balancer, firewall, email systems and storage components may be involved. Specific service providers and processors must be added before production use.",
     "retentionTitle": "9. Retention period",
     "retentionText": "Personal data are stored only as long as necessary for the stated purposes. User profiles and flight data generally remain stored while the user account is active or until deletion is requested. Technical logs should be rotated regularly and deleted after an appropriate period.",
     "rightsTitle": "10. Rights of data subjects",
@@ -122,8 +122,8 @@
     "featureUploadText": "Server-side validation, hashing and persistent storage.",
     "featureThermalTitle": "Thermal analysis",
     "featureThermalText": "Detection of climb phases and thermal zones from track data.",
-    "featureMultiUserTitle": "Multi-user & Keycloak",
-    "featureMultiUserText": "OIDC sign-in via the central Keycloak realm “flightclub”.",
+    "featureMultiUserTitle": "Multi-user",
+    "featureMultiUserText": "Central OIDC sign-in",
     "recentFlights": "🕐 Recent flights",
     "viewAll": "View all →",
     "noFlights": "No flights available yet."
@@ -285,8 +285,8 @@
   },
   "Login": {
     "title": "🔐 Sign in",
-    "description": "SimSoar uses Keycloak/OIDC. User management, MFA and password policies remain centralized.",
-    "button": "Sign in with Keycloak"
+    "description": "SimSoar uses an user management system, MFA and password policies remain centralized.",
+    "button": "Sign in"
   },
   "LocaleSwitcher": {
     "label": "Change language"
