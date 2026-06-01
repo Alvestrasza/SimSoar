@@ -22,6 +22,19 @@ enum SimSoarRole {
   OWNER
 }
 
+enum AuditAction {
+  USER_ROLE_SYNC
+  USER_UPDATE
+  USER_DELETE
+  PILOT_PROFILE_UPDATE
+  FLIGHT_UPLOAD
+  FLIGHT_APPROVE
+  FLIGHT_REJECT
+  FLIGHT_HIDE
+  FLIGHT_DELETE
+  PREFERENCE_UPDATE
+}
+
 model User {
   id            String         @id @default(cuid())
   name          String?
@@ -174,4 +187,21 @@ model Thermal {
 
   @@unique([flightId, seq])
   @@index([flightId, seq])
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  actorUserId String?
+  actorEmail  String?
+  action      AuditAction
+  targetType  String
+  targetId    String?
+  summary     String
+  metadata    Json?
+  createdAt   DateTime    @default(now())
+
+  @@index([createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([targetType, targetId])
+  @@index([action, createdAt])
 }

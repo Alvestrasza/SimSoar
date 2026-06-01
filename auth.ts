@@ -6,6 +6,7 @@ import {
   extractKeycloakRoleValues,
   normalizeSimSoarRoles
 } from "@/lib/rbac";
+import {writeAuditLog} from "@/lib/audit";
 
 type KeycloakProfileWithCallsign = {
   simsoar_callsign?: unknown;
@@ -120,6 +121,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       await prisma.user.update({
         where: { id: user.id },
         data: { roles }
+      });
+
+      await writeAuditLog({
+        actorUserId: user.id,
+        actorEmail: user.email,
+        action: "USER_ROLE_SYNC",
+        targetType: "User",
+        targetId: user.id,
+        summary: "User roles synchronized from Keycloak during sign-in.",
+        metadata: {
+          provider: account.provider,
+          roles,
+          rawRoleValues: roleValues
+        }
       });
 
       const callsign = getSimSoarCallsign(profile);
