@@ -56,7 +56,11 @@ export async function saveProfileAction(formData: FormData) {
     }
   });
 
-  const keycloakUserId = account?.providerAccountId ?? null;
+  if (!account?.providerAccountId) {
+    throw new Error("No Keycloak account mapping found for this SimSoar user.");
+  }
+
+  const keycloakUserId = account.providerAccountId;
 
   const callsignTaken = await prisma.pilotProfile.findFirst({
     where: {
@@ -89,6 +93,36 @@ export async function saveProfileAction(formData: FormData) {
   }
 });
 
+  try {
+    console.info("SimSoar profile save callsign sync:", {
+      simsoarUserId: session.user.id,
+      keycloakUserId,
+      callsign: profileData.callsign
+    });
+
+    await updateKeycloakUserCallsign(
+      keycloakUserId,
+      profileData.callsign
+    );
+
+    console.info("SimSoar profile save callsign sync completed:", {
+      simsoarUserId: session.user.id,
+      keycloakUserId,
+      callsign: profileData.callsign
+    });
+  } catch (error) {
+    console.error("SimSoar profile save aborted because Keycloak callsign sync failed:", {
+      simsoarUserId: session.user.id,
+      keycloakUserId,
+      callsign: profileData.callsign,
+      error
+    });
+
+    throw new Error(
+      "The callsign could not be written to Keycloak. The SimSoar profile was not changed."
+    );
+  }
+
   const updatedProfile = await prisma.pilotProfile.upsert({
     where: {
       userId: session.user.id
@@ -109,56 +143,6 @@ export async function saveProfileAction(formData: FormData) {
       showHomeAirfieldOnHome: true
     }
   });
-
-  let keycloakCallsignSyncStatus:
-    | "not_configured"
-    | "synced"
-    | "failed" = "not_configured";
-
-  if (keycloakUserId) {
-    try {
-      const keycloakUserId = account.providerAccountId;
-
-      try {
-        console.info("SimSoar profile save callsign sync:", {
-          simsoarUserId: session.user.id,
-          keycloakUserId,
-          callsign: profileData.callsign
-        });
-
-        await updateKeycloakUserCallsign(
-          keycloakUserId,
-          profileData.callsign
-        );
-
-        console.info("SimSoar profile save callsign sync completed:", {
-          simsoarUserId: session.user.id,
-          keycloakUserId,
-          callsign: profileData.callsign
-        });
-      } catch (error) {
-        console.error("SimSoar profile save aborted because Keycloak callsign sync failed:", {
-          simsoarUserId: session.user.id,
-          keycloakUserId,
-          callsign: profileData.callsign,
-          error
-        });
-
-        throw new Error(
-          "The callsign could not be written to Keycloak. The SimSoar profile was not changed."
-        );
-      }
-    } catch (error) {
-      keycloakCallsignSyncStatus = "failed";
-
-      console.warn("SimSoar profile was saved locally, but Keycloak callsign sync failed:", {
-        simsoarUserId: session.user.id,
-        keycloakUserId,
-        callsign: updatedProfile.callsign,
-        error
-      });
-    }
-  }
 
   await writeAuditLog({
     actorUserId: session.user.id,
