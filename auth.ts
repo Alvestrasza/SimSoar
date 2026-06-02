@@ -149,7 +149,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       });
 
-      const roles = new Set(normalizeSimSoarRoles(existingUser?.roles ?? ["USER"]));
+      const storedRoles = existingUser?.roles ?? [];
+
+      const roles = new Set(
+        normalizeSimSoarRoles(
+          storedRoles.length > 0 ? storedRoles : ["USER", "PILOT"]
+        )
+      );
 
       const bootstrapAdminEmails = (process.env.SIMSOAR_BOOTSTRAP_ADMIN_EMAILS ?? "")
         .split(",")
@@ -175,7 +181,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         action: "USER_ROLE_SYNC",
         targetType: "User",
         targetId: user.id,
-        summary: "User roles synchronized from Keycloak during sign-in.",
+        summary: "User application roles verified during sign-in.",
         metadata: {
           provider: account.provider,
           roles: finalRoles,
