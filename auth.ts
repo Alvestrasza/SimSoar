@@ -116,25 +116,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         process.env.AUTH_KEYCLOAK_ID
       );
 
-    const roles = new Set(normalizeSimSoarRoles(roleValues));
+      const roles = new Set(normalizeSimSoarRoles(roleValues));
 
-    const bootstrapAdminEmails = (process.env.SIMSOAR_BOOTSTRAP_ADMIN_EMAILS ?? "")
-      .split(",")
-      .map((value) => value.trim().toLowerCase())
-      .filter(Boolean);
+      const bootstrapAdminEmails = (process.env.SIMSOAR_BOOTSTRAP_ADMIN_EMAILS ?? "")
+        .split(",")
+        .map((value) => value.trim().toLowerCase())
+        .filter(Boolean);
 
-    const userEmail = user.email?.toLowerCase() ?? null;
+      const userEmail = user.email?.toLowerCase() ?? null;
 
-    if (userEmail && bootstrapAdminEmails.includes(userEmail)) {
-      roles.add("ADMIN");
-    }
+      if (userEmail && bootstrapAdminEmails.includes(userEmail)) {
+        roles.add("ADMIN");
+      }
 
-    const finalRoles = [...roles];
+      const finalRoles = [...roles];
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { roles: finalRoles }
-    });
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { roles: finalRoles }
+      });
 
       await writeAuditLog({
         actorUserId: user.id,
@@ -145,7 +145,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         summary: "User roles synchronized from Keycloak during sign-in.",
         metadata: {
           provider: account.provider,
-          roles,
+          roles: finalRoles,
           rawRoleValues: roleValues
         }
       });
