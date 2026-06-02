@@ -117,24 +117,37 @@ export async function saveProfileAction(formData: FormData) {
 
   if (keycloakUserId) {
     try {
-      console.info("SimSoar profile save callsign sync:", {
-        simsoarUserId: session.user.id,
-        keycloakUserId,
-        callsign: updatedProfile.callsign
-      });
+      const keycloakUserId = account.providerAccountId;
 
-      await updateKeycloakUserCallsign(
-        keycloakUserId,
-        updatedProfile.callsign
-      );
+      try {
+        console.info("SimSoar profile save callsign sync:", {
+          simsoarUserId: session.user.id,
+          keycloakUserId,
+          callsign: profileData.callsign
+        });
 
-      keycloakCallsignSyncStatus = "synced";
+        await updateKeycloakUserCallsign(
+          keycloakUserId,
+          profileData.callsign
+        );
 
-      console.info("SimSoar profile save callsign sync completed:", {
-        simsoarUserId: session.user.id,
-        keycloakUserId,
-        callsign: updatedProfile.callsign
-      });
+        console.info("SimSoar profile save callsign sync completed:", {
+          simsoarUserId: session.user.id,
+          keycloakUserId,
+          callsign: profileData.callsign
+        });
+      } catch (error) {
+        console.error("SimSoar profile save aborted because Keycloak callsign sync failed:", {
+          simsoarUserId: session.user.id,
+          keycloakUserId,
+          callsign: profileData.callsign,
+          error
+        });
+
+        throw new Error(
+          "The callsign could not be written to Keycloak. The SimSoar profile was not changed."
+        );
+      }
     } catch (error) {
       keycloakCallsignSyncStatus = "failed";
 
@@ -166,7 +179,7 @@ export async function saveProfileAction(formData: FormData) {
         showHomeAirfieldOnHome: updatedProfile.showHomeAirfieldOnHome
       },
       keycloakUserId,
-      keycloakCallsignSyncStatus
+      keycloakCallsignSyncStatus: "synced"
     }
   });
 

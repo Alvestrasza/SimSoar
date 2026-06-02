@@ -206,10 +206,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       });
 
       /*
-       * Keycloak may provide an initial callsign during registration.
-       * After the SimSoar profile exists, SimSoar is authoritative and
-       * the local callsign must not be overwritten during later sign-ins.
-       */
+      * Keycloak may provide an initial callsign during registration.
+      * After the SimSoar profile exists, the callsign is edited through SimSoar
+      * and written back to Keycloak through the profile save action.
+      */
       if (!existingProfile) {
         const initialCallsign = getInitialSimSoarCallsign(profile);
 
