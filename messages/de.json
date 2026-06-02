@@ -307,7 +307,9 @@
     "hiddenFlights": "Ausgeblendete Flüge",
     "rejectedFlights": "Abgelehnte Flüge",
     "auditTitle": "Audit Log",
-    "auditText": "Sicherheitsrelevante Aktionen werden protokolliert."
+    "auditText": "Sicherheitsrelevante Aktionen werden protokolliert.",
+    "openAuditLog": "Audit Log öffnen",
+    "auditRestricted": "Nur Administratoren können das Audit Log einsehen."
   },
   "AdminFlights": {
     "pageTitle": "Flugmoderation",
@@ -331,5 +333,19 @@
     "status_APPROVED": "Freigegeben",
     "status_REJECTED": "Abgelehnt",
     "status_HIDDEN": "Ausgeblendet"
+  },
+  "AdminAudit": {
+    "pageTitle": "Audit Log",
+    "subtitle": "Sicherheitsrelevante Aktionen und Systemereignisse der letzten Einträge.",
+    "backToAdmin": "Zurück zum Admin Dashboard",
+    "createdAt": "Zeitpunkt",
+    "actor": "Akteur",
+    "action": "Aktion",
+    "target": "Ziel",
+    "summary": "Zusammenfassung",
+    "metadata": "Metadaten",
+    "showMetadata": "Metadaten anzeigen",
+    "system": "System",
+    "noEntries": "Keine Audit-Log-Einträge vorhanden."
   }
 }

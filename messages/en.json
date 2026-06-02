@@ -307,7 +307,9 @@
     "hiddenFlights": "Hidden flights",
     "rejectedFlights": "Rejected flights",
     "auditTitle": "Audit Log",
-    "auditText": "Security-relevant actions are recorded."
+    "auditText": "Security-relevant actions are recorded.",
+    "openAuditLog": "Open audit log",
+    "auditRestricted": "Only administrators can view the audit log."
   },
   "AdminFlights": {
     "pageTitle": "Flight Moderation",
@@ -331,5 +333,19 @@
     "status_APPROVED": "Approved",
     "status_REJECTED": "Rejected",
     "status_HIDDEN": "Hidden"
+  },
+  "AdminAudit": {
+    "pageTitle": "Audit Log",
+    "subtitle": "Security-relevant actions and system events from the latest entries.",
+    "backToAdmin": "Back to Admin Dashboard",
+    "createdAt": "Timestamp",
+    "actor": "Actor",
+    "action": "Action",
+    "target": "Target",
+    "summary": "Summary",
+    "metadata": "Metadata",
+    "showMetadata": "Show metadata",
+    "system": "System",
+    "noEntries": "No audit log entries available."
   }
 }

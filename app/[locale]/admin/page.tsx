@@ -26,6 +26,7 @@ export default async function AdminPage({params}: AdminPageProps) {
   }
 
   const canUseAdmin = hasRole(session.user.roles, "MODERATOR");
+  const canViewAudit = hasRole(session.user.roles, "ADMIN");
 
   if (!canUseAdmin) {
     notFound();
@@ -128,6 +129,16 @@ export default async function AdminPage({params}: AdminPageProps) {
           <h3>{t("auditTitle")}</h3>
           <p className="statValue">{recentAuditCount}</p>
           <p className="muted">{t("auditText")}</p>
+
+          {canViewAudit ? (
+            <p>
+              <Link className="btn btnPrimary" href="/admin/audit">
+                {t("openAuditLog")}
+              </Link>
+            </p>
+          ) : (
+            <p className="muted">{t("auditRestricted")}</p>
+          )}
         </div>
       </section>
     </main>
