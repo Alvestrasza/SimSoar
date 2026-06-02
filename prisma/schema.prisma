@@ -37,6 +37,7 @@ enum ThemePreference {
 
 enum AuditAction {
   USER_ROLE_SYNC
+  USER_ROLE_UPDATE
   USER_UPDATE
   USER_DELETE
   PILOT_PROFILE_UPDATE
