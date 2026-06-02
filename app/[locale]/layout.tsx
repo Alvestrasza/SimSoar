@@ -1,4 +1,4 @@
-import type {Metadata} from "next";
+import type {Metadata, Viewport} from "next";
 import {Suspense} from "react";
 import {NextIntlClientProvider, hasLocale} from "next-intl";
 import {getMessages, getTranslations, setRequestLocale} from "next-intl/server";
@@ -27,6 +27,22 @@ type LocaleLayoutProps = {
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({locale}));
 }
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    {
+      media: "(prefers-color-scheme: light)",
+      color: "#1f6feb"
+    },
+    {
+      media: "(prefers-color-scheme: dark)",
+      color: "#0f172a"
+    }
+  ],
+  colorScheme: "light dark"
+};
 
 export async function generateMetadata({
   params
