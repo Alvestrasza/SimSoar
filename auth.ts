@@ -116,12 +116,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         process.env.AUTH_KEYCLOAK_ID
       );
 
-      const roles = normalizeSimSoarRoles(roleValues);
+    const roles = new Set(normalizeSimSoarRoles(roleValues));
 
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { roles }
-      });
+    const bootstrapAdminEmails = (process.env.SIMSOAR_BOOTSTRAP_ADMIN_EMAILS ?? "")
+      .split(",")
+      .map((value) => value.trim().toLowerCase())
+      .filter(Boolean);
+
+    const userEmail = user.email?.toLowerCase() ?? null;
+
+    if (userEmail && bootstrapAdminEmails.includes(userEmail)) {
+      roles.add("ADMIN");
+    }
+
+    const finalRoles = [...roles];
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { roles: finalRoles }
+    });
 
       await writeAuditLog({
         actorUserId: user.id,
