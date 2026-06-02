@@ -32,10 +32,14 @@ function visibilityLabel(
   return t("visibilityUnlisted");
 }
 
-function getVisibleRoles(roles: readonly string[] | undefined): SimSoarRole[] {
+function getHighestVisibleRole(roles: readonly string[] | undefined): SimSoarRole {
   const assignedRoles = new Set(normalizeSimSoarRoles([...(roles ?? [])]));
 
-  return SIMSOAR_ROLE_ORDER.filter((role) => assignedRoles.has(role));
+  return (
+    [...SIMSOAR_ROLE_ORDER]
+      .reverse()
+      .find((role) => assignedRoles.has(role)) ?? "USER"
+  );
 }
 
 export default async function ProfilePage({
@@ -89,7 +93,7 @@ const noticeStatus =
     redirect(`/${locale}/login`);
   }
 
-  const visibleRoles = getVisibleRoles(session.user.roles);
+  const highestVisibleRole = getHighestVisibleRole(session.user.roles);
 
   const [profile, preferences, flights] = await Promise.all([
     prisma.pilotProfile.findUnique({
@@ -122,11 +126,9 @@ const noticeStatus =
           <div className="roleStatusGroup" aria-label={t("roleStatusLabel")}>
             <span className="roleStatusText">{t("roleStatusLabel")}</span>
 
-            {visibleRoles.map((role) => (
-              <span className="roleStatusBadge" key={role}>
-                {t(`role_${role}`)}
-              </span>
-            ))}
+            <span className="roleStatusBadge">
+              {t(`role_${highestVisibleRole}`)}
+            </span>
           </div>
         </div>
 
