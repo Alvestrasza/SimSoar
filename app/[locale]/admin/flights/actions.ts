@@ -16,6 +16,11 @@ const moderationSchema = z.object({
   returnTo: z.string().min(1).optional()
 });
 
+const softDeleteFlightSchema = z.object({
+  flightId: z.string().min(1),
+  returnTo: z.string().min(1).optional()
+});
+
 function safeReturnTo(value: string | undefined) {
   const returnTo = value || "/de/admin/flights";
 
@@ -67,11 +72,6 @@ export async function moderateFlightAction(formData: FormData) {
     moderationStatus: formData.get("moderationStatus"),
     moderationNote: formData.get("moderationNote") || undefined,
     returnTo: formData.get("returnTo") || undefined
-  });
-
-  const softDeleteFlightSchema = z.object({
-    flightId: z.string().min(1),
-    returnTo: z.string().min(1).optional()
   });
 
   const returnTo = safeReturnTo(fields.returnTo);
