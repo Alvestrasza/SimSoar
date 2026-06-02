@@ -71,6 +71,49 @@ function toStringArray(value: unknown): string[] {
   return [];
 }
 
+function normalizeAccessValue(value: string): string {
+  return value
+    .trim()
+    .replace(/^\/+/, "")
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+}
+
+export function getSimSoarRuntimeEnvironment(): "dev" | "prod" | null {
+  const rawEnvironment = (
+    process.env.SIMSOAR_ENV ??
+    process.env.NEXT_PUBLIC_SIMSOAR_ENV ??
+    ""
+  )
+    .trim()
+    .toLowerCase();
+
+  if (rawEnvironment === "dev" || rawEnvironment === "development") {
+    return "dev";
+  }
+
+  if (rawEnvironment === "prod" || rawEnvironment === "production") {
+    return "prod";
+  }
+
+  return null;
+}
+
+export function hasSimSoarEnvironmentAccess(values: unknown[]): boolean {
+  const environment = getSimSoarRuntimeEnvironment();
+
+  if (!environment) {
+    return true;
+  }
+
+  const requiredMarker = `simsoar_${environment}_`;
+
+  return values
+    .filter((value): value is string => typeof value === "string")
+    .map(normalizeAccessValue)
+    .some((value) => value.includes(requiredMarker));
+}
+
 export function normalizeSimSoarRoles(values: unknown[]): SimSoarRole[] {
   const roles = new Set<SimSoarRole>();
 

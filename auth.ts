@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 import {
   extractKeycloakRoleValues,
+  hasSimSoarEnvironmentAccess,
   normalizeSimSoarRoles
 } from "@/lib/rbac";
 import {writeAuditLog} from "@/lib/audit";
@@ -57,7 +58,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     })
   ],
   callbacks: {
-  async session({ session, user }) {
+    async signIn({ account, profile }) {
+      if (account?.provider !== "keycloak") {
+        return true;
+      }
+
+      const roleValues = extractKeycloakRoleValues(
+        profile,
+        process.env.AUTH_KEYCLOAK_ID
+      );
+
+      if (!hasSimSoarEnvironmentAccess(roleValues)) {
+        console.warn("SimSoar sign-in denied because the user is not assigned to an environment-specific access group.", {
+          environment:
+            process.env.SIMSOAR_ENV ??
+            process.env.NEXT_PUBLIC_SIMSOAR_ENV ??
+            null,
+          provider: account.provider,
+          rawRoleValues: roleValues
+        });
+
+        return false;
+      }
+
+      return true;
+    },
+    async session({ session, user }) {
     if (session.user) {
       session.user.id = user.id;
 
@@ -78,7 +104,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }
 
     return session;
-  },
+    },
 
     async redirect({ url, baseUrl }) {
       if (url.startsWith("/")) return `${baseUrl}${url}`;
