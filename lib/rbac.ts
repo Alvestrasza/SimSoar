@@ -9,17 +9,33 @@ export const SIMSOAR_ROLE_ORDER = [
 export type SimSoarRole = (typeof SIMSOAR_ROLE_ORDER)[number];
 
 const KEYCLOAK_ROLE_MAP: Record<string, SimSoarRole> = {
+  // Preferred SimSoar role names used by Keycloak client roles.
+  "simsoar_user": "USER",
+  "simsoar_pilot": "PILOT",
+  "simsoar_moderator": "MODERATOR",
+  "simsoar_admin": "ADMIN",
+  "simsoar_owner": "OWNER",
+
+  // Alternative role names with hyphen separator.
   "simsoar-user": "USER",
   "simsoar-pilot": "PILOT",
   "simsoar-moderator": "MODERATOR",
   "simsoar-admin": "ADMIN",
   "simsoar-owner": "OWNER",
 
+  // AD-/group-style names.
   "app-simsoar-users": "USER",
   "app-simsoar-pilots": "PILOT",
   "app-simsoar-moderators": "MODERATOR",
   "app-simsoar-admins": "ADMIN",
-  "app-simsoar-owners": "OWNER"
+  "app-simsoar-owners": "OWNER",
+
+  // AD-/group-style names with underscore separator.
+  "app_simsoar_users": "USER",
+  "app_simsoar_pilots": "PILOT",
+  "app_simsoar_moderators": "MODERATOR",
+  "app_simsoar_admins": "ADMIN",
+  "app_simsoar_owners": "OWNER"
 };
 
 type KeycloakResourceAccess = Record<
