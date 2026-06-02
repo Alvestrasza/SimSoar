@@ -55,19 +55,23 @@ export default async function FlightDetailPage({
   const isOwner = session?.user?.id === flight.userId;
   const canModerate = hasRole(session?.user?.roles, "MODERATOR");
 
+  const isDeleted = flight.deletedAt !== null;
+
   const isPublicApprovedFlight =
     flight.visibility === "PUBLIC" &&
     flight.moderationStatus === "APPROVED" &&
-    flight.deletedAt === null;
+    !isDeleted;
 
   const canViewFlight =
-    isPublicApprovedFlight ||
-    isOwner ||
-    canModerate;
+    canModerate ||
+    (!isDeleted && (isPublicApprovedFlight || isOwner));
 
   if (!canViewFlight) {
     notFound();
   }
+
+  const isLockedByModeration =
+    isDeleted || flight.moderationStatus !== "APPROVED";
 
   if (flight.visibility === "PRIVATE" && !isOwner) {
     notFound();
@@ -93,7 +97,7 @@ export default async function FlightDetailPage({
         minAltitudeM: flight.minAltitudeM,
         maxVarioMs: flight.maxVarioMs,
         visibility: flight.visibility,
-        canManage: isOwner || canModerate,
+        canManage: canModerate || (isOwner && !isLockedByModeration),
         track: flight.track.map((p: any) => ({
           seq: p.seq,
           lat: p.lat,

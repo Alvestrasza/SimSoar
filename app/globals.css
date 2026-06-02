@@ -386,3 +386,11 @@ body {
 .adminActionForm + form {
   margin-top: 8px;
 }
+
+.moderationNotice {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}

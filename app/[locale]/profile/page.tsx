@@ -210,29 +210,58 @@ const noticeStatus =
           {flights.length === 0 ? (
             <p className="muted">{t("noFlights")}</p>
           ) : (
-            flights.map((f: any) => (
-              <div className="card featureTile flightManagementCard" key={f.id}>
-                <div>
-                  <Link href={`/flights/${f.id}`}>
-                    <strong>{f.title}</strong>
-                  </Link>
+            flights.map((f: any) => {
+              const isLockedByModeration =
+                Boolean(f.deletedAt) || f.moderationStatus !== "APPROVED";
 
-                  <p className="muted">
-                    {f.simulator} · {visibilityLabel(f.visibility, t)}
-                  </p>
+              return (
+                <div className="card featureTile flightManagementCard" key={f.id}>
+                  <div>
+                    {isLockedByModeration ? (
+                      <strong>{f.title}</strong>
+                    ) : (
+                      <Link href={`/flights/${f.id}`}>
+                        <strong>{f.title}</strong>
+                      </Link>
+                    )}
 
-                  <p>
-                    {Math.round(f.distanceKm)} km ·{" "}
-                    {Math.round(f.olcPoints)} OLC
-                  </p>
+                    <p className="muted">
+                      {f.simulator} · {visibilityLabel(f.visibility, t)}
+                    </p>
+
+                    <p>
+                      {Math.round(f.distanceKm)} km ·{" "}
+                      {Math.round(f.olcPoints)} OLC
+                    </p>
+
+                    {isLockedByModeration ? (
+                      <div className="moderationNotice">
+                        <strong>
+                          {f.deletedAt
+                            ? t("flightRemovedByModeration")
+                            : t("flightLockedByModeration")}
+                        </strong>
+
+                        {f.moderationNote ? (
+                          <p className="muted">
+                            {t("moderationNotePrefix")}: {f.moderationNote}
+                          </p>
+                        ) : null}
+
+                        <p className="muted">{t("flightActionsLocked")}</p>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {isLockedByModeration ? null : (
+                    <FlightOwnerActions
+                      flightId={f.id}
+                      visibility={f.visibility}
+                    />
+                  )}
                 </div>
-
-                <FlightOwnerActions
-                  flightId={f.id}
-                  visibility={f.visibility}
-                />
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

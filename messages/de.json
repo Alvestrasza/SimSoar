@@ -215,7 +215,11 @@
     "noFlights": "Noch keine Flüge hochgeladen.",
     "visibilityPublic": "Öffentlich",
     "visibilityPrivate": "Privat",
-    "visibilityUnlisted": "Nicht gelistet"
+    "visibilityUnlisted": "Nicht gelistet",
+    "flightRemovedByModeration": "Dieser Flug wurde durch einen Administrator oder Moderator entfernt.",
+    "flightLockedByModeration": "Dieser Flug wurde durch die Moderation eingeschränkt.",
+    "flightActionsLocked": "Die Benutzeraktionen für diesen Flug sind gesperrt.",
+    "moderationNotePrefix": "Hinweis"
   },
   "FlightOwnerActions": {
     "hide": "🙈 Nicht sichtbar machen",

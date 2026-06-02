@@ -48,7 +48,9 @@ export async function setFlightVisibilityAction(formData: FormData) {
   const result = await prisma.flight.updateMany({
     where: {
       id: flightId,
-      userId: session.user.id
+      userId: session.user.id,
+      deletedAt: null,
+      moderationStatus: "APPROVED"
     },
     data: {
       visibility
@@ -76,7 +78,9 @@ export async function deleteFlightAction(formData: FormData) {
   const flight = await prisma.flight.findFirst({
     where: {
       id: flightId,
-      userId: session.user.id
+      userId: session.user.id,
+      deletedAt: null,
+      moderationStatus: "APPROVED"
     },
     select: {
       id: true,
