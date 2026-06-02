@@ -3,7 +3,7 @@ import {Link} from "@/i18n/navigation";
 import {prisma} from "@/lib/db";
 import {hasRole} from "@/lib/rbac";
 import {getTranslations, setRequestLocale} from "next-intl/server";
-import {notFound, redirect} from "next/navigation";
+import {redirect} from "next/navigation";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -43,7 +43,30 @@ export default async function AdminAuditPage({params}: AdminAuditPageProps) {
   }
 
   if (!hasRole(session.user.roles, "ADMIN")) {
-    notFound();
+    return (
+      <main className="wrap" style={{maxWidth: 820}}>
+        <section className="card">
+          <div className="cardHead">
+            <div>
+              <span className="cardTitle">{t("accessDeniedTitle")}</span>
+              <p className="muted" style={{margin: "6px 0 0"}}>
+                {t("accessDeniedSubtitle")}
+              </p>
+            </div>
+          </div>
+
+          <div className="cardBody lineHeight">
+            <p>{t("accessDeniedText")}</p>
+
+            <p style={{marginTop: 22}}>
+              <Link className="btn btnSecondary" href="/admin">
+                {t("backToAdmin")}
+              </Link>
+            </p>
+          </div>
+        </section>
+      </main>
+    );
   }
 
   const auditLogs = await prisma.auditLog.findMany({

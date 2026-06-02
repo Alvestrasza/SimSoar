@@ -346,6 +346,9 @@
     "metadata": "Metadaten",
     "showMetadata": "Metadaten anzeigen",
     "system": "System",
-    "noEntries": "Keine Audit-Log-Einträge vorhanden."
+    "noEntries": "Keine Audit-Log-Einträge vorhanden.",
+    "accessDeniedTitle": "Zugriff verweigert",
+    "accessDeniedSubtitle": "Das Audit Log ist nur für Administratoren sichtbar.",
+    "accessDeniedText": "Du bist angemeldet, hast aber nicht die erforderliche Administratorrolle, um sicherheitsrelevante Audit-Log-Einträge einzusehen."
   }
 }

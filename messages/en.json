@@ -346,6 +346,9 @@
     "metadata": "Metadata",
     "showMetadata": "Show metadata",
     "system": "System",
-    "noEntries": "No audit log entries available."
+    "noEntries": "No audit log entries available.",
+    "accessDeniedTitle": "Access denied",
+    "accessDeniedSubtitle": "The audit log is only visible to administrators.",
+    "accessDeniedText": "You are signed in, but you do not have the required administrator role to view security-relevant audit log entries."
   }
 }
