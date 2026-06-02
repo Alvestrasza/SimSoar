@@ -220,7 +220,14 @@
     "flightLockedByModeration": "This flight was restricted by moderation.",
     "flightActionsLocked": "User actions for this flight are locked.",
     "flightVisibilityLockedButDeleteAllowed": "Visibility can no longer be changed. You can still delete the flight yourself.",
-    "moderationNotePrefix": "Note"
+    "moderationNotePrefix": "Note",
+    "preferencesTitle": "Preferences",
+    "themePreference": "Appearance",
+    "themeSystem": "System setting",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "savePreferences": "Save preferences",
+    "preferencesSaved": "✓ Preferences saved successfully."
   },
   "FlightOwnerActions": {
     "hide": "🙈 Hide",

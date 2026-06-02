@@ -6,6 +6,7 @@ import {Link} from "@/i18n/navigation";
 import {ProfileSaveNotice} from "./ProfileSaveNotice";
 import FlightOwnerActions from "@/app/components/FlightOwnerActions";
 import {getTranslations, setRequestLocale} from "next-intl/server";
+import {savePreferencesAction} from "./preferences-actions";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -50,14 +51,20 @@ const flightDeletedParam = Array.isArray(queryParams.flightDeleted)
   ? queryParams.flightDeleted[0]
   : queryParams.flightDeleted;
 
+const preferencesSavedParam = Array.isArray(queryParams.preferencesSaved)
+  ? queryParams.preferencesSaved[0]
+  : queryParams.preferencesSaved;
+
 const noticeStatus =
   savedParam === "1"
     ? "saved"
-    : flightUpdatedParam === "1"
-      ? "flightUpdated"
-      : flightDeletedParam === "1"
-        ? "flightDeleted"
-        : null;
+    : preferencesSavedParam === "1"
+      ? "preferencesSaved"
+      : flightUpdatedParam === "1"
+        ? "flightUpdated"
+        : flightDeletedParam === "1"
+          ? "flightDeleted"
+          : null;
 
   let session = null;
 
@@ -71,8 +78,13 @@ const noticeStatus =
     redirect(`/${locale}/login`);
   }
 
-  const [profile, flights] = await Promise.all([
+  const [profile, preferences, flights] = await Promise.all([
     prisma.pilotProfile.findUnique({
+      where: {
+        userId: session.user.id
+      }
+    }),
+    prisma.userPreference.findUnique({
       where: {
         userId: session.user.id
       }
@@ -200,7 +212,32 @@ const noticeStatus =
           {noticeStatus ? <ProfileSaveNotice status={noticeStatus} /> : null}
         </form>
       </div>
+      <div className="card" style={{marginBottom: 20}}>
+        <div className="cardHead">
+          <span className="cardTitle">{t("preferencesTitle")}</span>
+        </div>
 
+        <form className="cardBody" action={savePreferencesAction}>
+          <input type="hidden" name="locale" value={locale} />
+
+          <div className="formGrid">
+            <div className="formGroup">
+              <label>{t("themePreference")}</label>
+              <select name="theme" defaultValue={preferences?.theme ?? "SYSTEM"}>
+                <option value="SYSTEM">{t("themeSystem")}</option>
+                <option value="LIGHT">{t("themeLight")}</option>
+                <option value="DARK">{t("themeDark")}</option>
+              </select>
+            </div>
+          </div>
+
+          <p style={{marginTop: 20}}>
+            <button className="btn btnSuccess" type="submit">
+              {t("savePreferences")}
+            </button>
+          </p>
+        </form>
+      </div>
       <div className="card">
         <div className="cardHead">
           <span className="cardTitle">{t("myFlights")}</span>

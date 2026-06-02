@@ -16,6 +16,8 @@ import "leaflet/dist/leaflet.css";
 import "../globals.css";
 import {AuthNav} from "@/app/components/AuthNav";
 import LocaleSwitcher from "@/app/components/LocaleSwitcher";
+import {auth} from "@/auth";
+import {prisma} from "@/lib/db";
 
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -56,8 +58,35 @@ export default async function LocaleLayout({
   const nav = await getTranslations({locale, namespace: "Nav"});
   const footer = await getTranslations({locale, namespace: "Footer"});
 
+  let themePreference: "system" | "light" | "dark" = "system";
+
+try {
+  const session = await auth();
+
+  if (session?.user?.id) {
+    const preferences = await prisma.userPreference.findUnique({
+      where: {
+        userId: session.user.id
+      },
+      select: {
+        theme: true
+      }
+    });
+
+    if (preferences?.theme === "LIGHT") {
+      themePreference = "light";
+    }
+
+    if (preferences?.theme === "DARK") {
+      themePreference = "dark";
+    }
+  }
+} catch (error) {
+  console.error("SimSoar theme preference could not be loaded:", error);
+}
+
   return (
-    <html lang={locale}>
+    <html lang={locale} data-theme={themePreference} suppressHydrationWarning>
       <body>
         <NextIntlClientProvider messages={messages}>
           {process.env.NEXT_PUBLIC_SIMSOAR_ENV === "dev" ? (

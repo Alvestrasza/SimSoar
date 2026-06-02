@@ -3,10 +3,14 @@
 import {useEffect, useState} from "react";
 import {useTranslations} from "next-intl";
 
-type ProfileNoticeStatus = "saved" | "flightUpdated" | "flightDeleted";
+type NoticeStatus =
+  | "saved"
+  | "preferencesSaved"
+  | "flightUpdated"
+  | "flightDeleted";
 
 type ProfileSaveNoticeProps = {
-  status: ProfileNoticeStatus;
+  status: NoticeStatus;
 };
 
 export function ProfileSaveNotice({status}: ProfileSaveNoticeProps) {

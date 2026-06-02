@@ -220,7 +220,14 @@
     "flightLockedByModeration": "Dieser Flug wurde durch die Moderation eingeschränkt.",
     "flightActionsLocked": "Die Benutzeraktionen für diesen Flug sind gesperrt.",
     "flightVisibilityLockedButDeleteAllowed": "Die Sichtbarkeit kann nicht mehr geändert werden. Du kannst den Flug aber weiterhin selbst löschen.",
-    "moderationNotePrefix": "Hinweis"
+    "moderationNotePrefix": "Hinweis",
+    "preferencesTitle": "Einstellungen",
+    "themePreference": "Darstellung",
+    "themeSystem": "Systemeinstellung",
+    "themeLight": "Hell",
+    "themeDark": "Dunkel",
+    "savePreferences": "Einstellungen speichern",
+    "preferencesSaved": "✓ Einstellungen wurden erfolgreich gespeichert."  
   },
   "FlightOwnerActions": {
     "hide": "🙈 Nicht sichtbar machen",
