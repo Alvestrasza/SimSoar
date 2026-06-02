@@ -5,6 +5,7 @@ import {z} from "zod";
 import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
 import {updateKeycloakUserCallsign} from "@/lib/keycloak-admin";
+import {writeAuditLog} from "@/lib/audit";
 
 const schema = z.object({
   callsign: z
@@ -75,6 +76,21 @@ export async function saveProfileAction(formData: FormData) {
     throw new Error("This callsign is already used by another SimSoar pilot.");
   }
 
+  const previousProfile = await prisma.pilotProfile.findUnique({
+  where: {
+    userId: session.user.id
+  },
+  select: {
+    callsign: true,
+    homeAirfield: true,
+    favoriteSim: true,
+    favoriteGlider: true,
+    country: true,
+    bio: true,
+    showHomeAirfieldOnHome: true
+  }
+});
+
   console.info("SimSoar profile save callsign sync:", {
     simsoarUserId: session.user.id,
     keycloakUserId: account.providerAccountId,
@@ -92,7 +108,7 @@ export async function saveProfileAction(formData: FormData) {
     callsign: profileData.callsign
   });
 
-  await prisma.pilotProfile.upsert({
+  const updatedProfile = await prisma.pilotProfile.upsert({
     where: {
       userId: session.user.id
     },
@@ -100,7 +116,39 @@ export async function saveProfileAction(formData: FormData) {
       userId: session.user.id,
       ...profileData
     },
-    update: profileData
+    update: profileData,
+    select: {
+      id: true,
+      callsign: true,
+      homeAirfield: true,
+      favoriteSim: true,
+      favoriteGlider: true,
+      country: true,
+      bio: true,
+      showHomeAirfieldOnHome: true
+    }
+  });
+
+  await writeAuditLog({
+    actorUserId: session.user.id,
+    actorEmail: session.user.email,
+    action: "PILOT_PROFILE_UPDATE",
+    targetType: "PilotProfile",
+    targetId: updatedProfile.id,
+    summary: "Pilot profile was updated by the owner.",
+    metadata: {
+      previous: previousProfile,
+      current: {
+        callsign: updatedProfile.callsign,
+        homeAirfield: updatedProfile.homeAirfield,
+        favoriteSim: updatedProfile.favoriteSim,
+        favoriteGlider: updatedProfile.favoriteGlider,
+        country: updatedProfile.country,
+        bio: updatedProfile.bio,
+        showHomeAirfieldOnHome: updatedProfile.showHomeAirfieldOnHome
+      },
+      keycloakUserId: account.providerAccountId
+    }
   });
 
   redirect(`/${locale}/profile?saved=1`);
