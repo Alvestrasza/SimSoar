@@ -79,8 +79,7 @@ export async function deleteFlightAction(formData: FormData) {
     where: {
       id: flightId,
       userId: session.user.id,
-      deletedAt: null,
-      moderationStatus: "APPROVED"
+      deletedAt: null
     },
     select: {
       id: true,

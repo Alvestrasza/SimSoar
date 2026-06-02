@@ -210,58 +210,64 @@ const noticeStatus =
           {flights.length === 0 ? (
             <p className="muted">{t("noFlights")}</p>
           ) : (
-            flights.map((f: any) => {
-              const isLockedByModeration =
-                Boolean(f.deletedAt) || f.moderationStatus !== "APPROVED";
+          flights.map((f: any) => {
+            const isAdminDeleted = Boolean(f.deletedAt);
+            const isModerationRestricted = f.moderationStatus !== "APPROVED";
 
-              return (
-                <div className="card featureTile flightManagementCard" key={f.id}>
-                  <div>
-                    {isLockedByModeration ? (
+            return (
+              <div className="card featureTile flightManagementCard" key={f.id}>
+                <div>
+                  {isAdminDeleted ? (
+                    <strong>{f.title}</strong>
+                  ) : (
+                    <Link href={`/flights/${f.id}`}>
                       <strong>{f.title}</strong>
-                    ) : (
-                      <Link href={`/flights/${f.id}`}>
-                        <strong>{f.title}</strong>
-                      </Link>
-                    )}
-
-                    <p className="muted">
-                      {f.simulator} · {visibilityLabel(f.visibility, t)}
-                    </p>
-
-                    <p>
-                      {Math.round(f.distanceKm)} km ·{" "}
-                      {Math.round(f.olcPoints)} OLC
-                    </p>
-
-                    {isLockedByModeration ? (
-                      <div className="moderationNotice">
-                        <strong>
-                          {f.deletedAt
-                            ? t("flightRemovedByModeration")
-                            : t("flightLockedByModeration")}
-                        </strong>
-
-                        {f.moderationNote ? (
-                          <p className="muted">
-                            {t("moderationNotePrefix")}: {f.moderationNote}
-                          </p>
-                        ) : null}
-
-                        <p className="muted">{t("flightActionsLocked")}</p>
-                      </div>
-                    ) : null}
-                  </div>
-
-                  {isLockedByModeration ? null : (
-                    <FlightOwnerActions
-                      flightId={f.id}
-                      visibility={f.visibility}
-                    />
+                    </Link>
                   )}
+
+                  <p className="muted">
+                    {f.simulator} · {visibilityLabel(f.visibility, t)}
+                  </p>
+
+                  <p>
+                    {Math.round(f.distanceKm)} km ·{" "}
+                    {Math.round(f.olcPoints)} OLC
+                  </p>
+
+                  {isAdminDeleted || isModerationRestricted ? (
+                    <div className="moderationNotice">
+                      <strong>
+                        {isAdminDeleted
+                          ? t("flightRemovedByModeration")
+                          : t("flightLockedByModeration")}
+                      </strong>
+
+                      {f.moderationNote ? (
+                        <p className="muted">
+                          {t("moderationNotePrefix")}: {f.moderationNote}
+                        </p>
+                      ) : null}
+
+                      <p className="muted">
+                        {isAdminDeleted
+                          ? t("flightActionsLocked")
+                          : t("flightVisibilityLockedButDeleteAllowed")}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
-              );
-            })
+
+                {isAdminDeleted ? null : (
+                  <FlightOwnerActions
+                    flightId={f.id}
+                    visibility={f.visibility}
+                    canChangeVisibility={!isModerationRestricted}
+                    canDelete={true}
+                  />
+                )}
+              </div>
+            );
+          })
           )}
         </div>
       </div>

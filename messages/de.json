@@ -219,6 +219,7 @@
     "flightRemovedByModeration": "Dieser Flug wurde durch einen Administrator oder Moderator entfernt.",
     "flightLockedByModeration": "Dieser Flug wurde durch die Moderation eingeschränkt.",
     "flightActionsLocked": "Die Benutzeraktionen für diesen Flug sind gesperrt.",
+    "flightVisibilityLockedButDeleteAllowed": "Die Sichtbarkeit kann nicht mehr geändert werden. Du kannst den Flug aber weiterhin selbst löschen.",
     "moderationNotePrefix": "Hinweis"
   },
   "FlightOwnerActions": {

@@ -12,9 +12,16 @@ type Visibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
 type Props = {
   flightId: string;
   visibility: Visibility;
+  canChangeVisibility?: boolean;
+  canDelete?: boolean;
 };
 
-export default function FlightOwnerActions({flightId, visibility}: Props) {
+export default function FlightOwnerActions({
+  flightId,
+  visibility,
+  canChangeVisibility = true,
+  canDelete = true
+}: Props) {
   const t = useTranslations("FlightOwnerActions");
   const params = useParams<{locale?: string}>();
   const pathname = usePathname();
@@ -26,35 +33,43 @@ export default function FlightOwnerActions({flightId, visibility}: Props) {
   const visibilityLabel =
     visibility === "PUBLIC" ? t("hide") : t("show");
 
+  if (!canChangeVisibility && !canDelete) {
+    return null;
+  }
+
   return (
     <div className="ownerActions">
-      <form action={setFlightVisibilityAction}>
-        <input type="hidden" name="flightId" value={flightId} />
-        <input type="hidden" name="visibility" value={nextVisibility} />
-        <input type="hidden" name="returnTo" value={currentPath} />
+      {canChangeVisibility ? (
+        <form action={setFlightVisibilityAction}>
+          <input type="hidden" name="flightId" value={flightId} />
+          <input type="hidden" name="visibility" value={nextVisibility} />
+          <input type="hidden" name="returnTo" value={currentPath} />
 
-        <button className="btn btnSecondary" type="submit">
-          {visibilityLabel}
-        </button>
-      </form>
+          <button className="btn btnSecondary" type="submit">
+            {visibilityLabel}
+          </button>
+        </form>
+      ) : null}
 
-      <form
-        action={deleteFlightAction}
-        onSubmit={(event) => {
-          const ok = window.confirm(t("deleteConfirm"));
+      {canDelete ? (
+        <form
+          action={deleteFlightAction}
+          onSubmit={(event) => {
+            const ok = window.confirm(t("deleteConfirm"));
 
-          if (!ok) {
-            event.preventDefault();
-          }
-        }}
-      >
-        <input type="hidden" name="flightId" value={flightId} />
-        <input type="hidden" name="returnTo" value={`/${locale}/profile`} />
+            if (!ok) {
+              event.preventDefault();
+            }
+          }}
+        >
+          <input type="hidden" name="flightId" value={flightId} />
+          <input type="hidden" name="returnTo" value={`/${locale}/profile`} />
 
-        <button className="btn btnDanger" type="submit">
-          {t("delete")}
-        </button>
-      </form>
+          <button className="btn btnDanger" type="submit">
+            {t("delete")}
+          </button>
+        </form>
+      ) : null}
     </div>
   );
 }
