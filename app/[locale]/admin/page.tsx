@@ -86,14 +86,22 @@ export default async function AdminPage({params}: AdminPageProps) {
             <h3>{t("usersTitle")}</h3>
             <p className="statValue">{usersCount}</p>
             <p className="muted">{t("usersText")}</p>
-            <p className="muted">{t("comingSoon")}</p>
+            <p>
+              <Link className="btn btnPrimary" href="/admin/users">
+                {t("openUserAdmin")}
+              </Link>
+            </p>
           </div>
 
           <div className="card featureTile">
             <h3>{t("pilotsTitle")}</h3>
             <p className="statValue">{pilotsCount}</p>
             <p className="muted">{t("pilotsText")}</p>
-            <p className="muted">{t("comingSoon")}</p>
+            <p>
+              <Link className="btn btnPrimary" href="/admin/pilots">
+                {t("openPilotAdmin")}
+              </Link>
+            </p>
           </div>
 
           <div className="card featureTile">

@@ -368,3 +368,17 @@ body {
   line-height: 1.5;
   white-space: pre-wrap;
 }
+
+.rolePill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 240px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text);
+  white-space: normal;
+}

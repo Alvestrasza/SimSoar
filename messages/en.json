@@ -309,7 +309,8 @@
     "auditTitle": "Audit Log",
     "auditText": "Security-relevant actions are recorded.",
     "openAuditLog": "Open audit log",
-    "auditRestricted": "Only administrators can view the audit log."
+    "auditRestricted": "Only administrators can view the audit log.",
+    "openUserAdmin": "Open users & pilots"  
   },
   "AdminFlights": {
     "pageTitle": "Flight Moderation",
@@ -350,5 +351,24 @@
     "accessDeniedTitle": "Access denied",
     "accessDeniedSubtitle": "The audit log is only visible to administrators.",
     "accessDeniedText": "You are signed in, but you do not have the required administrator role to view security-relevant audit log entries."
+  },
+  "AdminUsers": {
+    "pageTitle": "Users & Pilots",
+    "subtitle": "Overview of registered user accounts, roles and pilot profiles.",
+    "backToAdmin": "Back to Admin Dashboard",
+    "roleNotice": "Note: Roles are currently synchronized during sign-in from Keycloak or from the temporary bootstrap configuration. Role changes are therefore not managed directly in this view yet.",
+    "user": "User",
+    "roles": "Roles",
+    "pilotProfile": "Pilot profile",
+    "homeAirfield": "Home airfield",
+    "favoriteSim": "Simulator",
+    "flights": "Flights",
+    "createdAt": "Created",
+    "unknownUser": "Unknown user",
+    "noPilotProfile": "No pilot profile",
+    "noUsers": "No users available.",
+    "accessDeniedTitle": "Access denied",
+    "accessDeniedSubtitle": "This view is only visible to administrators.",
+    "accessDeniedText": "You are signed in, but you do not have the required administrator role to view user and pilot data."
   }
 }
