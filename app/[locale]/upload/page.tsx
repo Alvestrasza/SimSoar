@@ -4,6 +4,8 @@ import {prisma} from "@/lib/db";
 import {saveFlightAction} from "./save-flight-action";
 import UploadIgcPreview from "@/app/components/UploadIgcPreview";
 import {getTranslations, setRequestLocale} from "next-intl/server";
+import {hasRole} from "@/lib/rbac";
+import {Link} from "@/i18n/navigation";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -29,6 +31,37 @@ export default async function UploadPage({params}: UploadPageProps) {
 
   if (!session?.user?.id) {
     redirect(`/${locale}/login`);
+  }
+
+  const isPilot = hasRole(session.user.roles, "PILOT");
+
+  if (!isPilot) {
+    return (
+      <main className="wrap" style={{maxWidth: 860}}>
+        <div className="card">
+          <div className="cardHead">
+            <div>
+              <span className="cardTitle">{t("pilotRequiredTitle")}</span>
+              <p className="muted" style={{margin: "6px 0 0"}}>
+                {t("pilotRequiredSubtitle")}
+              </p>
+            </div>
+          </div>
+
+          <div className="cardBody lineHeight">
+            <p>{t("pilotRequiredText")}</p>
+
+            <p className="muted">{t("pilotRequiredMace")}</p>
+
+            <p style={{marginTop: 22}}>
+              <Link className="btn btnSecondary" href="/profile">
+                {t("openProfile")}
+              </Link>
+            </p>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   const profile = await prisma.pilotProfile.findUnique({

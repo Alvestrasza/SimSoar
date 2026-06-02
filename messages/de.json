@@ -192,7 +192,12 @@
     "class15m": "15 m Klasse",
     "class18m": "18 m Klasse",
     "classOpen": "Offene Klasse",
-    "classTwoSeater": "Doppelsitzer"
+    "classTwoSeater": "Doppelsitzer",
+    "pilotRequiredTitle": "Kein Pilotenrang",
+    "pilotRequiredSubtitle": "Du bist angemeldet, aber für Uploads nicht als Pilot berechtigt.",
+    "pilotRequiredText": "Dein Konto besitzt aktuell keine Pilotenberechtigung. Du kannst SimSoar weiterhin nutzen, dein Profil ansehen und öffentliche Flüge betrachten, aber keine neuen Flüge hochladen.",
+    "pilotRequiredMace": "Du bist auf dieser Website, aber wir verleihen dir nicht den Rang eines Piloten.",
+    "openProfile": "Profil öffnen"
   },
   "Profile": {
     "pageTitle": "Mein Profil",

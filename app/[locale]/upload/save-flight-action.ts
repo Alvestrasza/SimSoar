@@ -9,6 +9,7 @@ import { prisma } from "@/lib/db";
 import { parseIgc } from "@/lib/igc";
 import { safeFilename, sha256Buffer } from "@/lib/security";
 import { writeAuditLog } from "@/lib/audit";
+import { hasRole } from "@/lib/rbac";
 
 const formSchema = z.object({
   locale: z.enum(["de", "en"]).default("de"),
@@ -24,6 +25,10 @@ const formSchema = z.object({
 export async function saveFlightAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Not authenticated.");
+
+  if (!hasRole(session.user.roles, "PILOT")) {
+    throw new Error("Pilot role required to upload flights.");
+  }
 
   const file = formData.get("igc");
   if (!(file instanceof File)) throw new Error("Missing IGC file.");
