@@ -15,12 +15,18 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["sports", "simulation", "navigation", "utilities"],
     lang: "de",
     icons: [
-      {
+    {
         src: "/icons/simsoar.svg",
         sizes: "any",
         type: "image/svg+xml",
-        purpose: "any maskable"
-      }
+        purpose: "any"
+    },
+    {
+        src: "/icons/simsoar.svg",
+        sizes: "any",
+        type: "image/svg+xml",
+        purpose: "maskable"
+    }
     ]
   };
 }
