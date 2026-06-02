@@ -322,7 +322,8 @@
     "auditText": "Sicherheitsrelevante Aktionen werden protokolliert.",
     "openAuditLog": "Audit Log öffnen",
     "auditRestricted": "Nur Administratoren können das Audit Log einsehen.",
-    "openUserAdmin": "Benutzer & Piloten öffnen"
+    "openUserAdmin": "Benutzer & Piloten öffnen",
+    "openPilotAdmin": "Pilotenverwaltung öffnen"
   },
   "AdminFlights": {
     "pageTitle": "Flugmoderation",
