@@ -7,6 +7,11 @@ import {ProfileSaveNotice} from "./ProfileSaveNotice";
 import FlightOwnerActions from "@/app/components/FlightOwnerActions";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {savePreferencesAction} from "./preferences-actions";
+import {
+  normalizeSimSoarRoles,
+  SIMSOAR_ROLE_ORDER,
+  type SimSoarRole
+} from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -25,6 +30,12 @@ function visibilityLabel(
   if (visibility === "PUBLIC") return t("visibilityPublic");
   if (visibility === "PRIVATE") return t("visibilityPrivate");
   return t("visibilityUnlisted");
+}
+
+function getVisibleRoles(roles: readonly string[] | undefined): SimSoarRole[] {
+  const assignedRoles = new Set(normalizeSimSoarRoles([...(roles ?? [])]));
+
+  return SIMSOAR_ROLE_ORDER.filter((role) => assignedRoles.has(role));
 }
 
 export default async function ProfilePage({
@@ -78,6 +89,8 @@ const noticeStatus =
     redirect(`/${locale}/login`);
   }
 
+  const visibleRoles = getVisibleRoles(session.user.roles);
+
   const [profile, preferences, flights] = await Promise.all([
     prisma.pilotProfile.findUnique({
       where: {
@@ -103,8 +116,18 @@ const noticeStatus =
   return (
     <main className="wrap" style={{maxWidth: 960}}>
       <div className="card" style={{marginBottom: 20}}>
-        <div className="cardHead">
+        <div className="cardHead profileHeader">
           <span className="cardTitle">{t("pageTitle")}</span>
+
+          <div className="roleStatusGroup" aria-label={t("roleStatusLabel")}>
+            <span className="roleStatusText">{t("roleStatusLabel")}</span>
+
+            {visibleRoles.map((role) => (
+              <span className="roleStatusBadge" key={role}>
+                {t(`role_${role}`)}
+              </span>
+            ))}
+          </div>
         </div>
 
         <form className="cardBody" action={saveProfileAction}>

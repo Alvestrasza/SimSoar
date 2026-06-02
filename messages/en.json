@@ -201,6 +201,12 @@
   },
   "Profile": {
     "pageTitle": "My Profile",
+    "roleStatusLabel": "Status",
+    "role_USER": "User",
+    "role_PILOT": "Pilot",
+    "role_MODERATOR": "Moderator",
+    "role_ADMIN": "Admin",
+    "role_OWNER": "Owner",    
     "username": "Username",
     "email": "Email address",
     "callsign": "Callsign",
