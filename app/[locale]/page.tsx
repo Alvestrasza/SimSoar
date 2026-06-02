@@ -17,16 +17,30 @@ export default async function HomePage({params}: HomePageProps) {
   const t = await getTranslations({locale, namespace: "Home"});
 
   const [totalFlights, totalPilots, best] = await Promise.all([
-    prisma.flight.count({where: {visibility: "PUBLIC"}}),
+    prisma.flight.count({
+      where: {
+        visibility: "PUBLIC",
+        moderationStatus: "APPROVED",
+        deletedAt: null
+      }
+    }),
     prisma.pilotProfile.count(),
     prisma.flight.findFirst({
-      where: {visibility: "PUBLIC"},
+      where: {
+        visibility: "PUBLIC",
+        moderationStatus: "APPROVED",
+        deletedAt: null
+      },
       orderBy: {distanceKm: "desc"}
     })
   ]);
 
   const recent = await prisma.flight.findMany({
-    where: {visibility: "PUBLIC"},
+    where: {
+      visibility: "PUBLIC",
+      moderationStatus: "APPROVED",
+      deletedAt: null
+    },
     orderBy: {createdAt: "desc"},
     take: 6,
     select: {

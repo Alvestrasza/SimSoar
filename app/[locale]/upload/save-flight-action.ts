@@ -110,11 +110,11 @@ export async function saveFlightAction(formData: FormData) {
       action: "FLIGHT_UPLOAD",
       targetType: "Flight",
       targetId: flight.id,
-      summary: "Flight uploaded and queued for moderation.",
+      summary: "Flight uploaded and automatically approved.",
       metadata: {
         title: flight.title,
         visibility: fields.visibility,
-        moderationStatus: "PENDING",
+        moderationStatus: "APPROVED",
         simulator: fields.simulator,
         distanceKm: parsed.distanceKm,
         olcPoints: parsed.olcPoints,

@@ -41,7 +41,9 @@ async function getPilots(
   try {
     const flights = await prisma.flight.findMany({
       where: {
-        visibility: "PUBLIC"
+        visibility: "PUBLIC",
+        moderationStatus: "APPROVED",
+        deletedAt: null
       },
       select: {
         pilotCallsign: true,

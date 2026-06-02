@@ -16,7 +16,11 @@ export default async function FlightsPage({params}: FlightsPageProps) {
   const t = await getTranslations({locale, namespace: "Flights"});
 
   const flights = await prisma.flight.findMany({
-    where: {visibility: "PUBLIC"},
+    where: {
+      visibility: "PUBLIC",
+      moderationStatus: "APPROVED",
+      deletedAt: null
+    },
     orderBy: [{olcPoints: "desc"}, {distanceKm: "desc"}],
     take: 100,
     include: {

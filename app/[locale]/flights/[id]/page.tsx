@@ -1,8 +1,10 @@
 import {notFound} from "next/navigation";
 import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
+import {hasRole} from "@/lib/rbac";
 import FlightDetailClient from "@/app/components/FlightDetailClient";
 import {setRequestLocale} from "next-intl/server";
+
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +53,21 @@ export default async function FlightDetailPage({
   }
 
   const isOwner = session?.user?.id === flight.userId;
+  const canModerate = hasRole(session?.user?.roles, "MODERATOR");
+
+  const isPublicApprovedFlight =
+    flight.visibility === "PUBLIC" &&
+    flight.moderationStatus === "APPROVED" &&
+    flight.deletedAt === null;
+
+  const canViewFlight =
+    isPublicApprovedFlight ||
+    isOwner ||
+    canModerate;
+
+  if (!canViewFlight) {
+    notFound();
+  }
 
   if (flight.visibility === "PRIVATE" && !isOwner) {
     notFound();
@@ -76,7 +93,7 @@ export default async function FlightDetailPage({
         minAltitudeM: flight.minAltitudeM,
         maxVarioMs: flight.maxVarioMs,
         visibility: flight.visibility,
-        canManage: isOwner,
+        canManage: isOwner || canModerate,
         track: flight.track.map((p: any) => ({
           seq: p.seq,
           lat: p.lat,
