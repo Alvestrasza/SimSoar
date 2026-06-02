@@ -20,19 +20,25 @@ function readStringClaim(value: unknown): string | null {
   return null;
 }
 
-function getSimSoarCallsign(profile: unknown): string | null {
-  const keycloakProfile = profile as KeycloakProfileWithCallsign | null;
+function normalizeCallsignCandidate(value: string | null): string | null {
+  if (!value) return null;
 
-  const rawCallsign = readStringClaim(keycloakProfile?.simsoar_callsign);
-  if (!rawCallsign) return null;
-
-  const callsign = rawCallsign.trim();
+  const callsign = value.trim();
 
   if (!/^[A-Za-z0-9_-]{3,32}$/.test(callsign)) {
     return null;
   }
 
   return callsign;
+}
+
+function getInitialSimSoarCallsign(profile: unknown): string | null {
+  const keycloakProfile = profile as KeycloakProfileWithCallsign | null;
+
+  return (
+    normalizeCallsignCandidate(readStringClaim(keycloakProfile?.simsoar_callsign)) ??
+    normalizeCallsignCandidate(readStringClaim(keycloakProfile?.preferred_username))
+  );
 }
 declare module "next-auth" {
   interface Session {
@@ -189,20 +195,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       });
 
-      const callsign = getSimSoarCallsign(profile);
-
-      if (!callsign) return;
-
-      await prisma.pilotProfile.upsert({
-        where: { userId: user.id },
-        create: {
-          userId: user.id,
-          callsign
+      const existingProfile = await prisma.pilotProfile.findUnique({
+        where: {
+          userId: user.id
         },
-        update: {
-          callsign
+        select: {
+          id: true,
+          callsign: true
         }
       });
+
+      /*
+       * Keycloak may provide an initial callsign during registration.
+       * After the SimSoar profile exists, SimSoar is authoritative and
+       * the local callsign must not be overwritten during later sign-ins.
+       */
+      if (!existingProfile) {
+        const initialCallsign = getInitialSimSoarCallsign(profile);
+
+        if (initialCallsign) {
+          await prisma.pilotProfile.create({
+            data: {
+              userId: user.id,
+              callsign: initialCallsign
+            }
+          });
+        }
+      }
     }
   },
   pages: {

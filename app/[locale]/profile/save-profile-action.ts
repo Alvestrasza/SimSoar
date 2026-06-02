@@ -56,9 +56,7 @@ export async function saveProfileAction(formData: FormData) {
     }
   });
 
-  if (!account?.providerAccountId) {
-    throw new Error("No Keycloak account mapping found for this SimSoar user.");
-  }
+  const keycloakUserId = account?.providerAccountId ?? null;
 
   const callsignTaken = await prisma.pilotProfile.findFirst({
     where: {
@@ -91,23 +89,6 @@ export async function saveProfileAction(formData: FormData) {
   }
 });
 
-  console.info("SimSoar profile save callsign sync:", {
-    simsoarUserId: session.user.id,
-    keycloakUserId: account.providerAccountId,
-    callsign: profileData.callsign
-  });
-
-  await updateKeycloakUserCallsign(
-    account.providerAccountId,
-    profileData.callsign
-  );
-
-  console.info("SimSoar profile save callsign sync completed:", {
-    simsoarUserId: session.user.id,
-    keycloakUserId: account.providerAccountId,
-    callsign: profileData.callsign
-  });
-
   const updatedProfile = await prisma.pilotProfile.upsert({
     where: {
       userId: session.user.id
@@ -129,6 +110,43 @@ export async function saveProfileAction(formData: FormData) {
     }
   });
 
+  let keycloakCallsignSyncStatus:
+    | "not_configured"
+    | "synced"
+    | "failed" = "not_configured";
+
+  if (keycloakUserId) {
+    try {
+      console.info("SimSoar profile save callsign sync:", {
+        simsoarUserId: session.user.id,
+        keycloakUserId,
+        callsign: updatedProfile.callsign
+      });
+
+      await updateKeycloakUserCallsign(
+        keycloakUserId,
+        updatedProfile.callsign
+      );
+
+      keycloakCallsignSyncStatus = "synced";
+
+      console.info("SimSoar profile save callsign sync completed:", {
+        simsoarUserId: session.user.id,
+        keycloakUserId,
+        callsign: updatedProfile.callsign
+      });
+    } catch (error) {
+      keycloakCallsignSyncStatus = "failed";
+
+      console.warn("SimSoar profile was saved locally, but Keycloak callsign sync failed:", {
+        simsoarUserId: session.user.id,
+        keycloakUserId,
+        callsign: updatedProfile.callsign,
+        error
+      });
+    }
+  }
+
   await writeAuditLog({
     actorUserId: session.user.id,
     actorEmail: session.user.email,
@@ -147,7 +165,8 @@ export async function saveProfileAction(formData: FormData) {
         bio: updatedProfile.bio,
         showHomeAirfieldOnHome: updatedProfile.showHomeAirfieldOnHome
       },
-      keycloakUserId: account.providerAccountId
+      keycloakUserId,
+      keycloakCallsignSyncStatus
     }
   });
 
