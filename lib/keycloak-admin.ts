@@ -1,3 +1,9 @@
+import {
+  getSimSoarRuntimeEnvironment,
+  normalizeSimSoarRoles,
+  type SimSoarRole
+} from "@/lib/rbac";
+
 type KeycloakUserRepresentation = {
   id?: string;
   username?: string;
@@ -8,6 +14,79 @@ type KeycloakUserRepresentation = {
   enabled?: boolean;
   attributes?: Record<string, string[]>;
 };
+
+type KeycloakGroupRepresentation = {
+  id?: string;
+  name?: string;
+  path?: string;
+  subGroups?: KeycloakGroupRepresentation[];
+};
+
+const SIMSOAR_GROUP_SUFFIX_BY_ROLE: Record<SimSoarRole, string[]> = {
+  USER: ["Users", "User"],
+  PILOT: ["Pilots", "Pilot"],
+  MODERATOR: ["Moderators", "Moderator"],
+  ADMIN: ["Admins", "Admin"],
+  OWNER: ["Owners", "Owner"]
+};
+
+function normalizeKeycloakGroupName(value: string): string {
+  return value
+    .trim()
+    .replace(/^\/+/, "")
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+}
+
+function flattenGroups(groups: KeycloakGroupRepresentation[]): KeycloakGroupRepresentation[] {
+  const result: KeycloakGroupRepresentation[] = [];
+
+  for (const group of groups) {
+    result.push(group);
+
+    if (group.subGroups?.length) {
+      result.push(...flattenGroups(group.subGroups));
+    }
+  }
+
+  return result;
+}
+
+function getSimSoarEnvironmentLabel(): "DEV" | "PROD" {
+  const environment = getSimSoarRuntimeEnvironment();
+
+  if (environment === "dev") return "DEV";
+  if (environment === "prod") return "PROD";
+
+  throw new Error("SIMSOAR_ENV or NEXT_PUBLIC_SIMSOAR_ENV must be set to dev or prod.");
+}
+
+function getSimSoarGroupPrefix(): string {
+  return process.env.KEYCLOAK_SIMSOAR_GROUP_PREFIX ?? "00005-2-LS-SimSoar";
+}
+
+function getCandidateGroupNamesForRole(role: SimSoarRole): string[] {
+  const environmentLabel = getSimSoarEnvironmentLabel();
+  const prefix = getSimSoarGroupPrefix();
+
+  return SIMSOAR_GROUP_SUFFIX_BY_ROLE[role].map(
+    (suffix) => `${prefix}_${environmentLabel}_${suffix}`
+  );
+}
+
+function groupMatchesAnyName(
+  group: KeycloakGroupRepresentation,
+  names: readonly string[]
+): boolean {
+  const normalizedNames = new Set(names.map(normalizeKeycloakGroupName));
+  const candidates = [group.name, group.path].filter(
+    (value): value is string => typeof value === "string"
+  );
+
+  return candidates.some((candidate) =>
+    normalizedNames.has(normalizeKeycloakGroupName(candidate))
+  );
+}
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -165,4 +244,174 @@ export async function updateKeycloakUserCallsign(
       stored: storedCallsign
     });
   }
+}
+async function fetchSimSoarRoleGroups(
+  token: string,
+  adminBaseUrl: string
+): Promise<KeycloakGroupRepresentation[]> {
+  const environmentLabel = getSimSoarEnvironmentLabel();
+  const searchValue = `SimSoar_${environmentLabel}`;
+
+  const groupsUrl = `${adminBaseUrl}/groups?search=${encodeURIComponent(
+    searchValue
+  )}&briefRepresentation=false&max=200`;
+
+  const response = await fetch(groupsUrl, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json"
+    }
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Keycloak groups read failed: ${response.status} ${text}`);
+  }
+
+  const groups = (await response.json()) as KeycloakGroupRepresentation[];
+
+  return flattenGroups(groups).filter((group) => {
+    const groupName = `${group.name ?? ""} ${group.path ?? ""}`;
+    return normalizeKeycloakGroupName(groupName).includes(
+      `simsoar_${environmentLabel.toLowerCase()}_`
+    );
+  });
+}
+
+async function fetchUserGroups(
+  token: string,
+  adminBaseUrl: string,
+  keycloakUserId: string
+): Promise<KeycloakGroupRepresentation[]> {
+  const userGroupsUrl = `${adminBaseUrl}/users/${encodeURIComponent(
+    keycloakUserId
+  )}/groups?briefRepresentation=false&max=200`;
+
+  const response = await fetch(userGroupsUrl, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json"
+    }
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Keycloak user groups read failed: ${response.status} ${text}`);
+  }
+
+  const groups = (await response.json()) as KeycloakGroupRepresentation[];
+
+  return flattenGroups(groups);
+}
+
+async function addUserToGroup(
+  token: string,
+  adminBaseUrl: string,
+  keycloakUserId: string,
+  groupId: string
+): Promise<void> {
+  const url = `${adminBaseUrl}/users/${encodeURIComponent(
+    keycloakUserId
+  )}/groups/${encodeURIComponent(groupId)}`;
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Keycloak user group add failed: ${response.status} ${text}`);
+  }
+}
+
+async function removeUserFromGroup(
+  token: string,
+  adminBaseUrl: string,
+  keycloakUserId: string,
+  groupId: string
+): Promise<void> {
+  const url = `${adminBaseUrl}/users/${encodeURIComponent(
+    keycloakUserId
+  )}/groups/${encodeURIComponent(groupId)}`;
+
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Keycloak user group remove failed: ${response.status} ${text}`);
+  }
+}
+
+export async function updateKeycloakUserSimSoarRoleGroups(
+  keycloakUserId: string,
+  requestedRoles: readonly string[]
+): Promise<void> {
+  const token = await getKeycloakAdminAccessToken();
+  const adminBaseUrl = getKeycloakAdminBaseUrl();
+
+  const finalRoles = normalizeSimSoarRoles([...requestedRoles]);
+  const desiredRoles = new Set<SimSoarRole>(finalRoles);
+
+  desiredRoles.add("USER");
+
+  const availableGroups = await fetchSimSoarRoleGroups(token, adminBaseUrl);
+  const currentUserGroups = await fetchUserGroups(token, adminBaseUrl, keycloakUserId);
+
+  const desiredGroupIds = new Set<string>();
+  const managedGroupIds = new Set<string>();
+
+  for (const role of normalizeSimSoarRoles(["USER", "PILOT", "MODERATOR", "ADMIN", "OWNER"])) {
+    const candidates = getCandidateGroupNamesForRole(role);
+
+    const group = availableGroups.find((candidateGroup) =>
+      groupMatchesAnyName(candidateGroup, candidates)
+    );
+
+    if (!group?.id) {
+      throw new Error(
+        `Keycloak SimSoar group for role ${role} was not found. Tried: ${candidates.join(", ")}`
+      );
+    }
+
+    managedGroupIds.add(group.id);
+
+    if (desiredRoles.has(role)) {
+      desiredGroupIds.add(group.id);
+    }
+  }
+
+  const currentGroupIds = new Set(
+    currentUserGroups
+      .map((group) => group.id)
+      .filter((id): id is string => typeof id === "string")
+  );
+
+  for (const groupId of managedGroupIds) {
+    if (currentGroupIds.has(groupId) && !desiredGroupIds.has(groupId)) {
+      await removeUserFromGroup(token, adminBaseUrl, keycloakUserId, groupId);
+    }
+  }
+
+  for (const groupId of desiredGroupIds) {
+    if (!currentGroupIds.has(groupId)) {
+      await addUserToGroup(token, adminBaseUrl, keycloakUserId, groupId);
+    }
+  }
+
+  console.info("SimSoar Keycloak role group update completed:", {
+    keycloakUserId,
+    environment: getSimSoarEnvironmentLabel(),
+    roles: finalRoles,
+    desiredGroupIds: [...desiredGroupIds]
+  });
 }

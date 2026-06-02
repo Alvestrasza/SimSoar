@@ -10,6 +10,7 @@ import {
   type SimSoarRole
 } from "@/lib/rbac";
 import {writeAuditLog} from "@/lib/audit";
+import {updateKeycloakUserSimSoarRoleGroups} from "@/lib/keycloak-admin";
 
 function readString(value: FormDataEntryValue | null): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
@@ -90,6 +91,29 @@ export async function updateUserRoles(formData: FormData) {
 
   const previousRoles = normalizeSimSoarRoles(targetUser.roles);
 
+  const targetAccount = await prisma.account.findFirst({
+    where: {
+      userId: targetUserId,
+      provider: "keycloak"
+    },
+    select: {
+      providerAccountId: true
+    }
+  });
+
+  if (!targetAccount?.providerAccountId) {
+    throw new Error("No Keycloak account mapping found for this user.");
+  }
+
+  /*
+   * Keycloak / AD is authoritative for role membership.
+   * Update Keycloak first, then mirror the resulting roles into SimSoar.
+   */
+  await updateKeycloakUserSimSoarRoleGroups(
+    targetAccount.providerAccountId,
+    finalRoles
+  );
+
   await prisma.user.update({
     where: {
       id: targetUserId
@@ -111,7 +135,9 @@ export async function updateUserRoles(formData: FormData) {
       previousRoles,
       newRoles: finalRoles,
       actorRoles: normalizeSimSoarRoles(session.user.roles ?? []),
-      roleOrder: SIMSOAR_ROLE_ORDER
+      roleOrder: SIMSOAR_ROLE_ORDER,
+      keycloakUserId: targetAccount.providerAccountId,
+      roleSource: "keycloak_groups"      
     }
   });
 

@@ -61,6 +61,54 @@ function normalizeRoleName(value: string): string {
     .toLowerCase();
 }
 
+function normalizeGroupRoleName(value: string): string {
+  return value
+    .trim()
+    .replace(/^\/+/, "")
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+}
+
+function inferRoleFromEnvironmentGroup(value: string): SimSoarRole | null {
+  const normalized = normalizeGroupRoleName(value);
+
+  if (!normalized.includes("simsoar_")) {
+    return null;
+  }
+
+  const environment = getSimSoarRuntimeEnvironment();
+
+  if (
+    environment &&
+    (normalized.includes("simsoar_dev_") || normalized.includes("simsoar_prod_")) &&
+    !normalized.includes(`simsoar_${environment}_`)
+  ) {
+    return null;
+  }
+
+  if (normalized.endsWith("_owners") || normalized.endsWith("_owner")) {
+    return "OWNER";
+  }
+
+  if (normalized.endsWith("_admins") || normalized.endsWith("_admin")) {
+    return "ADMIN";
+  }
+
+  if (normalized.endsWith("_moderators") || normalized.endsWith("_moderator")) {
+    return "MODERATOR";
+  }
+
+  if (normalized.endsWith("_pilots") || normalized.endsWith("_pilot")) {
+    return "PILOT";
+  }
+
+  if (normalized.endsWith("_users") || normalized.endsWith("_user")) {
+    return "USER";
+  }
+
+  return null;
+}
+
 function toStringArray(value: unknown): string[] {
   if (typeof value === "string") return [value];
 
@@ -127,7 +175,10 @@ export function normalizeSimSoarRoles(values: unknown[]): SimSoarRole[] {
       continue;
     }
 
-    const mapped = KEYCLOAK_ROLE_MAP[normalizeRoleName(value)];
+    const mapped =
+      KEYCLOAK_ROLE_MAP[normalizeRoleName(value)] ??
+      KEYCLOAK_ROLE_MAP[normalizeGroupRoleName(value)] ??
+      inferRoleFromEnvironmentGroup(value);
 
     if (mapped) {
       roles.add(mapped);

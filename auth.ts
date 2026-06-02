@@ -148,20 +148,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         process.env.AUTH_KEYCLOAK_ID
       );
 
-      const existingUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: {
-          roles: true
-        }
-      });
-
-      const storedRoles = existingUser?.roles ?? [];
-
-      const roles = new Set(
-        normalizeSimSoarRoles(
-          storedRoles.length > 0 ? storedRoles : ["USER", "PILOT"]
-        )
-      );
+      /*
+       * Keycloak / AD is the authoritative source for SimSoar role membership.
+       * SimSoar mirrors the resolved roles into the local database during sign-in.
+       */
+      const roles = new Set(normalizeSimSoarRoles(roleValues));
 
       const bootstrapAdminEmails = (process.env.SIMSOAR_BOOTSTRAP_ADMIN_EMAILS ?? "")
         .split(",")
@@ -187,7 +178,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         action: "USER_ROLE_SYNC",
         targetType: "User",
         targetId: user.id,
-        summary: "User application roles verified during sign-in.",
+        summary: "User roles synchronized from Keycloak during sign-in.",
         metadata: {
           provider: account.provider,
           roles: finalRoles,
