@@ -11,7 +11,8 @@
     "profile": "Profile",
     "login": "Sign in",
     "logout": "Sign out",
-    "myProfile": "My Profile"
+    "myProfile": "My Profile",
+    "admin": "Admin"
   },
   "Footer": {
     "copyright": "© {year} {holder1} / {holder2}. All rights reserved.",
@@ -290,5 +291,45 @@
   },
   "LocaleSwitcher": {
     "label": "Change language"
+  },
+  "Admin": {
+    "pageTitle": "Admin Dashboard",
+    "subtitle": "Central overview for moderation, user management and security-relevant actions.",
+    "usersTitle": "Users",
+    "usersText": "Registered user accounts in SimSoar.",
+    "pilotsTitle": "Pilots",
+    "pilotsText": "Active pilot profiles with callsign.",
+    "flightsTitle": "Flights",
+    "flightsText": "Uploaded flights and moderation status.",
+    "openFlightModeration": "Open flight moderation",
+    "comingSoon": "This administration area will follow in a later step.",
+    "approvedFlights": "Approved flights",
+    "hiddenFlights": "Hidden flights",
+    "rejectedFlights": "Rejected flights",
+    "auditTitle": "Audit Log",
+    "auditText": "Security-relevant actions are recorded."
+  },
+  "AdminFlights": {
+    "pageTitle": "Flight Moderation",
+    "subtitle": "Review, hide, reject or re-approve uploaded flights.",
+    "backToAdmin": "Back to Admin Dashboard",
+    "updated": "Moderation status was updated.",
+    "flight": "Flight",
+    "pilot": "Pilot",
+    "stats": "Stats",
+    "visibility": "Visibility",
+    "status": "Status",
+    "createdAt": "Created",
+    "action": "Action",
+    "noFlights": "No flights available.",
+    "save": "Save",
+    "moderationNotePlaceholder": "Optional moderation note",
+    "visibility_PUBLIC": "Public",
+    "visibility_PRIVATE": "Private",
+    "visibility_UNLISTED": "Unlisted",
+    "status_PENDING": "Pending",
+    "status_APPROVED": "Approved",
+    "status_REJECTED": "Rejected",
+    "status_HIDDEN": "Hidden"
   }
 }

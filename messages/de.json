@@ -11,7 +11,8 @@
     "profile": "Profil",
     "login": "Anmelden",
     "logout": "Abmelden",
-    "myProfile": "Mein Profil"
+    "myProfile": "Mein Profil",
+    "admin": "Admin"
   },
   "Footer": {
     "copyright": "© {year} {holder1} / {holder2}. Alle Rechte vorbehalten.",
@@ -290,5 +291,45 @@
   },
   "LocaleSwitcher": {
     "label": "Sprache wechseln"
+  },
+  "Admin": {
+    "pageTitle": "Admin Dashboard",
+    "subtitle": "Zentrale Übersicht für Moderation, Benutzerverwaltung und sicherheitsrelevante Aktionen.",
+    "usersTitle": "Benutzer",
+    "usersText": "Registrierte Benutzerkonten in SimSoar.",
+    "pilotsTitle": "Piloten",
+    "pilotsText": "Aktive Pilotenprofile mit Callsign.",
+    "flightsTitle": "Flüge",
+    "flightsText": "Hochgeladene Flüge und Moderationsstatus.",
+    "openFlightModeration": "Flugmoderation öffnen",
+    "comingSoon": "Diese Verwaltung folgt in einem späteren Schritt.",
+    "approvedFlights": "Freigegebene Flüge",
+    "hiddenFlights": "Ausgeblendete Flüge",
+    "rejectedFlights": "Abgelehnte Flüge",
+    "auditTitle": "Audit Log",
+    "auditText": "Sicherheitsrelevante Aktionen werden protokolliert."
+  },
+  "AdminFlights": {
+    "pageTitle": "Flugmoderation",
+    "subtitle": "Flüge prüfen, ausblenden, ablehnen oder wieder freigeben.",
+    "backToAdmin": "Zurück zum Admin Dashboard",
+    "updated": "Moderationsstatus wurde aktualisiert.",
+    "flight": "Flug",
+    "pilot": "Pilot",
+    "stats": "Werte",
+    "visibility": "Sichtbarkeit",
+    "status": "Status",
+    "createdAt": "Erstellt",
+    "action": "Aktion",
+    "noFlights": "Keine Flüge vorhanden.",
+    "save": "Speichern",
+    "moderationNotePlaceholder": "Optionale Moderationsnotiz",
+    "visibility_PUBLIC": "Öffentlich",
+    "visibility_PRIVATE": "Privat",
+    "visibility_UNLISTED": "Nicht gelistet",
+    "status_PENDING": "Wartend",
+    "status_APPROVED": "Freigegeben",
+    "status_REJECTED": "Abgelehnt",
+    "status_HIDDEN": "Ausgeblendet"
   }
 }

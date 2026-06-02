@@ -1,5 +1,6 @@
 import {Link} from "@/i18n/navigation";
 import {auth} from "@/auth";
+import {hasRole} from "@/lib/rbac";
 import {signInWithKeycloak, signOutWithKeycloak} from "@/app/auth-actions";
 import {getTranslations} from "next-intl/server";
 
@@ -22,8 +23,16 @@ export async function AuthNav({locale}: AuthNavProps) {
     );
   }
 
+  const canUseAdmin = hasRole(session.user.roles, "MODERATOR");
+
   return (
     <>
+      {canUseAdmin ? (
+        <Link className="btn btnSecondary" href="/admin">
+          {nav("admin")}
+        </Link>
+      ) : null}
+
       <Link className="btn btnSecondary" href="/profile">
         {nav("myProfile")}
       </Link>
