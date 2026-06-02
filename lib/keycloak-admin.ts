@@ -135,7 +135,16 @@ export async function updateKeycloakUserCallsign(
 
   if (!verifyResponse.ok) {
     const text = await verifyResponse.text();
-    throw new Error(`Keycloak user verify read failed: ${verifyResponse.status} ${text}`);
+
+    console.warn("SimSoar Keycloak callsign verification read failed after successful update:", {
+      keycloakUserId,
+      attributeName,
+      callsign,
+      status: verifyResponse.status,
+      response: text
+    });
+
+    return;
   }
 
   const verifiedUser = (await verifyResponse.json()) as KeycloakUserRepresentation;
@@ -149,8 +158,11 @@ export async function updateKeycloakUserCallsign(
   });
 
   if (storedCallsign !== callsign) {
-    throw new Error(
-      `Keycloak callsign sync verification failed. Expected "${callsign}", got "${storedCallsign ?? "<empty>"}".`
-    );
+    console.warn("SimSoar Keycloak callsign verification did not return the expected value after successful update. This can happen with LDAP-backed attributes.", {
+      keycloakUserId,
+      attributeName,
+      expected: callsign,
+      stored: storedCallsign
+    });
   }
 }
