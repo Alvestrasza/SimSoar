@@ -1,9 +1,10 @@
 import {auth} from "@/auth";
 import {Link} from "@/i18n/navigation";
 import {prisma} from "@/lib/db";
-import {hasRole} from "@/lib/rbac";
+import {hasRole, SIMSOAR_ROLE_ORDER} from "@/lib/rbac";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
+import {updateUserRoles} from "./actions";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -21,6 +22,12 @@ function formatDate(value: Date, locale: string) {
 
 function formatRoles(roles: string[]) {
   return roles.length > 0 ? roles.join(", ") : "USER";
+}
+
+function canEditRole(role: string, actorIsOwner: boolean) {
+  if (role === "USER") return false;
+  if (role === "ADMIN" || role === "OWNER") return actorIsOwner;
+  return true;
 }
 
 export default async function AdminUsersPage({params}: AdminUsersPageProps) {
@@ -62,6 +69,8 @@ export default async function AdminUsersPage({params}: AdminUsersPageProps) {
       </main>
     );
   }
+
+  const actorIsOwner = hasRole(session.user.roles, "OWNER");
 
   const users = await prisma.user.findMany({
     orderBy: {
@@ -145,9 +154,48 @@ export default async function AdminUsersPage({params}: AdminUsersPageProps) {
                     </td>
 
                     <td>
-                      <span className="rolePill">
-                        {formatRoles(user.roles)}
-                      </span>
+                      <form action={updateUserRoles}>
+                        <input type="hidden" name="userId" value={user.id} />
+
+                        <div style={{display: "grid", gap: 6}}>
+                          {SIMSOAR_ROLE_ORDER.map((role) => {
+                            const editable = canEditRole(role, actorIsOwner);
+
+                            return (
+                              <label
+                                key={role}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 8,
+                                  opacity: editable || role === "USER" ? 1 : 0.65
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  name="roles"
+                                  value={role}
+                                  defaultChecked={role === "USER" || user.roles.includes(role)}
+                                  disabled={!editable}
+                                />
+                                <span>{role}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+
+                        <p style={{marginTop: 10}}>
+                          <button className="btn btnSecondary btnSm" type="submit">
+                            {t("saveRoles")}
+                          </button>
+                        </p>
+
+                        {!actorIsOwner ? (
+                          <p className="muted" style={{fontSize: 12, marginTop: 6}}>
+                            {t("adminOwnerRoleHint")}
+                          </p>
+                        ) : null}
+                      </form>
                     </td>
 
                     <td>

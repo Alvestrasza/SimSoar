@@ -370,7 +370,7 @@
     "pageTitle": "Users & Pilots",
     "subtitle": "Overview of registered user accounts, roles and pilot profiles.",
     "backToAdmin": "Back to Admin Dashboard",
-    "roleNotice": "Note: Roles are currently synchronized during sign-in from Keycloak or from the temporary bootstrap configuration. Role changes are therefore not managed directly in this view yet.",
+    "roleNotice": "Note: Basic access is controlled through AD/Keycloak. Functional SimSoar roles are managed here and remain stored in the SimSoar database.",
     "user": "User",
     "roles": "Roles",
     "pilotProfile": "Pilot profile",
@@ -383,6 +383,8 @@
     "noUsers": "No users available.",
     "accessDeniedTitle": "Access denied",
     "accessDeniedSubtitle": "This view is only visible to administrators.",
-    "accessDeniedText": "You are signed in, but you do not have the required administrator role to view user and pilot data."
+    "accessDeniedText": "You are signed in, but you do not have the required administrator role to view user and pilot data.",
+    "saveRoles": "Save roles",
+    "adminOwnerRoleHint": "Admin and owner roles can only be changed by owners."
   }
 }

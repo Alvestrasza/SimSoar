@@ -142,7 +142,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         process.env.AUTH_KEYCLOAK_ID
       );
 
-      const roles = new Set(normalizeSimSoarRoles(roleValues));
+      const existingUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: {
+          roles: true
+        }
+      });
+
+      const roles = new Set(normalizeSimSoarRoles(existingUser?.roles ?? ["USER"]));
 
       const bootstrapAdminEmails = (process.env.SIMSOAR_BOOTSTRAP_ADMIN_EMAILS ?? "")
         .split(",")
@@ -155,7 +162,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         roles.add("ADMIN");
       }
 
-      const finalRoles = [...roles];
+      const finalRoles = normalizeSimSoarRoles([...roles]);
 
       await prisma.user.update({
         where: { id: user.id },
