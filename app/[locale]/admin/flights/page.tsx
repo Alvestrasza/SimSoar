@@ -5,6 +5,7 @@ import {hasRole} from "@/lib/rbac";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound, redirect} from "next/navigation";
 import {moderateFlightAction} from "./actions";
+import AdminFlightDeleteButton from "@/app/components/AdminFlightDeleteButton";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -42,6 +43,8 @@ export default async function AdminFlightsPage({
   if (!hasRole(session.user.roles, "MODERATOR")) {
     notFound();
   }
+
+  const canDeleteFlights = hasRole(session.user.roles, "ADMIN");
 
   const queryParams = searchParams ? await searchParams : {};
   const updatedParam = Array.isArray(queryParams.updated)
@@ -177,6 +180,14 @@ export default async function AdminFlightsPage({
                           {t("save")}
                         </button>
                       </form>
+                      
+                      {canDeleteFlights ? (
+                        <AdminFlightDeleteButton
+                          flightId={flight.id}
+                          flightTitle={flight.title}
+                          returnTo={`/${locale}/admin/flights`}
+                        />
+                      ) : null}
                     </td>
                   </tr>
                 ))

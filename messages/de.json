@@ -333,7 +333,9 @@
     "status_PENDING": "Wartend",
     "status_APPROVED": "Freigegeben",
     "status_REJECTED": "Abgelehnt",
-    "status_HIDDEN": "Ausgeblendet"
+    "status_HIDDEN": "Ausgeblendet",
+    "delete": "Flug löschen",
+    "deleteConfirm": "Soll der Flug „{title}“ wirklich gelöscht werden? Der Flug wird nur ausgeblendet und bleibt im Audit nachvollziehbar."
   },
   "AdminAudit": {
     "pageTitle": "Audit Log",

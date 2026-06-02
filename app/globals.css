@@ -382,3 +382,7 @@ body {
   color: var(--text);
   white-space: normal;
 }
+
+.adminActionForm + form {
+  margin-top: 8px;
+}

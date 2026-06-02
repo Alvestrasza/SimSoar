@@ -333,7 +333,9 @@
     "status_PENDING": "Pending",
     "status_APPROVED": "Approved",
     "status_REJECTED": "Rejected",
-    "status_HIDDEN": "Hidden"
+    "status_HIDDEN": "Hidden",
+    "delete": "Delete flight",
+    "deleteConfirm": "Do you really want to delete the flight “{title}”? The flight will only be hidden and remains traceable in the audit log."
   },
   "AdminAudit": {
     "pageTitle": "Audit Log",

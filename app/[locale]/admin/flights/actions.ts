@@ -69,6 +69,11 @@ export async function moderateFlightAction(formData: FormData) {
     returnTo: formData.get("returnTo") || undefined
   });
 
+  const softDeleteFlightSchema = z.object({
+    flightId: z.string().min(1),
+    returnTo: z.string().min(1).optional()
+  });
+
   const returnTo = safeReturnTo(fields.returnTo);
 
   const flight = await prisma.flight.update({
@@ -108,6 +113,92 @@ export async function moderateFlightAction(formData: FormData) {
   });
 
   revalidateFlightAdminViews(flight.id);
+
+  redirect(`${returnTo}?updated=1`);
+}
+
+export async function softDeleteFlightAction(formData: FormData) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("Not authenticated.");
+  }
+
+  if (!hasRole(session.user.roles, "ADMIN")) {
+    throw new Error("Not authorized.");
+  }
+
+  const fields = softDeleteFlightSchema.parse({
+    flightId: formData.get("flightId"),
+    returnTo: formData.get("returnTo") || undefined
+  });
+
+  const returnTo = safeReturnTo(fields.returnTo);
+
+  const flight = await prisma.flight.findFirst({
+    where: {
+      id: fields.flightId,
+      deletedAt: null
+    },
+    select: {
+      id: true,
+      title: true,
+      pilotCallsign: true,
+      visibility: true,
+      moderationStatus: true,
+      igcSha256: true
+    }
+  });
+
+  if (!flight) {
+    throw new Error("Flight not found or already deleted.");
+  }
+
+  const deletedAt = new Date();
+
+  const updatedFlight = await prisma.flight.update({
+    where: {
+      id: flight.id
+    },
+    data: {
+      deletedAt,
+      deletedByUserId: session.user.id,
+      moderationStatus: "HIDDEN",
+      moderatedByUserId: session.user.id,
+      moderatedAt: deletedAt,
+      moderationNote: "Soft-deleted by administrator."
+    },
+    select: {
+      id: true,
+      title: true,
+      pilotCallsign: true,
+      visibility: true,
+      moderationStatus: true,
+      deletedAt: true,
+      deletedByUserId: true
+    }
+  });
+
+  await writeAuditLog({
+    actorUserId: session.user.id,
+    actorEmail: session.user.email,
+    action: "FLIGHT_DELETE",
+    targetType: "Flight",
+    targetId: updatedFlight.id,
+    summary: "Flight was soft-deleted by an administrator.",
+    metadata: {
+      title: updatedFlight.title,
+      pilotCallsign: updatedFlight.pilotCallsign,
+      previousVisibility: flight.visibility,
+      previousModerationStatus: flight.moderationStatus,
+      moderationStatus: updatedFlight.moderationStatus,
+      deletedAt: updatedFlight.deletedAt?.toISOString() ?? null,
+      deletedByUserId: updatedFlight.deletedByUserId,
+      igcSha256: flight.igcSha256
+    }
+  });
+
+  revalidateFlightAdminViews(updatedFlight.id);
 
   redirect(`${returnTo}?updated=1`);
 }
