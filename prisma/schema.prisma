@@ -57,7 +57,7 @@ model User {
   image          String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
-  roles          SimSoarRole[]   @default([USER])
+  roles          SimSoarRole[]   @default([USER, PILOT])
   accounts       Account[]
   sessions       Session[]
   authenticators Authenticator[]
