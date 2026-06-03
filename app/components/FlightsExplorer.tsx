@@ -28,6 +28,7 @@ type FlightListItem = {
 
 type Props = {
   flights: FlightListItem[];
+  initialFilter?: FilterKey;
 };
 
 type SortKey = "olcPoints" | "distanceKm" | "maxVarioMs";
@@ -244,10 +245,13 @@ function SimDistributionChart({
   );
 }
 
-export default function FlightsExplorer({flights}: Props) {
+export default function FlightsExplorer({
+  flights,
+  initialFilter = "all"
+}: Props) {
   const t = useTranslations("Flights");
 
-  const [filter, setFilter] = useState<FilterKey>("all");
+  const [filter, setFilter] = useState<FilterKey>(initialFilter);
 
   const [sort, setSort] = useState<{key: SortKey; dir: 1 | -1}>({
     key: "olcPoints",

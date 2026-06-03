@@ -9,7 +9,19 @@ import {writeAuditLog} from "@/lib/audit";
 
 const preferencesSchema = z.object({
   locale: z.enum(["de", "en"]).default("de"),
-  theme: z.enum(["SYSTEM", "LIGHT", "DARK"])
+  theme: z.enum(["SYSTEM", "LIGHT", "DARK"]),
+  preferredSimulator: z.enum([
+    "MSFS 2024",
+    "MSFS 2020",
+    "Condor 2",
+    "X-Plane 12",
+    "X-Plane 11",
+    "DCS World",
+    "Other"
+  ]),
+  unitSystem: z.enum(["METRIC", "IMPERIAL"]),
+  preferredLeaderboardView: z.enum(["ALL", "MSFS", "CONDOR", "XPLANE"]),
+  preferredMapMode: z.enum(["STANDARD", "SATELLITE", "TERRAIN"])
 });
 
 export async function savePreferencesAction(formData: FormData) {
@@ -21,7 +33,11 @@ export async function savePreferencesAction(formData: FormData) {
 
   const fields = preferencesSchema.parse({
     locale: formData.get("locale") || "de",
-    theme: formData.get("theme")
+    theme: formData.get("theme"),
+    preferredSimulator: formData.get("preferredSimulator") || "MSFS 2024",
+    unitSystem: formData.get("unitSystem") || "METRIC",
+    preferredLeaderboardView: formData.get("preferredLeaderboardView") || "ALL",
+    preferredMapMode: formData.get("preferredMapMode") || "STANDARD"
   });
 
   await prisma.userPreference.upsert({
@@ -30,10 +46,18 @@ export async function savePreferencesAction(formData: FormData) {
     },
     create: {
       userId: session.user.id,
-      theme: fields.theme
+      theme: fields.theme,
+      preferredSimulator: fields.preferredSimulator,
+      unitSystem: fields.unitSystem,
+      preferredLeaderboardView: fields.preferredLeaderboardView,
+      preferredMapMode: fields.preferredMapMode
     },
     update: {
-      theme: fields.theme
+      theme: fields.theme,
+      preferredSimulator: fields.preferredSimulator,
+      unitSystem: fields.unitSystem,
+      preferredLeaderboardView: fields.preferredLeaderboardView,
+      preferredMapMode: fields.preferredMapMode
     }
   });
 
@@ -45,7 +69,11 @@ export async function savePreferencesAction(formData: FormData) {
     targetId: session.user.id,
     summary: "User preferences were updated.",
     metadata: {
-      theme: fields.theme
+      theme: fields.theme,
+      preferredSimulator: fields.preferredSimulator,
+      unitSystem: fields.unitSystem,
+      preferredLeaderboardView: fields.preferredLeaderboardView,
+      preferredMapMode: fields.preferredMapMode
     }
   });
 

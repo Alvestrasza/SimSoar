@@ -238,7 +238,21 @@
     "themeLight": "Light",
     "themeDark": "Dark",
     "savePreferences": "Save preferences",
-    "preferencesSaved": "✓ Preferences saved successfully."
+    "preferencesSaved": "✓ Preferences saved successfully.",
+    "preferredSimulator": "Preferred simulator",
+    "simOther": "Other",
+    "unitSystem": "Unit system",
+    "unitMetric": "Metric",
+    "unitImperial": "Imperial",
+    "preferredLeaderboardView": "Default leaderboard view",
+    "leaderboardAll": "All",
+    "leaderboardMsfs": "MSFS",
+    "leaderboardCondor": "Condor",
+    "leaderboardXplane": "X-Plane",
+    "preferredMapMode": "Preferred map mode",
+    "mapStandard": "Standard",
+    "mapSatellite": "Satellite",
+    "mapTerrain": "Terrain"
   },
   "FlightOwnerActions": {
     "hide": "🙈 Hide",

@@ -35,6 +35,24 @@ enum ThemePreference {
   DARK
 }
 
+enum UnitSystemPreference {
+  METRIC
+  IMPERIAL
+}
+
+enum LeaderboardViewPreference {
+  ALL
+  MSFS
+  CONDOR
+  XPLANE
+}
+
+enum MapModePreference {
+  STANDARD
+  SATELLITE
+  TERRAIN
+}
+
 enum AuditAction {
   USER_ROLE_SYNC
   USER_ROLE_UPDATE
@@ -214,11 +232,15 @@ model Thermal {
 }
 
 model UserPreference {
-  id        String          @id @default(cuid())
-  userId    String          @unique
-  theme     ThemePreference @default(SYSTEM)
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  id                       String                    @id @default(cuid())
+  userId                   String                    @unique
+  theme                    ThemePreference           @default(SYSTEM)
+  preferredSimulator       String                    @default("MSFS 2024")
+  unitSystem               UnitSystemPreference      @default(METRIC)
+  preferredLeaderboardView LeaderboardViewPreference @default(ALL)
+  preferredMapMode         MapModePreference         @default(STANDARD)
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

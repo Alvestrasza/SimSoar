@@ -238,7 +238,21 @@
     "themeLight": "Hell",
     "themeDark": "Dunkel",
     "savePreferences": "Einstellungen speichern",
-    "preferencesSaved": "✓ Einstellungen wurden erfolgreich gespeichert."  
+    "preferencesSaved": "✓ Einstellungen wurden erfolgreich gespeichert.",
+    "preferredSimulator": "Bevorzugter Simulator",
+    "simOther": "Sonstiger",
+    "unitSystem": "Einheitensystem",
+    "unitMetric": "Metrisch",
+    "unitImperial": "Imperial",
+    "preferredLeaderboardView": "Standardansicht Bestenliste",
+    "leaderboardAll": "Gesamt",
+    "leaderboardMsfs": "MSFS",
+    "leaderboardCondor": "Condor",
+    "leaderboardXplane": "X-Plane",
+    "preferredMapMode": "Bevorzugter Kartenmodus",
+    "mapStandard": "Standard",
+    "mapSatellite": "Satellit",
+    "mapTerrain": "Gelände"  
   },
   "FlightOwnerActions": {
     "hide": "🙈 Nicht sichtbar machen",

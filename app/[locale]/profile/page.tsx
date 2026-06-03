@@ -254,6 +254,58 @@ const noticeStatus =
                 <option value="DARK">{t("themeDark")}</option>
               </select>
             </div>
+
+            <div className="formGroup">
+              <label>{t("preferredSimulator")}</label>
+              <select
+                name="preferredSimulator"
+                defaultValue={preferences?.preferredSimulator ?? "MSFS 2024"}
+              >
+                <option value="MSFS 2024">MSFS 2024</option>
+                <option value="MSFS 2020">MSFS 2020</option>
+                <option value="Condor 2">Condor 2</option>
+                <option value="X-Plane 12">X-Plane 12</option>
+                <option value="X-Plane 11">X-Plane 11</option>
+                <option value="DCS World">DCS World</option>
+                <option value="Other">{t("simOther")}</option>
+              </select>
+            </div>
+
+            <div className="formGroup">
+              <label>{t("unitSystem")}</label>
+              <select
+                name="unitSystem"
+                defaultValue={preferences?.unitSystem ?? "METRIC"}
+              >
+                <option value="METRIC">{t("unitMetric")}</option>
+                <option value="IMPERIAL">{t("unitImperial")}</option>
+              </select>
+            </div>
+
+            <div className="formGroup">
+              <label>{t("preferredLeaderboardView")}</label>
+              <select
+                name="preferredLeaderboardView"
+                defaultValue={preferences?.preferredLeaderboardView ?? "ALL"}
+              >
+                <option value="ALL">{t("leaderboardAll")}</option>
+                <option value="MSFS">{t("leaderboardMsfs")}</option>
+                <option value="CONDOR">{t("leaderboardCondor")}</option>
+                <option value="XPLANE">{t("leaderboardXplane")}</option>
+              </select>
+            </div>
+
+            <div className="formGroup">
+              <label>{t("preferredMapMode")}</label>
+              <select
+                name="preferredMapMode"
+                defaultValue={preferences?.preferredMapMode ?? "STANDARD"}
+              >
+                <option value="STANDARD">{t("mapStandard")}</option>
+                <option value="SATELLITE">{t("mapSatellite")}</option>
+                <option value="TERRAIN">{t("mapTerrain")}</option>
+              </select>
+            </div>
           </div>
 
           <p style={{marginTop: 20}}>

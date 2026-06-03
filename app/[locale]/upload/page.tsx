@@ -64,11 +64,18 @@ export default async function UploadPage({params}: UploadPageProps) {
     );
   }
 
-  const profile = await prisma.pilotProfile.findUnique({
-    where: {
-      userId: session.user.id
-    }
-  });
+  const [profile, preferences] = await Promise.all([
+    prisma.pilotProfile.findUnique({
+      where: {
+        userId: session.user.id
+      }
+    }),
+    prisma.userPreference.findUnique({
+      where: {
+        userId: session.user.id
+      }
+    })
+  ]);
 
   return (
     <main className="wrap" style={{maxWidth: 860}}>
@@ -97,7 +104,7 @@ export default async function UploadPage({params}: UploadPageProps) {
               <label>{t("simulator")}</label>
               <select
                 name="simulator"
-                defaultValue={profile?.favoriteSim ?? "MSFS 2024"}
+                defaultValue={preferences?.preferredSimulator ?? profile?.favoriteSim ?? "MSFS 2024"}
               >
                 <option>MSFS 2024</option>
                 <option>MSFS 2020</option>

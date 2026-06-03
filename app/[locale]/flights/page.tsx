@@ -1,6 +1,7 @@
 import {prisma} from "@/lib/db";
 import FlightsExplorer from "@/app/components/FlightsExplorer";
 import {getTranslations, setRequestLocale} from "next-intl/server";
+import {auth} from "@/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -8,12 +9,44 @@ type FlightsPageProps = {
   params: Promise<{locale: string}>;
 };
 
+function leaderboardPreferenceToFilter(
+  value: "ALL" | "MSFS" | "CONDOR" | "XPLANE" | null | undefined
+) {
+  if (value === "MSFS") return "msfs";
+  if (value === "CONDOR") return "condor";
+  if (value === "XPLANE") return "xplane";
+  return "all";
+}
+
 export default async function FlightsPage({params}: FlightsPageProps) {
   const {locale} = await params;
 
   setRequestLocale(locale);
 
   const t = await getTranslations({locale, namespace: "Flights"});
+
+  let session = null;
+
+  try {
+    session = await auth();
+  } catch (error) {
+    console.error("SimSoar flights auth session could not be loaded:", error);
+  }
+
+  const preferences = session?.user?.id
+    ? await prisma.userPreference.findUnique({
+        where: {
+          userId: session.user.id
+        },
+        select: {
+          preferredLeaderboardView: true
+        }
+      })
+    : null;
+
+  const initialFilter = leaderboardPreferenceToFilter(
+    preferences?.preferredLeaderboardView
+  );
 
   const flights = await prisma.flight.findMany({
     where: {
@@ -38,6 +71,7 @@ export default async function FlightsPage({params}: FlightsPageProps) {
       </div>
 
       <FlightsExplorer
+        initialFilter={initialFilter}
         flights={flights.map((f: any) => ({
           id: f.id,
           title: f.title,
