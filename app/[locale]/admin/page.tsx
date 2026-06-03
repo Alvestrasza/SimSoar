@@ -39,7 +39,8 @@ export default async function AdminPage({params}: AdminPageProps) {
     approvedFlightsCount,
     hiddenFlightsCount,
     rejectedFlightsCount,
-    recentAuditCount
+    recentAuditCount,
+    blockedIgcCount
   ] = await Promise.all([
     prisma.user.count(),
     prisma.pilotProfile.count(),
@@ -66,7 +67,8 @@ export default async function AdminPage({params}: AdminPageProps) {
         deletedAt: null
       }
     }),
-    prisma.auditLog.count()
+    prisma.auditLog.count(),
+    prisma.igcUploadBlock.count()
   ]);
 
   return (
@@ -148,6 +150,22 @@ export default async function AdminPage({params}: AdminPageProps) {
             <p className="muted">{t("auditRestricted")}</p>
           )}
         </div>
+
+        <div className="card featureTile">
+          <h3>{t("igcBlocksTitle")}</h3>
+          <p className="statValue">{blockedIgcCount}</p>
+          <p className="muted">{t("igcBlocksText")}</p>
+
+          {canViewAudit ? (
+            <p>
+              <Link className="btn btnPrimary" href="/admin/igc-blocks">
+                {t("openIgcBlocks")}
+              </Link>
+            </p>
+          ) : (
+            <p className="muted">{t("auditRestricted")}</p>
+          )}
+        </div>       
       </section>
     </main>
   );

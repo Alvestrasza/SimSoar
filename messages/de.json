@@ -364,7 +364,10 @@
     "openAuditLog": "Audit Log öffnen",
     "auditRestricted": "Nur Administratoren können das Audit Log einsehen.",
     "openUserAdmin": "Benutzer & Piloten öffnen",
-    "openPilotAdmin": "Pilotenverwaltung öffnen"
+    "openPilotAdmin": "Pilotenverwaltung öffnen",
+    "igcBlocksTitle": "Gesperrte IGC-Hashes",
+    "igcBlocksText": "IGC-Dateien, die nach endgültiger Löschung weiterhin für Re-Uploads blockiert sind.",
+    "openIgcBlocks": "IGC-Hashes verwalten"
   },
   "AdminFlights": {
     "pageTitle": "Flugmoderation",
@@ -460,5 +463,20 @@
     "comment": "Kommentar",
     "save": "✓ Änderungen speichern",
     "cancel": "Abbrechen"
+  },
+  "AdminIgcBlocks": {
+    "pageTitle": "Gesperrte IGC-Hashes",
+    "subtitle": "Verwaltung gesperrter Upload-Hashes nach endgültig gelöschten Flügen.",
+    "backToAdmin": "Zurück zum Admin Dashboard",
+    "updated": "IGC-Hash wurde freigegeben.",
+    "noBlockedHashes": "Keine gesperrten IGC-Hashes vorhanden.",
+    "unknownFlight": "Unbekannter Flug",
+    "blocked": "Gesperrt",
+    "hash": "SHA256",
+    "originalFlightId": "Ursprünglicher Flug",
+    "blockedAt": "Gesperrt am",
+    "reason": "Grund",
+    "unblock": "Hash freigeben",
+    "unblockConfirm": "Den gesperrten IGC-Hash „{hash}…“ wirklich freigeben? Danach kann dieselbe IGC-Datei erneut hochgeladen werden."
   }
 }

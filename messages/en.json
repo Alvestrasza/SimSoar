@@ -364,7 +364,10 @@
     "openAuditLog": "Open audit log",
     "auditRestricted": "Only administrators can view the audit log.",
     "openUserAdmin": "Open users & pilots",
-    "openPilotAdmin": "Open pilot administration"
+    "openPilotAdmin": "Open pilot administration",
+    "igcBlocksTitle": "Blocked IGC hashes",
+    "igcBlocksText": "IGC files that remain blocked for re-upload after permanent deletion.",
+    "openIgcBlocks": "Manage IGC hashes"
   },
   "AdminFlights": {
     "pageTitle": "Flight Moderation",
@@ -460,5 +463,20 @@
     "comment": "Comment",
     "save": "✓ Save changes",
     "cancel": "Cancel"
+  },
+  "AdminIgcBlocks": {
+    "pageTitle": "Blocked IGC hashes",
+    "subtitle": "Manage blocked upload hashes after permanently deleted flights.",
+    "backToAdmin": "Back to Admin Dashboard",
+    "updated": "IGC hash was released.",
+    "noBlockedHashes": "No blocked IGC hashes available.",
+    "unknownFlight": "Unknown flight",
+    "blocked": "Blocked",
+    "hash": "SHA256",
+    "originalFlightId": "Original flight",
+    "blockedAt": "Blocked at",
+    "reason": "Reason",
+    "unblock": "Release hash",
+    "unblockConfirm": "Really release the blocked IGC hash “{hash}…”? Afterwards, the same IGC file can be uploaded again."
   }
 }
