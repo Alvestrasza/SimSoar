@@ -176,19 +176,6 @@ const noticeStatus =
             </div>
 
             <div className="formGroup">
-              <label>{t("favoriteSim")}</label>
-              <select
-                name="favoriteSim"
-                defaultValue={profile?.favoriteSim ?? "MSFS 2024"}
-              >
-                <option>MSFS 2024</option>
-                <option>MSFS 2020</option>
-                <option>Condor 2</option>
-                <option>X-Plane 12</option>
-              </select>
-            </div>
-
-            <div className="formGroup">
               <label>{t("favoriteGlider")}</label>
               <input
                 name="favoriteGlider"

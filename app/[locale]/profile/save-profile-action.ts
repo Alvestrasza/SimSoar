@@ -18,7 +18,6 @@ const schema = z.object({
       "Callsign may only contain letters, numbers, underscore and hyphen."
     ),
   homeAirfield: z.string().max(120).optional(),
-  favoriteSim: z.string().max(40).optional(),
   favoriteGlider: z.string().max(80).optional(),
   country: z.string().max(80).optional(),
   bio: z.string().max(2000).optional(),
@@ -36,7 +35,6 @@ export async function saveProfileAction(formData: FormData) {
   const data = schema.parse({
     callsign: formData.get("callsign"),
     homeAirfield: formData.get("homeAirfield") || undefined,
-    favoriteSim: formData.get("favoriteSim") || undefined,
     favoriteGlider: formData.get("favoriteGlider") || undefined,
     country: formData.get("country") || undefined,
     bio: formData.get("bio") || undefined,
@@ -85,7 +83,6 @@ export async function saveProfileAction(formData: FormData) {
   select: {
     callsign: true,
     homeAirfield: true,
-    favoriteSim: true,
     favoriteGlider: true,
     country: true,
     bio: true,
@@ -136,7 +133,6 @@ export async function saveProfileAction(formData: FormData) {
       id: true,
       callsign: true,
       homeAirfield: true,
-      favoriteSim: true,
       favoriteGlider: true,
       country: true,
       bio: true,
@@ -156,7 +152,6 @@ export async function saveProfileAction(formData: FormData) {
       current: {
         callsign: updatedProfile.callsign,
         homeAirfield: updatedProfile.homeAirfield,
-        favoriteSim: updatedProfile.favoriteSim,
         favoriteGlider: updatedProfile.favoriteGlider,
         country: updatedProfile.country,
         bio: updatedProfile.bio,
