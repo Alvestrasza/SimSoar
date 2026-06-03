@@ -121,7 +121,7 @@ export default async function AdminUsersPage({params}: AdminUsersPageProps) {
           <p className="muted">{t("roleNotice")}</p>
         </div>
 
-        <div className="tableWrap">
+        <div className="tableWrap adminUsersDesktopTable">
           <table>
             <thead>
               <tr>
@@ -163,11 +163,9 @@ export default async function AdminUsersPage({params}: AdminUsersPageProps) {
 
                             return (
                               <label
+                                className="adminRoleCheckbox"
                                 key={role}
                                 style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 8,
                                   opacity: editable || role === "USER" ? 1 : 0.65
                                 }}
                               >
@@ -229,6 +227,99 @@ export default async function AdminUsersPage({params}: AdminUsersPageProps) {
             </tbody>
           </table>
         </div>
+        <div className="adminUsersMobileCards">
+          {users.length === 0 ? (
+            <p className="muted emptyInline">{t("noUsers")}</p>
+          ) : (
+            users.map((user) => (
+              <article className="adminUserMobileCard" key={user.id}>
+                <div className="adminUserMobileHeader">
+                  <div className="adminUserMobileIdentity">
+                    <strong>{user.name ?? t("unknownUser")}</strong>
+
+                    <span className="muted">{user.email ?? "–"}</span>
+
+                    <span className="muted adminUserMobileId">
+                      {user.id}
+                    </span>
+                  </div>
+
+                  <div className="adminUserMobileFlightCount">
+                    <span>{t("flights")}</span>
+                    <strong>{user._count.flights}</strong>
+                  </div>
+                </div>
+
+                <div className="adminUserMobileSection">
+                  <span className="adminUserMobileLabel">{t("roles")}</span>
+
+                  <form className="adminUserRoleForm" action={updateUserRoles}>
+                    <input type="hidden" name="userId" value={user.id} />
+
+                    <div className="adminUserRoleGrid">
+                      {SIMSOAR_ROLE_ORDER.map((role) => {
+                        const editable = canEditRole(role, actorIsOwner);
+
+                        return (
+                          <label
+                            className="adminRoleCheckbox"
+                            key={role}
+                            style={{
+                              opacity: editable || role === "USER" ? 1 : 0.65
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              name="roles"
+                              value={role}
+                              defaultChecked={role === "USER" || user.roles.includes(role)}
+                              disabled={!editable}
+                            />
+                            <span>{role}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+
+                    <button className="btn btnSecondary btnSmall" type="submit">
+                      {t("saveRoles")}
+                    </button>
+
+                    {!actorIsOwner ? (
+                      <p className="muted adminUserMobileHint">
+                        {t("adminOwnerRoleHint")}
+                      </p>
+                    ) : null}
+                  </form>
+                </div>
+
+                <div className="adminUserMobileGrid">
+                  <div>
+                    <span>{t("pilotProfile")}</span>
+                    <strong>
+                      {user.profile?.callsign ?? t("noPilotProfile")}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>{t("homeAirfield")}</span>
+                    <strong>{user.profile?.homeAirfield ?? "–"}</strong>
+                  </div>
+
+                  <div>
+                    <span>{t("favoriteSim")}</span>
+                    <strong>{user.profile?.favoriteSim ?? "–"}</strong>
+                  </div>
+
+                  <div>
+                    <span>{t("createdAt")}</span>
+                    <strong>{formatDate(user.createdAt, locale)}</strong>
+                  </div>
+                </div>
+              </article>
+            ))
+          )}
+        </div>        
       </section>
     </main>
   );
