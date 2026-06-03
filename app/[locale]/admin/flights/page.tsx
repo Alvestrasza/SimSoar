@@ -6,6 +6,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound, redirect} from "next/navigation";
 import {moderateFlightAction} from "./actions";
 import AdminFlightDeleteButton from "@/app/components/AdminFlightDeleteButton";
+import AdminFlightRestoreButton from "@/app/components/AdminFlightRestoreButton";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -241,7 +242,15 @@ export default async function AdminFlightsPage({
                           </button>
                         </form>
                       ) : null}
-
+                      
+                      {canDeleteFlights && isSoftDeleted ? (
+                        <AdminFlightRestoreButton
+                          flightId={flight.id}
+                          flightTitle={flight.title}
+                          returnTo={`/${locale}/admin/flights`}
+                        />
+                      ) : null}
+                      
                       {canDeleteFlights ? (
                         <AdminFlightDeleteButton
                           flightId={flight.id}

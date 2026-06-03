@@ -396,7 +396,9 @@
     "softDeleted": "Soft-deleted",
     "softDeletedHint": "This flight is already hidden and can be permanently removed.",
     "purge": "Permanently delete",
-    "purgeConfirm": "Permanently remove the soft-deleted flight “{title}”? The flight, track data, thermals, and IGC file will be deleted. The IGC hash remains blocked so the same file cannot be uploaded again."
+    "purgeConfirm": "Permanently remove the soft-deleted flight “{title}”? The flight, track data, thermals, and IGC file will be deleted. The IGC hash remains blocked so the same file cannot be uploaded again.",
+    "restore": "Restore",
+    "restoreConfirm": "Restore the soft-deleted flight “{title}”? The flight will be approved again and become available according to its visibility setting."
   },
   "AdminAudit": {
     "pageTitle": "Audit Log",

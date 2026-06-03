@@ -22,6 +22,11 @@ const softDeleteFlightSchema = z.object({
   returnTo: z.string().min(1).optional()
 });
 
+const restoreFlightSchema = z.object({
+  flightId: z.string().min(1),
+  returnTo: z.string().min(1).optional()
+});
+
 function safeReturnTo(value: string | undefined) {
   const returnTo = value || "/de/admin/flights";
 
@@ -277,6 +282,99 @@ export async function softDeleteFlightAction(formData: FormData) {
   });
 
   revalidateFlightAdminViews(updatedFlight.id);
+
+  redirect(`${returnTo}?updated=1`);
+}
+
+export async function restoreFlightAction(formData: FormData) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("Not authenticated.");
+  }
+
+  if (!hasRole(session.user.roles, "ADMIN")) {
+    throw new Error("Not authorized.");
+  }
+
+  const fields = restoreFlightSchema.parse({
+    flightId: formData.get("flightId"),
+    returnTo: formData.get("returnTo") || undefined
+  });
+
+  const returnTo = safeReturnTo(fields.returnTo);
+
+  const flight = await prisma.flight.findUnique({
+    where: {
+      id: fields.flightId
+    },
+    select: {
+      id: true,
+      title: true,
+      pilotCallsign: true,
+      visibility: true,
+      moderationStatus: true,
+      deletedAt: true,
+      deletedByUserId: true,
+      igcSha256: true
+    }
+  });
+
+  if (!flight) {
+    throw new Error("Flight not found.");
+  }
+
+  if (!flight.deletedAt) {
+    throw new Error("Flight is not soft-deleted.");
+  }
+
+  const restoredAt = new Date();
+
+  const restoredFlight = await prisma.flight.update({
+    where: {
+      id: flight.id
+    },
+    data: {
+      deletedAt: null,
+      deletedByUserId: null,
+      moderationStatus: "APPROVED",
+      moderatedByUserId: session.user.id,
+      moderatedAt: restoredAt,
+      moderationNote: "Restored by administrator."
+    },
+    select: {
+      id: true,
+      title: true,
+      pilotCallsign: true,
+      visibility: true,
+      moderationStatus: true,
+      moderatedAt: true,
+      moderationNote: true
+    }
+  });
+
+  await writeAuditLog({
+    actorUserId: session.user.id,
+    actorEmail: session.user.email,
+    action: "FLIGHT_RESTORE",
+    targetType: "Flight",
+    targetId: restoredFlight.id,
+    summary: "Soft-deleted flight was restored by an administrator.",
+    metadata: {
+      title: restoredFlight.title,
+      pilotCallsign: restoredFlight.pilotCallsign,
+      visibility: restoredFlight.visibility,
+      previousModerationStatus: flight.moderationStatus,
+      restoredModerationStatus: restoredFlight.moderationStatus,
+      previousDeletedAt: flight.deletedAt.toISOString(),
+      previousDeletedByUserId: flight.deletedByUserId,
+      igcSha256: flight.igcSha256,
+      moderationNote: restoredFlight.moderationNote,
+      restoredAt: restoredFlight.moderatedAt?.toISOString() ?? null
+    }
+  });
+
+  revalidateFlightAdminViews(restoredFlight.id);
 
   redirect(`${returnTo}?updated=1`);
 }
