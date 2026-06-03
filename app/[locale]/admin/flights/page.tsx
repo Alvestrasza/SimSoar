@@ -17,11 +17,26 @@ type AdminFlightsPageProps = {
     | Record<string, string | string[] | undefined>;
 };
 
-function formatDate(value: Date, locale: string) {
+function formatDate(value: Date | null, locale: string) {
+  if (!value) {
+    return "–";
+  }
+
   return new Intl.DateTimeFormat(locale === "en" ? "en-US" : "de-DE", {
     dateStyle: "medium",
     timeStyle: "short"
   }).format(value);
+}
+
+function moderationStatusClass(
+  status: "APPROVED" | "REJECTED" | "HIDDEN" | "PENDING",
+  isSoftDeleted: boolean
+) {
+  if (isSoftDeleted) return "moderationStatusBadge deleted";
+  if (status === "APPROVED") return "moderationStatusBadge approved";
+  if (status === "REJECTED") return "moderationStatusBadge rejected";
+  if (status === "HIDDEN") return "moderationStatusBadge hidden";
+  return "moderationStatusBadge pending";
 }
 
 export default async function AdminFlightsPage({
@@ -74,9 +89,9 @@ export default async function AdminFlightsPage({
   });
 
   return (
-    <main className="wrap">
+    <main className="wrap adminFlightsWrap">
       <section className="card">
-        <div className="cardHead">
+        <div className="cardHead adminFlightsHeader">
           <div>
             <span className="cardTitle">{t("pageTitle")}</span>
             <p className="muted" style={{margin: "6px 0 0"}}>
@@ -95,115 +110,152 @@ export default async function AdminFlightsPage({
           </div>
         ) : null}
 
-        <div className="tableWrap">
-          <table>
-            <thead>
-              <tr>
-                <th>{t("flight")}</th>
-                <th>{t("pilot")}</th>
-                <th>{t("stats")}</th>
-                <th>{t("visibility")}</th>
-                <th>{t("status")}</th>
-                <th>{t("createdAt")}</th>
-                <th>{t("action")}</th>
-              </tr>
-            </thead>
+        <div className="cardBody">
+          {flights.length === 0 ? (
+            <p className="muted">{t("noFlights")}</p>
+          ) : (
+            <div className="moderationCardGrid">
+              {flights.map((flight) => {
+                const isSoftDeleted = flight.deletedAt !== null;
 
-            <tbody>
-              {flights.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="emptyTable">
-                    {t("noFlights")}
-                  </td>
-                </tr>
-              ) : (
-                flights.map((flight) => (
-                  <tr key={flight.id}>
-                    <td>
-                      <Link href={`/flights/${flight.id}`}>
-                        <strong>{flight.title}</strong>
-                      </Link>
-                      <br />
-                      <span className="muted">{flight.simulator}</span>
-                    </td>
+                return (
+                  <article
+                    className={`moderationCard ${isSoftDeleted ? "softDeleted" : ""}`}
+                    key={flight.id}
+                  >
+                    <div className="moderationCardMain">
+                      <div className="moderationCardTop">
+                        <div>
+                          <Link href={`/flights/${flight.id}`}>
+                            <strong className="moderationFlightTitle">
+                              {flight.title}
+                            </strong>
+                          </Link>
 
-                    <td>{flight.pilotCallsign}</td>
+                          <p className="muted moderationSubLine">
+                            {flight.pilotCallsign} · {flight.simulator}
+                          </p>
+                        </div>
 
-                    <td>
-                      {Math.round(flight.distanceKm)} km
-                      <br />
-                      <span className="muted">
-                        {Math.round(flight.olcPoints)} OLC
-                      </span>
-                    </td>
-
-                    <td>{t(`visibility_${flight.visibility}`)}</td>
-
-                    <td>
-                      <strong>
-                        {flight.deletedAt ? t("softDeleted") : t(`status_${flight.moderationStatus}`)}
-                      </strong>
-                      {flight.deletedAt ? (
-                        <>
-                          <br />
-                          <span className="muted">
-                            {t("softDeletedHint")}
-                          </span>
-                        </>
-                      ) : null}
-                      {flight.moderationNote ? (
-                        <>
-                          <br />
-                          <span className="muted">{flight.moderationNote}</span>
-                        </>
-                      ) : null}
-                    </td>
-
-                    <td>{formatDate(flight.createdAt, locale)}</td>
-
-                    <td>
-                      <form className="adminActionForm" action={moderateFlightAction}>
-                        <input type="hidden" name="flightId" value={flight.id} />
-                        <input
-                          type="hidden"
-                          name="returnTo"
-                          value={`/${locale}/admin/flights`}
-                        />
-
-                        <select
-                          name="moderationStatus"
-                          defaultValue={flight.moderationStatus}
+                        <span
+                          className={moderationStatusClass(
+                            flight.moderationStatus,
+                            isSoftDeleted
+                          )}
                         >
-                          <option value="APPROVED">{t("status_APPROVED")}</option>
-                          <option value="HIDDEN">{t("status_HIDDEN")}</option>
-                          <option value="REJECTED">{t("status_REJECTED")}</option>
-                        </select>
+                          {isSoftDeleted
+                            ? t("softDeleted")
+                            : t(`status_${flight.moderationStatus}`)}
+                        </span>
+                      </div>
 
-                        <textarea
-                          name="moderationNote"
-                          placeholder={t("moderationNotePlaceholder")}
-                          defaultValue={flight.moderationNote ?? ""}
-                        />
+                      <div className="moderationMetaGrid">
+                        <div>
+                          <span>{t("stats")}</span>
+                          <strong>
+                            {Math.round(flight.distanceKm)} km ·{" "}
+                            {Math.round(flight.olcPoints)} OLC
+                          </strong>
+                        </div>
 
-                        <button className="btn btnPrimary btnSmall" type="submit">
-                          {t("save")}
-                        </button>
-                      </form>
-                      
+                        <div>
+                          <span>{t("visibility")}</span>
+                          <strong>{t(`visibility_${flight.visibility}`)}</strong>
+                        </div>
+
+                        <div>
+                          <span>{t("createdAt")}</span>
+                          <strong>{formatDate(flight.createdAt, locale)}</strong>
+                        </div>
+
+                        <div>
+                          <span>{t("status")}</span>
+                          <strong>
+                            {isSoftDeleted
+                              ? t("softDeleted")
+                              : t(`status_${flight.moderationStatus}`)}
+                          </strong>
+                        </div>
+                      </div>
+
+                      {isSoftDeleted ? (
+                        <div className="moderationNotice">
+                          <strong>{t("softDeleted")}</strong>
+                          <p className="muted">{t("softDeletedHint")}</p>
+                          <p className="muted">
+                            {formatDate(flight.deletedAt, locale)}
+                          </p>
+                        </div>
+                      ) : flight.moderationNote ? (
+                        <div className="moderationNotice">
+                          <strong>{t("moderationNotePlaceholder")}</strong>
+                          <p className="muted">{flight.moderationNote}</p>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="moderationCardActions">
+                      {!isSoftDeleted ? (
+                        <form
+                          className="adminActionForm moderationActionForm"
+                          action={moderateFlightAction}
+                        >
+                          <input
+                            type="hidden"
+                            name="flightId"
+                            value={flight.id}
+                          />
+
+                          <input
+                            type="hidden"
+                            name="returnTo"
+                            value={`/${locale}/admin/flights`}
+                          />
+
+                          <select
+                            name="moderationStatus"
+                            defaultValue={flight.moderationStatus}
+                          >
+                            <option value="APPROVED">
+                              {t("status_APPROVED")}
+                            </option>
+                            <option value="HIDDEN">
+                              {t("status_HIDDEN")}
+                            </option>
+                            <option value="REJECTED">
+                              {t("status_REJECTED")}
+                            </option>
+                          </select>
+
+                          <textarea
+                            name="moderationNote"
+                            placeholder={t("moderationNotePlaceholder")}
+                            defaultValue={flight.moderationNote ?? ""}
+                          />
+
+                          <button
+                            className="btn btnPrimary btnSmall"
+                            type="submit"
+                          >
+                            {t("save")}
+                          </button>
+                        </form>
+                      ) : null}
+
                       {canDeleteFlights ? (
                         <AdminFlightDeleteButton
                           flightId={flight.id}
                           flightTitle={flight.title}
                           returnTo={`/${locale}/admin/flights`}
-                          isSoftDeleted={flight.deletedAt !== null}
+                          isSoftDeleted={isSoftDeleted}
                         />
                       ) : null}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     </main>

@@ -693,6 +693,183 @@ body {
   resize: vertical;
 }
 
+.adminFlightsWrap {
+  max-width: 1180px;
+}
+
+.adminFlightsHeader {
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.moderationCardGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.moderationCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg);
+}
+
+.moderationCard.softDeleted {
+  opacity: .82;
+  border-style: dashed;
+}
+
+.moderationCardMain {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.moderationCardTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.moderationFlightTitle {
+  display: block;
+  max-width: 100%;
+  font-size: 16px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.moderationSubLine {
+  margin: 5px 0 0;
+}
+
+.moderationMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.moderationMetaGrid div {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.moderationMetaGrid span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+.moderationMetaGrid strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.moderationStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.moderationStatusBadge.approved {
+  background: color-mix(in srgb, var(--green) 14%, var(--surface));
+  color: var(--green);
+}
+
+.moderationStatusBadge.hidden,
+.moderationStatusBadge.pending {
+  background: color-mix(in srgb, var(--orange) 14%, var(--surface));
+  color: var(--orange);
+}
+
+.moderationStatusBadge.rejected,
+.moderationStatusBadge.deleted {
+  background: color-mix(in srgb, #dc2626 12%, var(--surface));
+  color: #dc2626;
+}
+
+.moderationCardActions {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.moderationActionForm {
+  min-width: 0;
+  width: 100%;
+}
+
+.moderationActionForm select,
+.moderationActionForm textarea {
+  width: 100%;
+}
+
+.moderationActionForm textarea {
+  min-height: 78px;
+}
+
+.moderationCardActions form:not(.moderationActionForm) {
+  margin: 0;
+}
+
+.moderationCardActions .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 980px) {
+  .moderationCard {
+    grid-template-columns: 1fr;
+  }
+
+  .moderationCardActions {
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+}
+
+@media (max-width: 720px) {
+  .adminFlightsHeader {
+    flex-direction: column;
+  }
+
+  .moderationCard {
+    padding: 14px;
+  }
+
+  .moderationCardTop {
+    flex-direction: column;
+  }
+
+  .moderationMetaGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .moderationMetaGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .ownerActions,
 .adminActions {
   display: flex;
