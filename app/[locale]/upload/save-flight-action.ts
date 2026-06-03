@@ -1,7 +1,6 @@
 "use server";
 
 import fs from "node:fs/promises";
-import path from "node:path";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
