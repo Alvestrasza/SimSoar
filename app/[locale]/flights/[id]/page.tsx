@@ -69,14 +69,18 @@ export default async function FlightDetailPage({
 
   const isDeleted = flight.deletedAt !== null;
 
-  const isPublicApprovedFlight =
-    flight.visibility === "PUBLIC" &&
+  const isApprovedAndActive =
     flight.moderationStatus === "APPROVED" &&
     !isDeleted;
 
+  const isPublicOrUnlisted =
+    flight.visibility === "PUBLIC" ||
+    flight.visibility === "UNLISTED";
+
   const canViewFlight =
     canModerate ||
-    (!isDeleted && (isPublicApprovedFlight || isOwner));
+    isOwner ||
+    (isApprovedAndActive && isPublicOrUnlisted);
 
   if (!canViewFlight) {
     notFound();
@@ -84,10 +88,6 @@ export default async function FlightDetailPage({
 
   const isLockedByModeration =
     isDeleted || flight.moderationStatus !== "APPROVED";
-
-  if (flight.visibility === "PRIVATE" && !isOwner) {
-    notFound();
-  }
 
   return (
     <FlightDetailClient

@@ -262,8 +262,11 @@
     "mapTerrain": "Terrain"
   },
   "FlightOwnerActions": {
-    "hide": "🙈 Hide",
-    "show": "👁️ Make visible",
+    "visibilityLabel": "Visibility",
+    "visibilityPublic": "Public",
+    "visibilityUnlisted": "Unlisted",
+    "visibilityPrivate": "Private",
+    "saveVisibility": "Save visibility",
     "delete": "🗑️ Delete",
     "deleteConfirm": "Really delete this flight? This action cannot be undone."
   },
