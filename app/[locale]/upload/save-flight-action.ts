@@ -10,6 +10,7 @@ import { parseIgc } from "@/lib/igc";
 import { safeFilename, sha256Buffer } from "@/lib/security";
 import { writeAuditLog } from "@/lib/audit";
 import { hasRole } from "@/lib/rbac";
+import { Prisma } from "@prisma/client";
 
 const formSchema = z.object({
   locale: z.enum(["de", "en"]).default("de"),
@@ -57,6 +58,39 @@ function hasValidIgcStructure(text: string): boolean {
   );
 
   return validBRecords.length >= 2;
+}
+
+function trimTrailingPathSeparators(value: string): string {
+  return value.replace(/[\\/]+$/, "");
+}
+
+function isUniqueConstraintError(error: unknown, fieldName: string): boolean {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
+    return false;
+  }
+
+  if (error.code !== "P2002") {
+    return false;
+  }
+
+  const target = error.meta?.target;
+
+  if (Array.isArray(target)) {
+    return target.includes(fieldName);
+  }
+
+  return target === fieldName;
+}
+
+async function cleanupUploadedFile(objectPath: string) {
+  try {
+    await fs.unlink(/* turbopackIgnore: true */ objectPath);
+  } catch (error) {
+    console.warn("SimSoar upload cleanup failed:", {
+      objectPath,
+      error
+    });
+  }
 }
 
 export async function saveFlightAction(formData: FormData) {
@@ -149,76 +183,100 @@ export async function saveFlightAction(formData: FormData) {
     redirectUploadError(locale, "invalid-content");
   }
 
-  const uploadRoot =
-    process.env.UPLOAD_DIR ?? path.resolve(process.cwd(), "..", "uploads");
-
-  const uploadDir = path.join(uploadRoot, sha.slice(0, 2), sha.slice(2, 4));
-
-  await fs.mkdir(uploadDir, { recursive: true });
-
-  const objectPath = path.join(
-    uploadDir,
-    `${sha}-${safeFilename(file.name)}`
+  const uploadRoot = trimTrailingPathSeparators(
+    process.env.UPLOAD_DIR ?? "uploads"
   );
 
-  await fs.writeFile(objectPath, buffer, { flag: "wx", mode: 0o640 });
+  const uploadDir = [
+    uploadRoot,
+    sha.slice(0, 2),
+    sha.slice(2, 4)
+  ].join("/");
 
-  const flight = await prisma.flight.create({
-    data: {
-      userId: session.user.id,
-      pilotCallsign: fields.pilotCallsign,
-      title: `${fields.pilotCallsign} · ${Math.round(parsed.distanceKm)} km`,
-      simulator: fields.simulator,
-      glider: fields.glider || parsed.glider,
-      registration: fields.registration || parsed.registration,
-      competitionClass: fields.competitionClass,
-      comment: fields.comment,
-      visibility: fields.visibility,
-      igcObjectPath: objectPath,
-      igcSha256: sha,
-      startTime: parsed.startTime,
-      durationSeconds: parsed.durationSeconds,
-      distanceKm: parsed.distanceKm,
-      olcPoints: parsed.olcPoints,
-      avgSpeedKmh: parsed.avgSpeedKmh,
-      maxAltitudeM: parsed.maxAltitudeM,
-      minAltitudeM: parsed.minAltitudeM,
-      maxVarioMs: parsed.maxVarioMs,
-      startLat: parsed.points[0]?.lat,
-      startLon: parsed.points[0]?.lon,
-      finishLat: parsed.points.at(-1)?.lat,
-      finishLon: parsed.points.at(-1)?.lon,
-      track: {
-        createMany: {
-          data: parsed.points
-            .filter((_, i) => i % Math.max(1, Math.floor(parsed.points.length / 2500)) === 0)
-            .map((p) => ({
-              seq: p.seq,
-              time: p.time,
-              lat: p.lat,
-              lon: p.lon,
-              altM: p.altM,
-              varioMs: p.varioMs
+  const objectPath = [
+    uploadDir,
+    `${sha}-${safeFilename(file.name)}`
+  ].join("/");
+
+  await fs.mkdir(/* turbopackIgnore: true */ uploadDir, { recursive: true });
+
+  await fs.writeFile(
+    /* turbopackIgnore: true */ objectPath,
+    buffer,
+    {
+      flag: "wx",
+      mode: 0o640
+    }
+  );
+
+  let flight;
+
+  try {
+    flight = await prisma.flight.create({
+      data: {
+        userId: session.user.id,
+        pilotCallsign: fields.pilotCallsign,
+        title: `${fields.pilotCallsign} · ${Math.round(parsed.distanceKm)} km`,
+        simulator: fields.simulator,
+        glider: fields.glider || parsed.glider,
+        registration: fields.registration || parsed.registration,
+        competitionClass: fields.competitionClass,
+        comment: fields.comment,
+        visibility: fields.visibility,
+        igcObjectPath: objectPath,
+        igcSha256: sha,
+        startTime: parsed.startTime,
+        durationSeconds: parsed.durationSeconds,
+        distanceKm: parsed.distanceKm,
+        olcPoints: parsed.olcPoints,
+        avgSpeedKmh: parsed.avgSpeedKmh,
+        maxAltitudeM: parsed.maxAltitudeM,
+        minAltitudeM: parsed.minAltitudeM,
+        maxVarioMs: parsed.maxVarioMs,
+        startLat: parsed.points[0]?.lat,
+        startLon: parsed.points[0]?.lon,
+        finishLat: parsed.points.at(-1)?.lat,
+        finishLon: parsed.points.at(-1)?.lon,
+        track: {
+          createMany: {
+            data: parsed.points
+              .filter((_, i) => i % Math.max(1, Math.floor(parsed.points.length / 2500)) === 0)
+              .map((p) => ({
+                seq: p.seq,
+                time: p.time,
+                lat: p.lat,
+                lon: p.lon,
+                altM: p.altM,
+                varioMs: p.varioMs
+              }))
+          }
+        },
+        thermals: {
+          createMany: {
+            data: parsed.thermals.map((t) => ({
+              seq: t.seq,
+              startTime: t.startTime,
+              endTime: t.endTime,
+              centerLat: t.centerLat,
+              centerLon: t.centerLon,
+              avgClimbMs: t.avgClimbMs,
+              maxClimbMs: t.maxClimbMs,
+              gainM: t.gainM,
+              durationSec: t.durationSec
             }))
-        }
-      },
-      thermals: {
-        createMany: {
-          data: parsed.thermals.map((t) => ({
-            seq: t.seq,
-            startTime: t.startTime,
-            endTime: t.endTime,
-            centerLat: t.centerLat,
-            centerLon: t.centerLon,
-            avgClimbMs: t.avgClimbMs,
-            maxClimbMs: t.maxClimbMs,
-            gainM: t.gainM,
-            durationSec: t.durationSec
-          }))
+          }
         }
       }
+    });
+  } catch (error) {
+    await cleanupUploadedFile(objectPath);
+
+    if (isUniqueConstraintError(error, "igcSha256")) {
+      redirectUploadError(locale, "duplicate");
     }
-  });
+
+    throw error;
+  }
 
   await writeAuditLog({
     actorUserId: session.user.id,

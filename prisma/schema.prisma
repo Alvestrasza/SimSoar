@@ -168,7 +168,7 @@ model Flight {
   deletedAt         DateTime?
   deletedByUserId   String?
   igcObjectPath     String
-  igcSha256         String
+  igcSha256         String                 @unique
   startTime         DateTime?
   durationSeconds   Int
   distanceKm        Float
