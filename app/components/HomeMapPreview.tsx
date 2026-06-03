@@ -6,6 +6,14 @@ type LeafletApi = typeof import("leaflet");
 
 type LocationSource = "browser" | "ip" | "home" | "default";
 
+type MapModePreference = "STANDARD" | "SATELLITE" | "TERRAIN";
+
+type TileLayerConfig = {
+  url: string;
+  attribution: string;
+  maxZoom: number;
+};
+
 type PreviewLocation = {
   lat: number;
   lon: number;
@@ -22,6 +30,7 @@ type Props = {
 type MapPreferenceResponse = {
   homeAirfield: string | null;
   preferHomeAirfield: boolean;
+  preferredMapMode?: MapModePreference;
 };
 
 const DEFAULT_LOCATION: PreviewLocation = {
@@ -30,6 +39,30 @@ const DEFAULT_LOCATION: PreviewLocation = {
   label: "Deutschland",
   source: "default"
 };
+
+function tileLayerForMode(mapMode: MapModePreference): TileLayerConfig {
+  if (mapMode === "SATELLITE") {
+    return {
+      url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      attribution: "Tiles © Esri",
+      maxZoom: 19
+    };
+  }
+
+  if (mapMode === "TERRAIN") {
+    return {
+      url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+      attribution: "© OpenTopoMap contributors",
+      maxZoom: 17
+    };
+  }
+
+  return {
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: "© OpenStreetMap",
+    maxZoom: 18
+  };
+}
 
 function createMarkerIcon(L: LeafletApi, source: LocationSource) {
   const emoji = source === "home" ? "🛩️" : source === "ip" ? "📍" : source === "browser" ? "📍" : "🗺️";
@@ -102,6 +135,7 @@ export default function HomeMapPreview({ homeAirfield, preferHomeAirfield = fals
   const mapEl = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const [location, setLocation] = useState<PreviewLocation>(DEFAULT_LOCATION);
+  const [mapMode, setMapMode] = useState<MapModePreference>("STANDARD");
 
   useEffect(() => {
     let cancelled = false;
@@ -113,6 +147,11 @@ export default function HomeMapPreview({ homeAirfield, preferHomeAirfield = fals
 
         try {
           const preference = await loadMapPreference();
+
+          if (!cancelled) {
+            setMapMode(preference.preferredMapMode ?? "STANDARD");
+          }
+
           if (preference.homeAirfield) effectiveHomeAirfield = preference.homeAirfield;
           effectivePreferHomeAirfield = preference.preferHomeAirfield;
         } catch {
@@ -196,9 +235,11 @@ export default function HomeMapPreview({ homeAirfield, preferHomeAirfield = fals
         scrollWheelZoom: false
       });
       mapRef.current = map;
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 18,
-        attribution: "© OpenStreetMap"
+      const tileLayer = tileLayerForMode(mapMode);
+
+      L.tileLayer(tileLayer.url, {
+        maxZoom: tileLayer.maxZoom,
+        attribution: tileLayer.attribution
       }).addTo(map);
 
       const latLng = L.latLng(location.lat, location.lon);
@@ -227,7 +268,7 @@ export default function HomeMapPreview({ homeAirfield, preferHomeAirfield = fals
         mapRef.current = null;
       }
     };
-  }, [location]);
+  }, [location, mapMode]);
 
   return (
     <div className="homeMapPreview" aria-label="SimSoar Standortvorschau">

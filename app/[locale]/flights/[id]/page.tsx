@@ -55,15 +55,15 @@ export default async function FlightDetailPage({
   const canModerate = hasRole(session?.user?.roles, "MODERATOR");
 
   const preferences = session?.user?.id
-    ? await prisma.userPreference.findUnique({
-        where: {
-          userId: session.user.id
-        },
-        select: {
-          preferredMapMode: true
-        }
-      })
-    : null;
+  ? await prisma.userPreference.findUnique({
+      where: {
+        userId: session.user.id
+      },
+      select: {
+        preferredMapMode: true
+      }
+    })
+  : null;
 
   const preferredMapMode = preferences?.preferredMapMode ?? "STANDARD";
 

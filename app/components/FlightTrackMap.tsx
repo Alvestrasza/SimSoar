@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import {useEffect, useRef, useState} from "react";
 
 type LeafletApi = typeof import("leaflet");
 
@@ -76,6 +76,18 @@ function tileLayerForMode(mapMode: MapModePreference): TileLayerConfig {
   };
 }
 
+function nextMapMode(mapMode: MapModePreference): MapModePreference {
+  if (mapMode === "STANDARD") return "SATELLITE";
+  if (mapMode === "SATELLITE") return "TERRAIN";
+  return "STANDARD";
+}
+
+function mapModeLabel(mapMode: MapModePreference) {
+  if (mapMode === "SATELLITE") return "🛰️ Satellite";
+  if (mapMode === "TERRAIN") return "⛰️ Terrain";
+  return "🗺️ Standard";
+}
+
 export default function FlightTrackMap({
   points,
   thermals = [],
@@ -84,6 +96,12 @@ export default function FlightTrackMap({
 }: Props) {
   const mapEl = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
+
+  const [currentMapMode, setCurrentMapMode] = useState<MapModePreference>(mapMode);
+
+  useEffect(() => {
+    setCurrentMapMode(mapMode);
+  }, [mapMode]);
 
   useEffect(() => {
     let cancelled = false;
@@ -102,7 +120,7 @@ export default function FlightTrackMap({
       const map = L.map(mapEl.current, { zoomControl: true, attributionControl: true });
       mapRef.current = map;
 
-      const tileLayer = tileLayerForMode(mapMode);
+      const tileLayer = tileLayerForMode(currentMapMode);
 
       L.tileLayer(tileLayer.url, {
         maxZoom: tileLayer.maxZoom,
@@ -158,11 +176,25 @@ export default function FlightTrackMap({
         mapRef.current = null;
       }
     };
-  }, [points, thermals, mapMode]);
+  }, [points, thermals, currentMapMode]);
 
   useEffect(() => {
     if (active && mapRef.current) setTimeout(() => mapRef.current?.invalidateSize(), 80);
   }, [active]);
 
-  return <div ref={mapEl} className="leafletMap" />;
+  return (
+    <div className="flightMapShell">
+      <button
+        className="mapModeToggle"
+        type="button"
+        onClick={() => setCurrentMapMode((value) => nextMapMode(value))}
+        title="Switch map mode"
+        aria-label="Switch map mode"
+      >
+        {mapModeLabel(currentMapMode)}
+      </button>
+
+      <div ref={mapEl} className="leafletMap" />
+    </div>
+  );
 }

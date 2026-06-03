@@ -924,3 +924,50 @@ body {
     overflow-wrap: anywhere;
   }
 }
+
+.flightMapShell {
+  position: relative;
+}
+
+.mapModeToggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 7px 11px;
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,.14);
+  backdrop-filter: blur(8px);
+  transition:
+    background-color .15s ease,
+    border-color .15s ease,
+    transform .12s ease,
+    box-shadow .15s ease;
+}
+
+.mapModeToggle:hover {
+  background: var(--accent-lt);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.18);
+}
+
+@media (max-width: 720px) {
+  .mapModeToggle {
+    top: 10px;
+    right: 10px;
+    max-width: calc(100% - 20px);
+    font-size: 11px;
+  }
+}
