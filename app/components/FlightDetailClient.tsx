@@ -48,6 +48,8 @@ type FlightDetail = {
   minAltitudeM: number;
   maxVarioMs: number;
   visibility: Visibility;
+  publicIgcDownloadEnabled: boolean;
+  canDownloadIgc: boolean;
   canManage: boolean;
   track: TrackPoint[];
   thermals: Thermal[];
@@ -446,6 +448,29 @@ export default function FlightDetailClient({
               </div>
             </div>
           </div>
+
+          {flight.canDownloadIgc ? (
+            <div className="card">
+              <div className="cardHead">
+                <span className="cardTitle">{t("igcDownloadTitle")}</span>
+              </div>
+
+              <div className="cardBody">
+                <p className="muted" style={{marginTop: 0}}>
+                  {flight.publicIgcDownloadEnabled
+                    ? t("igcDownloadPublicHint")
+                    : t("igcDownloadPrivateHint")}
+                </p>
+
+                <a
+                  className="btn btnPrimary"
+                  href={`/${locale}/flights/${flight.id}/igc`}
+                >
+                  {t("downloadIgc")}
+                </a>
+              </div>
+            </div>
+          ) : null}
 
           {flight.comment ? (
             <div className="card">

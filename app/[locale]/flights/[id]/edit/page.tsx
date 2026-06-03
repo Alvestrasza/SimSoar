@@ -58,6 +58,7 @@ export default async function EditFlightPage({
       competitionClass: true,
       weatherMode: true,
       visibility: true,
+      publicIgcDownloadEnabled: true,
       comment: true,
       moderationStatus: true,
       deletedAt: true
@@ -158,6 +159,23 @@ export default async function EditFlightPage({
                 <option value="UNLISTED">{t("visibilityUnlisted")}</option>
                 <option value="PRIVATE">{t("visibilityPrivate")}</option>
               </select>
+            </div>
+
+            <div className="formGroup">
+              <label>{t("publicIgcDownload")}</label>
+
+              <label className="checkboxLine">
+                <input
+                  type="checkbox"
+                  name="publicIgcDownloadEnabled"
+                  defaultChecked={flight.publicIgcDownloadEnabled}
+                />
+                <span>{t("publicIgcDownloadEnabled")}</span>
+              </label>
+
+              <p className="muted" style={{margin: "6px 0 0", fontSize: 13}}>
+                {t("publicIgcDownloadHint")}
+              </p>
             </div>
 
             <div className="formGroup">

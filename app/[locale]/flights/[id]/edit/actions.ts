@@ -22,6 +22,7 @@ const editFlightSchema = z.object({
   competitionClass: z.string().trim().max(80).optional(),
   weatherMode: z.enum(["UNKNOWN", "LIVE", "PRESET", "CUSTOM"]).default("UNKNOWN"),
   visibility: z.enum(["PUBLIC", "UNLISTED", "PRIVATE"]),
+  publicIgcDownloadEnabled: z.boolean().default(false),
   comment: z.string().trim().max(2000).optional()
 });
 
@@ -269,6 +270,7 @@ export async function updateFlightMetadataAction(formData: FormData) {
     competitionClass: formData.get("competitionClass") || undefined,
     weatherMode: formData.get("weatherMode") || "UNKNOWN",
     visibility: formData.get("visibility"),
+    publicIgcDownloadEnabled: formData.get("publicIgcDownloadEnabled") === "on",
     comment: formData.get("comment") || undefined
   });
 
@@ -287,6 +289,7 @@ export async function updateFlightMetadataAction(formData: FormData) {
       competitionClass: true,
       weatherMode: true,
       visibility: true,
+      publicIgcDownloadEnabled: true,
       comment: true,
       moderationStatus: true,
       deletedAt: true,
@@ -376,6 +379,7 @@ export async function updateFlightMetadataAction(formData: FormData) {
           competitionClass: fields.competitionClass,
           weatherMode: fields.weatherMode,
           visibility: fields.visibility,
+          publicIgcDownloadEnabled: fields.publicIgcDownloadEnabled,
           comment: fields.comment,
           ...(replacement
             ? {
@@ -406,6 +410,7 @@ export async function updateFlightMetadataAction(formData: FormData) {
           competitionClass: true,
           weatherMode: true,
           visibility: true,
+          publicIgcDownloadEnabled: true,
           comment: true,
           moderationStatus: true,
           igcObjectPath: true,
@@ -494,6 +499,7 @@ export async function updateFlightMetadataAction(formData: FormData) {
         competitionClass: currentFlight.competitionClass,
         weatherMode: currentFlight.weatherMode,
         visibility: currentFlight.visibility,
+        publicIgcDownloadEnabled: currentFlight.publicIgcDownloadEnabled,
         comment: currentFlight.comment,
         igcSha256: currentFlight.igcSha256
       },
@@ -505,6 +511,7 @@ export async function updateFlightMetadataAction(formData: FormData) {
         competitionClass: updatedFlight.competitionClass,
         weatherMode: updatedFlight.weatherMode,
         visibility: updatedFlight.visibility,
+        publicIgcDownloadEnabled: updatedFlight.publicIgcDownloadEnabled,
         comment: updatedFlight.comment,
         igcSha256: updatedFlight.igcSha256
       },

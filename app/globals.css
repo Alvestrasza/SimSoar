@@ -1395,3 +1395,20 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+.checkboxLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-weight: 800;
+}
+
+.checkboxLine input {
+  width: auto;
+  accent-color: var(--accent);
+}

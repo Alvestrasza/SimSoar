@@ -69,6 +69,7 @@ enum AuditAction {
   FLIGHT_RESTORE
   FLIGHT_IGC_REPLACE
   IGC_UPLOAD_UNBLOCK
+  IGC_DOWNLOAD
   PREFERENCE_UPDATE
 }
 
@@ -167,6 +168,7 @@ model Flight {
   weatherMode       String                 @default("UNKNOWN")
   comment           String?
   visibility        FlightVisibility       @default(PUBLIC)
+  publicIgcDownloadEnabled Boolean         @default(false)
   moderationStatus  FlightModerationStatus @default(APPROVED)
   moderatedByUserId String?
   moderatedAt       DateTime?

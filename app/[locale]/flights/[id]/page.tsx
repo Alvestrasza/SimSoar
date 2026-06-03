@@ -111,6 +111,15 @@ export default async function FlightDetailPage({
         minAltitudeM: flight.minAltitudeM,
         maxVarioMs: flight.maxVarioMs,
         visibility: flight.visibility,
+        publicIgcDownloadEnabled: flight.publicIgcDownloadEnabled,
+        canDownloadIgc:
+          hasRole(session?.user?.roles, "ADMIN") ||
+          isOwner ||
+          (
+            flight.publicIgcDownloadEnabled &&
+            isApprovedAndActive &&
+            flight.visibility !== "PRIVATE"
+          ),        
         canManage: canModerate || (isOwner && !isLockedByModeration),
         track: flight.track.map((p: any) => ({
           seq: p.seq,

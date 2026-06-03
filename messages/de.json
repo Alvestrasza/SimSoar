@@ -335,7 +335,11 @@
     "weatherModeUnknown": "Unbekannt",
     "weatherModeLive": "Live-Wetter",
     "weatherModePreset": "Voreinstellung",
-    "weatherModeCustom": "Benutzerdefiniert"    
+    "weatherModeCustom": "Benutzerdefiniert",
+    "igcDownloadTitle": "IGC-Datei",
+    "downloadIgc": "IGC herunterladen",
+    "igcDownloadPublicHint": "Der IGC-Download ist für diesen Flug öffentlich freigegeben.",
+    "igcDownloadPrivateHint": "Du kannst diese IGC-Datei herunterladen, weil du Besitzer oder Administrator bist."      
   },
   "Login": {
     "title": "🔐 Anmeldung",
@@ -474,7 +478,10 @@
     "replaceError_invalid-content": "Die Datei enthält keine gültige IGC-Struktur oder zu wenige gültige Trackpunkte.",
     "replaceError_duplicate": "Diese IGC-Datei ist bereits vorhanden oder gesperrt.",
     "replaceError_deleted-flight": "Soft-deleted Flüge müssen zuerst wiederhergestellt werden, bevor die IGC-Datei ersetzt werden kann.",
-    "replaceError_write-failed": "Die neue IGC-Datei konnte nicht sicher gespeichert werden."    
+    "replaceError_write-failed": "Die neue IGC-Datei konnte nicht sicher gespeichert werden.",
+    "publicIgcDownload": "IGC-Download",
+    "publicIgcDownloadEnabled": "Öffentlichen IGC-Download erlauben",
+    "publicIgcDownloadHint": "Wenn aktiviert, kann die IGC-Datei bei öffentlichen oder nicht gelisteten Flügen auch ohne Besitzer- oder Adminrechte heruntergeladen werden. Private Flüge bleiben geschützt."  
   },
   "AdminIgcBlocks": {
     "pageTitle": "Gesperrte IGC-Hashes",
