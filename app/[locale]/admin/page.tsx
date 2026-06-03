@@ -72,100 +72,130 @@ export default async function AdminPage({params}: AdminPageProps) {
   ]);
 
   return (
-    <main className="wrap">
-      <section className="card" style={{marginBottom: 22}}>
-        <div className="cardHead">
-          <div>
-            <span className="cardTitle">{t("pageTitle")}</span>
-            <p className="muted" style={{margin: "6px 0 0"}}>
-              {t("subtitle")}
-            </p>
-          </div>
+    <main className="wrap adminWrap">
+      <section className="card adminHeroCard">
+        <div>
+          <span className="adminEyebrow">SimSoar Control</span>
+          <h1 className="adminHeroTitle">{t("pageTitle")}</h1>
+          <p className="muted adminHeroText">{t("subtitle")}</p>
         </div>
 
-        <div className="cardBody grid grid3">
-          <div className="card featureTile">
-            <h3>{t("usersTitle")}</h3>
-            <p className="statValue">{usersCount}</p>
-            <p className="muted">{t("usersText")}</p>
-            <p>
-              <Link className="btn btnPrimary" href="/admin/users">
-                {t("openUserAdmin")}
-              </Link>
-            </p>
+        <div className="adminHeroStats">
+          <div>
+            <span>{t("usersTitle")}</span>
+            <strong>{usersCount}</strong>
           </div>
 
-          <div className="card featureTile">
-            <h3>{t("pilotsTitle")}</h3>
-            <p className="statValue">{pilotsCount}</p>
-            <p className="muted">{t("pilotsText")}</p>
-            <p>
-              <Link className="btn btnPrimary" href="/admin/pilots">
-                {t("openPilotAdmin")}
-              </Link>
-            </p>
+          <div>
+            <span>{t("pilotsTitle")}</span>
+            <strong>{pilotsCount}</strong>
           </div>
 
-          <div className="card featureTile">
-            <h3>{t("flightsTitle")}</h3>
-            <p className="statValue">{flightsCount}</p>
-            <p className="muted">{t("flightsText")}</p>
-            <p>
-              <Link className="btn btnPrimary" href="/admin/flights">
-                {t("openFlightModeration")}
-              </Link>
-            </p>
+          <div>
+            <span>{t("flightsTitle")}</span>
+            <strong>{flightsCount}</strong>
           </div>
         </div>
       </section>
 
-      <section className="grid grid3">
-        <div className="card featureTile">
-          <h3>{t("approvedFlights")}</h3>
-          <p className="statValue">{approvedFlightsCount}</p>
+      <section className="adminSection">
+        <div className="sectionHead compact">
+          <span className="cardTitle">{t("comingSoon")}</span>
         </div>
 
-        <div className="card featureTile">
-          <h3>{t("hiddenFlights")}</h3>
-          <p className="statValue">{hiddenFlightsCount}</p>
+        <div className="adminDashboardGrid">
+          <div className="card adminDashboardTile">
+            <div>
+              <span className="adminTileIcon">👥</span>
+              <h3>{t("usersTitle")}</h3>
+              <p className="statValue">{usersCount}</p>
+              <p className="muted">{t("usersText")}</p>
+            </div>
+
+            <Link className="btn btnPrimary" href="/admin/users">
+              {t("openUserAdmin")}
+            </Link>
+          </div>
+
+          <div className="card adminDashboardTile">
+            <div>
+              <span className="adminTileIcon">🛩️</span>
+              <h3>{t("pilotsTitle")}</h3>
+              <p className="statValue">{pilotsCount}</p>
+              <p className="muted">{t("pilotsText")}</p>
+            </div>
+
+            <Link className="btn btnPrimary" href="/admin/pilots">
+              {t("openPilotAdmin")}
+            </Link>
+          </div>
+
+          <div className="card adminDashboardTile">
+            <div>
+              <span className="adminTileIcon">📋</span>
+              <h3>{t("flightsTitle")}</h3>
+              <p className="statValue">{flightsCount}</p>
+              <p className="muted">{t("flightsText")}</p>
+            </div>
+
+            <Link className="btn btnPrimary" href="/admin/flights">
+              {t("openFlightModeration")}
+            </Link>
+          </div>
         </div>
+      </section>
 
-        <div className="card featureTile">
-          <h3>{t("rejectedFlights")}</h3>
-          <p className="statValue">{rejectedFlightsCount}</p>
-        </div>
+      <section className="adminSection">
+        <div className="adminDashboardGrid">
+          <div className="card adminMetricTile">
+            <span>{t("approvedFlights")}</span>
+            <strong>{approvedFlightsCount}</strong>
+          </div>
 
-        <div className="card featureTile">
-          <h3>{t("auditTitle")}</h3>
-          <p className="statValue">{recentAuditCount}</p>
-          <p className="muted">{t("auditText")}</p>
+          <div className="card adminMetricTile">
+            <span>{t("hiddenFlights")}</span>
+            <strong>{hiddenFlightsCount}</strong>
+          </div>
 
-          {canViewAudit ? (
-            <p>
+          <div className="card adminMetricTile">
+            <span>{t("rejectedFlights")}</span>
+            <strong>{rejectedFlightsCount}</strong>
+          </div>
+
+          <div className="card adminDashboardTile">
+            <div>
+              <span className="adminTileIcon">🧾</span>
+              <h3>{t("auditTitle")}</h3>
+              <p className="statValue">{recentAuditCount}</p>
+              <p className="muted">{t("auditText")}</p>
+            </div>
+
+            {canViewAudit ? (
               <Link className="btn btnPrimary" href="/admin/audit">
                 {t("openAuditLog")}
               </Link>
-            </p>
-          ) : (
-            <p className="muted">{t("auditRestricted")}</p>
-          )}
-        </div>
+            ) : (
+              <p className="muted">{t("auditRestricted")}</p>
+            )}
+          </div>
 
-        <div className="card featureTile">
-          <h3>{t("igcBlocksTitle")}</h3>
-          <p className="statValue">{blockedIgcCount}</p>
-          <p className="muted">{t("igcBlocksText")}</p>
+          <div className="card adminDashboardTile">
+            <div>
+              <span className="adminTileIcon">🔐</span>
+              <h3>{t("igcBlocksTitle")}</h3>
+              <p className="statValue">{blockedIgcCount}</p>
+              <p className="muted">{t("igcBlocksText")}</p>
+            </div>
 
-          {canViewAudit ? (
-            <p>
+            {canViewAudit ? (
               <Link className="btn btnPrimary" href="/admin/igc-blocks">
                 {t("openIgcBlocks")}
               </Link>
-            </p>
-          ) : (
-            <p className="muted">{t("auditRestricted")}</p>
-          )}
-        </div>       
+            ) : (
+              <p className="muted">{t("auditRestricted")}</p>
+            )}
+          </div>
+        </div>
       </section>
     </main>
   );

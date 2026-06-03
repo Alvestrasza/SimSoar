@@ -89,7 +89,7 @@ export default async function AdminFlightsPage({
   });
 
   return (
-    <main className="wrap adminFlightsWrap">
+    <main className="wrap adminWrap">
       <section className="card">
         <div className="cardHead adminFlightsHeader">
           <div>
