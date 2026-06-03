@@ -319,7 +319,7 @@ export default function FlightsExplorer({
             </div>
           </div>
 
-          <div className="tableWrap">
+          <div className="tableWrap desktopTableOnly">
             <table>
               <thead>
                 <tr>
@@ -413,6 +413,52 @@ export default function FlightsExplorer({
                 )}
               </tbody>
             </table>
+          </div>
+          <div className="mobileFlightCards">
+            {filteredFlights.length === 0 ? (
+              <p className="muted emptyInline">{t("noFlights")}</p>
+            ) : (
+              filteredFlights.map((f, index) => (
+                <Link className="mobileLeaderboardCard" href={`/flights/${f.id}`} key={f.id}>
+                  <div className="mobileLeaderboardTop">
+                    <div>
+                      <strong>{f.pilotCallsign}</strong>
+                      <p className="muted" style={{margin: "4px 0 0"}}>
+                        {f.glider ?? "–"}
+                      </p>
+                    </div>
+
+                    <span className="mobileLeaderboardRank">#{index + 1}</span>
+                  </div>
+
+                  <span className={simClass(f.simulator)}>
+                    {f.simulator}
+                  </span>
+
+                  <div className="mobileLeaderboardStats">
+                    <div>
+                      <span>{t("distance")}</span>
+                      <strong>{Math.round(f.distanceKm)} km</strong>
+                    </div>
+
+                    <div>
+                      <span>{t("olc")}</span>
+                      <strong>{Math.round(f.olcPoints)}</strong>
+                    </div>
+
+                    <div>
+                      <span>{t("avgSpeed")}</span>
+                      <strong>{Math.round(f.avgSpeedKmh)} km/h</strong>
+                    </div>
+
+                    <div>
+                      <span>{t("maxVario")}</span>
+                      <strong>▲ {f.maxVarioMs.toFixed(1)} m/s</strong>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </div>
 

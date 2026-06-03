@@ -1,0 +1,19 @@
+{
+  "name": "SimSoar",
+  "short_name": "SimSoar",
+  "description": "Virtual soaring community for IGC flight uploads, analysis and leaderboards.",
+  "start_url": "/en",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f7fb",
+  "theme_color": "#1f6feb",
+  "icons": [
+    {
+      "src": "/icons/simsoar-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

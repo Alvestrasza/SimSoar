@@ -18,6 +18,7 @@ import {AuthNav} from "@/app/components/AuthNav";
 import LocaleSwitcher from "@/app/components/LocaleSwitcher";
 import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
+import QuickThemeToggle from "@/app/components/QuickThemeToggle";
 
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -54,7 +55,17 @@ export async function generateMetadata({
 
   return {
     title: t("title"),
-    description: t("description")
+    description: t("description"),
+    manifest: "/manifest.webmanifest",
+    icons: {
+      icon: "/icons/simsoar-icon.svg",
+      apple: "/icons/simsoar-icon.svg"
+    },
+    appleWebApp: {
+      capable: true,
+      title: "SimSoar",
+      statusBarStyle: "default"
+    }
   };
 }
 
@@ -122,10 +133,10 @@ try {
               <Link href="/flights">{nav("flights")}</Link>
               <Link href="/upload">{nav("upload")}</Link>
               <Link href="/pilots">{nav("pilots")}</Link>
-              <Link href="/profile">{nav("profile")}</Link>
             </div>
 
             <div className="navRight">
+              <QuickThemeToggle />
               <LocaleSwitcher />
               <Suspense fallback={null}>
                 <AuthNav locale={locale} />

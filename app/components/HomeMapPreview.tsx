@@ -189,7 +189,12 @@ export default function HomeMapPreview({ homeAirfield, preferHomeAirfield = fals
         mapRef.current = null;
       }
 
-      const map = L.map(mapEl.current, { zoomControl: false, attributionControl: false, dragging: true, scrollWheelZoom: false });
+      const map = L.map(mapEl.current, {
+        zoomControl: true,
+        attributionControl: false,
+        dragging: true,
+        scrollWheelZoom: false
+      });
       mapRef.current = map;
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 18,

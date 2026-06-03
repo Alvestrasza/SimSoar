@@ -1,40 +1,43 @@
 "use client";
 
-import Link from "next/link";
 import {useLocale, useTranslations} from "next-intl";
-import {usePathname} from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
 
 const LOCALE_PREFIX = /^\/(de|en)(?=\/|$)/;
+
+const SUPPORTED_LOCALES = [
+  {value: "de", label: "Deutsch"},
+  {value: "en", label: "English"}
+];
 
 export default function LocaleSwitcher() {
   const t = useTranslations("LocaleSwitcher");
   const locale = useLocale();
   const pathname = usePathname();
+  const router = useRouter();
 
   const pathWithoutLocale = pathname.replace(LOCALE_PREFIX, "") || "/";
 
-  const deHref = `/de${pathWithoutLocale === "/" ? "" : pathWithoutLocale}`;
-  const enHref = `/en${pathWithoutLocale === "/" ? "" : pathWithoutLocale}`;
+  function changeLocale(nextLocale: string) {
+    const nextPath = `/${nextLocale}${pathWithoutLocale === "/" ? "" : pathWithoutLocale}`;
+    router.push(nextPath);
+  }
 
   return (
-    <div className="localeSwitcher" aria-label={t("label")}>
-      <Link
-        href={deHref}
-        className={locale === "de" ? "active" : undefined}
-        aria-current={locale === "de" ? "true" : undefined}
-      >
-        DE
-      </Link>
+    <label className="localeSelectWrap" aria-label={t("label")}>
+      <span className="srOnly">{t("label")}</span>
 
-      <span>/</span>
-
-      <Link
-        href={enHref}
-        className={locale === "en" ? "active" : undefined}
-        aria-current={locale === "en" ? "true" : undefined}
+      <select
+        className="navSelect"
+        value={locale}
+        onChange={(event) => changeLocale(event.target.value)}
       >
-        EN
-      </Link>
-    </div>
+        {SUPPORTED_LOCALES.map((item) => (
+          <option key={item.value} value={item.value}>
+            {item.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
