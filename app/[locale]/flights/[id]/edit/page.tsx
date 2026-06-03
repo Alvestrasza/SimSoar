@@ -14,14 +14,29 @@ type EditFlightPageProps = {
     locale: string;
     id: string;
   }>;
+  searchParams?:
+    | Promise<Record<string, string | string[] | undefined>>
+    | Record<string, string | string[] | undefined>;
 };
 
-export default async function EditFlightPage({params}: EditFlightPageProps) {
+export default async function EditFlightPage({
+  params,
+  searchParams
+}: EditFlightPageProps) {
   const {locale, id} = await params;
 
   setRequestLocale(locale);
 
   const t = await getTranslations({locale, namespace: "FlightEdit"});
+
+  const queryParams = searchParams ? await searchParams : {};
+
+  const replaceErrorParam = Array.isArray(queryParams.replaceError)
+    ? queryParams.replaceError[0]
+    : queryParams.replaceError;
+
+  const replaceError =
+    typeof replaceErrorParam === "string" ? replaceErrorParam : null;
 
   const session = await auth();
 
@@ -81,11 +96,37 @@ export default async function EditFlightPage({params}: EditFlightPageProps) {
           </Link>
         </div>
 
-        <form className="cardBody" action={updateFlightMetadataAction}>
+        {replaceError ? (
+          <div
+            className="cardBody"
+            style={{
+              borderBottom: "1px solid var(--border)",
+              background: "var(--orange-lt)"
+            }}
+          >
+            <strong>{t("replaceErrorTitle")}</strong>
+            <p style={{margin: "6px 0 0"}}>
+              {t(`replaceError_${replaceError}`)}
+            </p>
+          </div>
+        ) : null}
+
+        <form className="cardBody" action={updateFlightMetadataAction} encType="multipart/form-data">
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="flightId" value={flight.id} />
 
           <div className="formGrid">
+            <div className="formGroup full">
+              <label>{t("replaceIgcFile")}</label>
+              <input
+                type="file"
+                name="igc"
+                accept=".igc,text/plain,application/octet-stream"
+              />
+              <p className="muted" style={{margin: "6px 0 0", fontSize: 13}}>
+                {t("replaceIgcHint")}
+              </p>
+            </div>
             <div className="formGroup full">
               <label>{t("title")}</label>
               <input

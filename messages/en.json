@@ -464,7 +464,17 @@
     "weatherModeCustom": "Custom",
     "comment": "Comment",
     "save": "✓ Save changes",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "replaceIgcFile": "Replace IGC file",
+    "replaceIgcHint": "Optional. If a new IGC file is selected, distance, OLC values, track points, and thermals will be recalculated.",
+    "replaceErrorTitle": "IGC file could not be replaced",
+    "replaceError_invalid-size": "The file is empty or exceeds the configured maximum upload size.",
+    "replaceError_invalid-extension": "Only files with the .igc extension are allowed.",
+    "replaceError_invalid-mime": "The file type was not recognized as a supported IGC upload.",
+    "replaceError_invalid-content": "The file does not contain a valid IGC structure or enough valid track points.",
+    "replaceError_duplicate": "This IGC file already exists or is blocked.",
+    "replaceError_deleted-flight": "Soft-deleted flights must be restored before replacing the IGC file.",
+    "replaceError_write-failed": "The new IGC file could not be stored safely."  
   },
   "AdminIgcBlocks": {
     "pageTitle": "Blocked IGC hashes",
