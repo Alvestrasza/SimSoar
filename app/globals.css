@@ -578,6 +578,51 @@ body {
   font-size: 13px;
 }
 
+.visibilityActionForm {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.visibilitySelect {
+  width: auto;
+  min-width: 130px;
+  height: 38px;
+  padding: 7px 34px 7px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text2);
+  background: var(--surface);
+}
+
+.visibilitySelect:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-lt);
+}
+
+.visibilityActionForm .btn {
+  min-height: 38px;
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .visibilityActionForm {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .visibilitySelect {
+    flex: 1 1 160px;
+  }
+
+  .visibilityActionForm .btn {
+    flex: 1 1 auto;
+  }
+}
+
 .localeSelectWrap {
   display: inline-flex;
   align-items: center;

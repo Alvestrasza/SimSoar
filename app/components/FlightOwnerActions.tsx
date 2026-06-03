@@ -36,7 +36,7 @@ export default function FlightOwnerActions({
   return (
     <div className="ownerActions">
       {canChangeVisibility ? (
-        <form action={setFlightVisibilityAction}>
+        <form className="visibilityActionForm" action={setFlightVisibilityAction}>
           <input type="hidden" name="flightId" value={flightId} />
           <input type="hidden" name="returnTo" value={currentPath} />
 
@@ -45,6 +45,7 @@ export default function FlightOwnerActions({
           </label>
 
           <select
+            className="visibilitySelect"
             id={`visibility-${flightId}`}
             name="visibility"
             defaultValue={visibility}
