@@ -22,23 +22,80 @@ const formSchema = z.object({
   comment: z.string().max(2000).optional()
 });
 
+const allowedIgcMimeTypes = new Set([
+  "",
+  "text/plain",
+  "application/octet-stream",
+  "application/x-igc"
+]);
+
+type UploadErrorCode =
+  | "missing-file"
+  | "invalid-size"
+  | "invalid-extension"
+  | "invalid-mime"
+  | "invalid-content"
+  | "duplicate";
+
+function getLocale(formData: FormData): "de" | "en" {
+  return formData.get("locale") === "en" ? "en" : "de";
+}
+
+function redirectUploadError(locale: "de" | "en", code: UploadErrorCode): never {
+  redirect(`/${locale}/upload?uploadError=${code}`);
+}
+
+function hasNullBytes(buffer: Buffer): boolean {
+  return buffer.includes(0);
+}
+
+function hasValidIgcStructure(text: string): boolean {
+  const lines = text.split(/\r?\n/);
+
+  const validBRecords = lines.filter((line) =>
+    /^B\d{6}\d{7}[NS]\d{8}[EW][AV]\d{5}\d{5}/i.test(line)
+  );
+
+  return validBRecords.length >= 2;
+}
+
 export async function saveFlightAction(formData: FormData) {
+  const locale = getLocale(formData);
+
   const session = await auth();
-  if (!session?.user?.id) throw new Error("Not authenticated.");
+
+  if (!session?.user?.id) {
+    throw new Error("Not authenticated.");
+  }
 
   if (!hasRole(session.user.roles, "PILOT")) {
     throw new Error("Pilot role required to upload flights.");
   }
 
   const file = formData.get("igc");
-  if (!(file instanceof File)) throw new Error("Missing IGC file.");
+
+  if (!(file instanceof File)) {
+    redirectUploadError(locale, "missing-file");
+  }
 
   const maxBytes = Number(process.env.MAX_IGC_UPLOAD_BYTES ?? 10 * 1024 * 1024);
-  if (file.size <= 0 || file.size > maxBytes) throw new Error("Invalid file size.");
-  if (!file.name.toLowerCase().endsWith(".igc")) throw new Error("Only .igc files are allowed.");
+
+  if (file.size <= 0 || file.size > maxBytes) {
+    redirectUploadError(locale, "invalid-size");
+  }
+
+  if (!file.name.toLowerCase().endsWith(".igc")) {
+    redirectUploadError(locale, "invalid-extension");
+  }
+
+  const mimeType = file.type.toLowerCase();
+
+  if (!allowedIgcMimeTypes.has(mimeType)) {
+    redirectUploadError(locale, "invalid-mime");
+  }
 
   const fields = formSchema.parse({
-    locale: formData.get("locale") || "de",
+    locale,
     pilotCallsign: formData.get("pilotCallsign"),
     simulator: formData.get("simulator"),
     registration: formData.get("registration") || undefined,
@@ -50,14 +107,61 @@ export async function saveFlightAction(formData: FormData) {
 
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  const sha = sha256Buffer(buffer);
-  const text = buffer.toString("utf8");
-  const parsed = parseIgc(text);
 
-  const uploadRoot = process.env.UPLOAD_DIR ?? path.join(process.cwd(), "uploads");
-  await fs.mkdir(uploadRoot, { recursive: true });
-  const objectPath = path.join(uploadRoot, `${Date.now()}-${sha.slice(0, 12)}-${safeFilename(file.name)}`);
-  await fs.writeFile(objectPath, buffer, { flag: "wx" });
+  if (hasNullBytes(buffer)) {
+    redirectUploadError(locale, "invalid-content");
+  }
+
+  const text = buffer.toString("utf8");
+
+  if (!hasValidIgcStructure(text)) {
+    redirectUploadError(locale, "invalid-content");
+  }
+
+  const sha = sha256Buffer(buffer);
+
+  const duplicateFlight = await prisma.flight.findFirst({
+    where: {
+      igcSha256: sha
+    },
+    select: {
+      id: true
+    }
+  });
+
+  if (duplicateFlight) {
+    redirectUploadError(locale, "duplicate");
+  }
+
+  let parsed;
+
+  try {
+    parsed = parseIgc(text);
+  } catch (error) {
+    console.warn("SimSoar IGC upload rejected during parser validation:", {
+      userId: session.user.id,
+      fileName: file.name,
+      mimeType,
+      size: file.size,
+      error
+    });
+
+    redirectUploadError(locale, "invalid-content");
+  }
+
+  const uploadRoot =
+    process.env.UPLOAD_DIR ?? path.resolve(process.cwd(), "..", "uploads");
+
+  const uploadDir = path.join(uploadRoot, sha.slice(0, 2), sha.slice(2, 4));
+
+  await fs.mkdir(uploadDir, { recursive: true });
+
+  const objectPath = path.join(
+    uploadDir,
+    `${sha}-${safeFilename(file.name)}`
+  );
+
+  await fs.writeFile(objectPath, buffer, { flag: "wx", mode: 0o640 });
 
   const flight = await prisma.flight.create({
     data: {
@@ -88,7 +192,14 @@ export async function saveFlightAction(formData: FormData) {
         createMany: {
           data: parsed.points
             .filter((_, i) => i % Math.max(1, Math.floor(parsed.points.length / 2500)) === 0)
-            .map((p) => ({ seq: p.seq, time: p.time, lat: p.lat, lon: p.lon, altM: p.altM, varioMs: p.varioMs }))
+            .map((p) => ({
+              seq: p.seq,
+              time: p.time,
+              lat: p.lat,
+              lon: p.lon,
+              altM: p.altM,
+              varioMs: p.varioMs
+            }))
         }
       },
       thermals: {
@@ -109,23 +220,27 @@ export async function saveFlightAction(formData: FormData) {
     }
   });
 
-    await writeAuditLog({
-      actorUserId: session.user.id,
-      actorEmail: session.user.email,
-      action: "FLIGHT_UPLOAD",
-      targetType: "Flight",
-      targetId: flight.id,
-      summary: "Flight uploaded and automatically approved.",
-      metadata: {
-        title: flight.title,
-        visibility: fields.visibility,
-        moderationStatus: "APPROVED",
-        simulator: fields.simulator,
-        distanceKm: parsed.distanceKm,
-        olcPoints: parsed.olcPoints,
-        igcSha256: sha
-      }
-    });
+  await writeAuditLog({
+    actorUserId: session.user.id,
+    actorEmail: session.user.email,
+    action: "FLIGHT_UPLOAD",
+    targetType: "Flight",
+    targetId: flight.id,
+    summary: "Flight uploaded and automatically approved.",
+    metadata: {
+      title: flight.title,
+      visibility: fields.visibility,
+      moderationStatus: "APPROVED",
+      simulator: fields.simulator,
+      distanceKm: parsed.distanceKm,
+      olcPoints: parsed.olcPoints,
+      igcSha256: sha,
+      originalFileName: file.name,
+      mimeType,
+      sizeBytes: file.size,
+      storagePath: objectPath
+    }
+  });
 
   redirect(`/${fields.locale}/flights/${flight.id}`);
 }
