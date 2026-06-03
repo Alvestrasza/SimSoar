@@ -20,10 +20,19 @@ type Thermal = {
   durationSec: number;
 };
 
+type MapModePreference = "STANDARD" | "SATELLITE" | "TERRAIN";
+
+type TileLayerConfig = {
+  url: string;
+  attribution: string;
+  maxZoom: number;
+};
+
 type Props = {
   points: TrackPoint[];
   thermals?: Thermal[];
   active?: boolean;
+  mapMode?: MapModePreference;
 };
 
 function mkIcon(L: LeafletApi, label: string, color: string) {
@@ -43,7 +52,36 @@ function altitudeColor(alt: number, minAlt: number, maxAlt: number) {
   return `rgb(${r},${g},${b})`;
 }
 
-export default function FlightTrackMap({ points, thermals = [], active = true }: Props) {
+function tileLayerForMode(mapMode: MapModePreference): TileLayerConfig {
+  if (mapMode === "SATELLITE") {
+    return {
+      url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      attribution: "Tiles © Esri",
+      maxZoom: 19
+    };
+  }
+
+  if (mapMode === "TERRAIN") {
+    return {
+      url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+      attribution: "© OpenTopoMap contributors",
+      maxZoom: 17
+    };
+  }
+
+  return {
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: "© OpenStreetMap",
+    maxZoom: 18
+  };
+}
+
+export default function FlightTrackMap({
+  points,
+  thermals = [],
+  active = true,
+  mapMode = "STANDARD"
+}: Props) {
   const mapEl = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
 
@@ -64,9 +102,11 @@ export default function FlightTrackMap({ points, thermals = [], active = true }:
       const map = L.map(mapEl.current, { zoomControl: true, attributionControl: true });
       mapRef.current = map;
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 18,
-        attribution: "© OpenStreetMap"
+      const tileLayer = tileLayerForMode(mapMode);
+
+      L.tileLayer(tileLayer.url, {
+        maxZoom: tileLayer.maxZoom,
+        attribution: tileLayer.attribution
       }).addTo(map);
 
       if (points.length > 1) {
@@ -118,7 +158,7 @@ export default function FlightTrackMap({ points, thermals = [], active = true }:
         mapRef.current = null;
       }
     };
-  }, [points, thermals]);
+  }, [points, thermals, mapMode]);
 
   useEffect(() => {
     if (active && mapRef.current) setTimeout(() => mapRef.current?.invalidateSize(), 80);

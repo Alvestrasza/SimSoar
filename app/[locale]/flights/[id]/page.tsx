@@ -5,7 +5,6 @@ import {hasRole} from "@/lib/rbac";
 import FlightDetailClient from "@/app/components/FlightDetailClient";
 import {setRequestLocale} from "next-intl/server";
 
-
 export const dynamic = "force-dynamic";
 
 type FlightDetailPageProps = {
@@ -55,6 +54,19 @@ export default async function FlightDetailPage({
   const isOwner = session?.user?.id === flight.userId;
   const canModerate = hasRole(session?.user?.roles, "MODERATOR");
 
+  const preferences = session?.user?.id
+    ? await prisma.userPreference.findUnique({
+        where: {
+          userId: session.user.id
+        },
+        select: {
+          preferredMapMode: true
+        }
+      })
+    : null;
+
+  const preferredMapMode = preferences?.preferredMapMode ?? "STANDARD";
+
   const isDeleted = flight.deletedAt !== null;
 
   const isPublicApprovedFlight =
@@ -79,6 +91,7 @@ export default async function FlightDetailPage({
 
   return (
     <FlightDetailClient
+      preferredMapMode={preferredMapMode}
       flight={{
         id: flight.id,
         title: flight.title,

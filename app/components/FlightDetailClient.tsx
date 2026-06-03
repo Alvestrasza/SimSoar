@@ -27,6 +27,7 @@ type Thermal = {
 };
 
 type Visibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
+type MapModePreference = "STANDARD" | "SATELLITE" | "TERRAIN";
 
 type FlightDetail = {
   id: string;
@@ -53,6 +54,7 @@ type FlightDetail = {
 
 type Props = {
   flight: FlightDetail;
+  preferredMapMode?: MapModePreference;
 };
 
 type Tab = "map" | "altitude" | "thermals" | "info";
@@ -130,7 +132,10 @@ function tabClass(tab: Tab, current: Tab) {
   return `tab ${tab === current ? "active" : ""}`;
 }
 
-export default function FlightDetailClient({flight}: Props) {
+export default function FlightDetailClient({
+  flight,
+  preferredMapMode = "STANDARD"
+}: Props) {
   const t = useTranslations("FlightDetail");
   const locale = useLocale();
   const [tab, setTab] = useState<Tab>("map");
@@ -251,6 +256,7 @@ export default function FlightDetailClient({flight}: Props) {
               points={flight.track}
               thermals={flight.thermals}
               active={tab === "map"}
+              mapMode={preferredMapMode}
             />
           </div>
 
