@@ -29,6 +29,8 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({locale}));
 }
 
+export const dynamic = "force-dynamic";
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
