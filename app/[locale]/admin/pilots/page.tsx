@@ -113,7 +113,7 @@ export default async function AdminPilotsPage({params}: AdminPilotsPageProps) {
                 const lastFlightAt = stats?._max.createdAt ?? null;
 
                 return (
-                  <article className="moderationCard" key={profile.id}>
+                  <article className="moderationCard pilotAdminCard" key={profile.id}>
                     <div className="moderationCardMain">
                       <div className="moderationCardTop">
                         <div>
@@ -178,8 +178,8 @@ export default async function AdminPilotsPage({params}: AdminPilotsPageProps) {
                       </div>
                     </div>
 
-                    <div className="moderationCardActions">
-                      <div className="moderationMetaGrid">
+                    <div className="moderationCardActions pilotAdminSidePanel">
+                        <div className="pilotAdminSideGrid">
                         <div>
                           <span>{t("createdAt")}</span>
                           <strong>{formatDate(profile.createdAt, locale)}</strong>
