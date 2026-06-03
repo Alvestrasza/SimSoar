@@ -52,9 +52,6 @@ export default async function AdminFlightsPage({
     : queryParams.updated;
 
   const flights = await prisma.flight.findMany({
-    where: {
-      deletedAt: null
-    },
     orderBy: {
       createdAt: "desc"
     },
@@ -70,7 +67,9 @@ export default async function AdminFlightsPage({
       distanceKm: true,
       olcPoints: true,
       createdAt: true,
-      moderatedAt: true
+      moderatedAt: true,
+      deletedAt: true,
+      deletedByUserId: true
     }
   });
 
@@ -141,7 +140,17 @@ export default async function AdminFlightsPage({
                     <td>{t(`visibility_${flight.visibility}`)}</td>
 
                     <td>
-                      <strong>{t(`status_${flight.moderationStatus}`)}</strong>
+                      <strong>
+                        {flight.deletedAt ? t("softDeleted") : t(`status_${flight.moderationStatus}`)}
+                      </strong>
+                      {flight.deletedAt ? (
+                        <>
+                          <br />
+                          <span className="muted">
+                            {t("softDeletedHint")}
+                          </span>
+                        </>
+                      ) : null}
                       {flight.moderationNote ? (
                         <>
                           <br />
@@ -186,6 +195,7 @@ export default async function AdminFlightsPage({
                           flightId={flight.id}
                           flightTitle={flight.title}
                           returnTo={`/${locale}/admin/flights`}
+                          isSoftDeleted={flight.deletedAt !== null}
                         />
                       ) : null}
                     </td>

@@ -65,6 +65,7 @@ enum AuditAction {
   FLIGHT_REJECT
   FLIGHT_HIDE
   FLIGHT_DELETE
+  FLIGHT_PURGE
   PREFERENCE_UPDATE
 }
 
@@ -262,4 +263,18 @@ model AuditLog {
   @@index([actorUserId, createdAt])
   @@index([targetType, targetId])
   @@index([action, createdAt])
+}
+
+model IgcUploadBlock {
+  id                    String   @id @default(cuid())
+  igcSha256             String   @unique
+  originalFlightId      String?
+  originalTitle         String?
+  originalPilotCallsign String?
+  reason                String   @default("deleted-flight")
+  blockedAt             DateTime @default(now())
+  blockedByUserId       String?
+
+  @@index([blockedAt])
+  @@index([originalFlightId])
 }

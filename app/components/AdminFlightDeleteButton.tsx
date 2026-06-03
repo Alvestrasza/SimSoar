@@ -7,12 +7,14 @@ type AdminFlightDeleteButtonProps = {
   flightId: string;
   flightTitle: string;
   returnTo: string;
+  isSoftDeleted?: boolean;
 };
 
 export default function AdminFlightDeleteButton({
   flightId,
   flightTitle,
-  returnTo
+  returnTo,
+  isSoftDeleted = false
 }: AdminFlightDeleteButtonProps) {
   const t = useTranslations("AdminFlights");
 
@@ -21,7 +23,7 @@ export default function AdminFlightDeleteButton({
       action={softDeleteFlightAction}
       onSubmit={(event) => {
         const confirmed = window.confirm(
-          t("deleteConfirm", {
+          t(isSoftDeleted ? "purgeConfirm" : "deleteConfirm", {
             title: flightTitle
           })
         );
@@ -35,7 +37,7 @@ export default function AdminFlightDeleteButton({
       <input type="hidden" name="returnTo" value={returnTo} />
 
       <button className="btn btnDanger btnSmall" type="submit">
-        {t("delete")}
+        {isSoftDeleted ? t("purge") : t("delete")}
       </button>
     </form>
   );

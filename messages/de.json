@@ -389,7 +389,11 @@
     "status_REJECTED": "Abgelehnt",
     "status_HIDDEN": "Ausgeblendet",
     "delete": "Flug löschen",
-    "deleteConfirm": "Soll der Flug „{title}“ wirklich gelöscht werden? Der Flug wird nur ausgeblendet und bleibt im Audit nachvollziehbar."
+    "deleteConfirm": "Soll der Flug „{title}“ wirklich gelöscht werden? Der Flug wird nur ausgeblendet und bleibt im Audit nachvollziehbar.",
+    "softDeleted": "Soft-deleted",
+    "softDeletedHint": "Dieser Flug ist bereits ausgeblendet und kann endgültig entfernt werden.",
+    "purge": "Endgültig löschen",
+    "purgeConfirm": "Den soft-deleted Flug „{title}“ endgültig entfernen? Der Flug, Trackdaten, Thermiken und die IGC-Datei werden gelöscht. Der IGC-Hash bleibt gesperrt, damit dieselbe Datei nicht erneut hochgeladen werden kann."
   },
   "AdminAudit": {
     "pageTitle": "Audit Log",

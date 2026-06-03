@@ -8,6 +8,7 @@ import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
 import {hasRole} from "@/lib/rbac";
 import {writeAuditLog} from "@/lib/audit";
+import fs from "node:fs/promises";
 
 const moderationSchema = z.object({
   flightId: z.string().min(1),
@@ -45,6 +46,25 @@ function revalidateFlightAdminViews(flightId: string) {
   revalidatePath("/en/admin/flights");
   revalidatePath(`/de/flights/${flightId}`);
   revalidatePath(`/en/flights/${flightId}`);
+}
+
+async function cleanupFlightFile(objectPath: string | null | undefined) {
+  if (!objectPath) {
+    return;
+  }
+
+  try {
+    await fs.unlink(objectPath);
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+
+    if (code !== "ENOENT") {
+      console.error("Could not purge IGC file:", {
+        objectPath,
+        error
+      });
+    }
+  }
 }
 
 const auditActionByStatus: Record<
@@ -135,10 +155,9 @@ export async function softDeleteFlightAction(formData: FormData) {
 
   const returnTo = safeReturnTo(fields.returnTo);
 
-  const flight = await prisma.flight.findFirst({
+  const flight = await prisma.flight.findUnique({
     where: {
-      id: fields.flightId,
-      deletedAt: null
+      id: fields.flightId
     },
     select: {
       id: true,
@@ -146,12 +165,71 @@ export async function softDeleteFlightAction(formData: FormData) {
       pilotCallsign: true,
       visibility: true,
       moderationStatus: true,
-      igcSha256: true
+      igcSha256: true,
+      deletedAt: true,
+      deletedByUserId: true,
+      igcObjectPath: true
     }
   });
 
   if (!flight) {
-    throw new Error("Flight not found or already deleted.");
+    throw new Error("Flight not found.");
+  }
+
+  if (flight.deletedAt) {
+    await prisma.$transaction(async (tx) => {
+      await tx.igcUploadBlock.upsert({
+        where: {
+          igcSha256: flight.igcSha256
+        },
+        create: {
+          igcSha256: flight.igcSha256,
+          originalFlightId: flight.id,
+          originalTitle: flight.title,
+          originalPilotCallsign: flight.pilotCallsign,
+          reason: "admin-purge",
+          blockedByUserId: session.user.id
+        },
+        update: {
+          originalFlightId: flight.id,
+          originalTitle: flight.title,
+          originalPilotCallsign: flight.pilotCallsign,
+          reason: "admin-purge",
+          blockedByUserId: session.user.id
+        }
+      });
+
+      await tx.flight.delete({
+        where: {
+          id: flight.id
+        }
+      });
+    });
+
+    await cleanupFlightFile(flight.igcObjectPath);
+
+    await writeAuditLog({
+      actorUserId: session.user.id,
+      actorEmail: session.user.email,
+      action: "FLIGHT_PURGE",
+      targetType: "Flight",
+      targetId: flight.id,
+      summary: "Soft-deleted flight was permanently purged by an administrator.",
+      metadata: {
+        title: flight.title,
+        pilotCallsign: flight.pilotCallsign,
+        previousVisibility: flight.visibility,
+        previousModerationStatus: flight.moderationStatus,
+        deletedAt: flight.deletedAt.toISOString(),
+        deletedByUserId: flight.deletedByUserId,
+        igcSha256: flight.igcSha256,
+        uploadHashBlocked: true
+      }
+    });
+
+    revalidateFlightAdminViews(flight.id);
+
+    redirect(`${returnTo}?updated=1`);
   }
 
   const deletedAt = new Date();

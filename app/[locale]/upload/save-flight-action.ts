@@ -154,16 +154,26 @@ export async function saveFlightAction(formData: FormData) {
 
   const sha = sha256Buffer(buffer);
 
-  const duplicateFlight = await prisma.flight.findFirst({
-    where: {
-      igcSha256: sha
-    },
-    select: {
-      id: true
-    }
-  });
+  const [duplicateFlight, blockedUpload] = await Promise.all([
+    prisma.flight.findFirst({
+      where: {
+        igcSha256: sha
+      },
+      select: {
+        id: true
+      }
+    }),
+    prisma.igcUploadBlock.findUnique({
+      where: {
+        igcSha256: sha
+      },
+      select: {
+        id: true
+      }
+    })
+  ]);
 
-  if (duplicateFlight) {
+  if (duplicateFlight || blockedUpload) {
     redirectUploadError(locale, "duplicate");
   }
 

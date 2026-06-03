@@ -389,7 +389,11 @@
     "status_REJECTED": "Rejected",
     "status_HIDDEN": "Hidden",
     "delete": "Delete flight",
-    "deleteConfirm": "Do you really want to delete the flight “{title}”? The flight will only be hidden and remains traceable in the audit log."
+    "deleteConfirm": "Do you really want to delete the flight “{title}”? The flight will only be hidden and remains traceable in the audit log.",
+    "softDeleted": "Soft-deleted",
+    "softDeletedHint": "This flight is already hidden and can be permanently removed.",
+    "purge": "Permanently delete",
+    "purgeConfirm": "Permanently remove the soft-deleted flight “{title}”? The flight, track data, thermals, and IGC file will be deleted. The IGC hash remains blocked so the same file cannot be uploaded again."
   },
   "AdminAudit": {
     "pageTitle": "Audit Log",
