@@ -37,6 +37,7 @@ type FlightDetail = {
   glider?: string | null;
   registration?: string | null;
   competitionClass?: string | null;
+  weatherMode?: string | null;
   comment?: string | null;
   startTime?: string | null;
   durationSeconds: number;
@@ -126,6 +127,16 @@ function competitionClassLabel(
   }
 
   return value;
+}
+
+function weatherModeLabel(
+  value: string | null | undefined,
+  t: ReturnType<typeof useTranslations>
+) {
+  if (value === "LIVE") return t("weatherModeLive");
+  if (value === "PRESET") return t("weatherModePreset");
+  if (value === "CUSTOM") return t("weatherModeCustom");
+  return t("weatherModeUnknown");
 }
 
 function tabClass(tab: Tab, current: Tab) {
@@ -372,6 +383,11 @@ export default function FlightDetailClient({
               <div>
                 <span>{t("class")}</span>
                 <strong>{competitionClassLabel(flight.competitionClass, t)}</strong>
+              </div>
+
+              <div>
+                <span>{t("weatherMode")}</span>
+                <strong>{weatherModeLabel(flight.weatherMode, t)}</strong>
               </div>
 
               <div>

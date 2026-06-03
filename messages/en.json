@@ -268,7 +268,8 @@
     "visibilityPrivate": "Private",
     "saveVisibility": "Save visibility",
     "delete": "🗑️ Delete",
-    "deleteConfirm": "Really delete this flight? This action cannot be undone."
+    "deleteConfirm": "Really delete this flight? This action cannot be undone.",
+    "edit": "✏️ Edit"
   },
   "Pilots": {
     "pageTitle": "👨‍✈️ Pilot ranking",
@@ -329,7 +330,12 @@
     "class15m": "15 m class",
     "class18m": "18 m class",
     "classOpen": "Open class",
-    "classTwoSeater": "Two-seater"
+    "classTwoSeater": "Two-seater",
+    "weatherMode": "Weather mode",
+    "weatherModeUnknown": "Unknown",
+    "weatherModeLive": "Live weather",
+    "weatherModePreset": "Preset",
+    "weatherModeCustom": "Custom"    
   },
   "Login": {
     "title": "🔐 Sign in",
@@ -422,5 +428,33 @@
     "accessDeniedText": "You are signed in, but you do not have the required administrator role to view user and pilot data.",
     "saveRoles": "Save roles",
     "adminOwnerRoleHint": "Admin and owner roles can only be changed by owners."
+  },
+  "FlightEdit": {
+    "pageTitle": "Edit flight",
+    "subtitle": "Update metadata and visibility for this flight.",
+    "backToFlight": "Back to flight",
+    "title": "Title",
+    "simulator": "Simulator",
+    "simOther": "Other",
+    "visibility": "Visibility",
+    "visibilityPublic": "Public",
+    "visibilityUnlisted": "Unlisted",
+    "visibilityPrivate": "Private",
+    "glider": "Sailplane",
+    "registration": "Registration",
+    "competitionClass": "Competition class",
+    "classClub": "Club class",
+    "class15m": "15 m class",
+    "class18m": "18 m class",
+    "classOpen": "Open class",
+    "classTwoSeater": "Two-seater",
+    "weatherMode": "Weather mode",
+    "weatherModeUnknown": "Unknown",
+    "weatherModeLive": "Live weather",
+    "weatherModePreset": "Preset",
+    "weatherModeCustom": "Custom",
+    "comment": "Comment",
+    "save": "✓ Save changes",
+    "cancel": "Cancel"
   }
 }

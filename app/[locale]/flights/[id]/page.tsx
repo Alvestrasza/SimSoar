@@ -100,6 +100,7 @@ export default async function FlightDetailPage({
         glider: flight.glider,
         registration: flight.registration,
         competitionClass: flight.competitionClass,
+        weatherMode: flight.weatherMode,
         comment: flight.comment,
         startTime: flight.startTime?.toISOString() ?? null,
         durationSeconds: flight.durationSeconds,

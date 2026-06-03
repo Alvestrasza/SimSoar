@@ -268,7 +268,8 @@
     "visibilityPrivate": "Privat",
     "saveVisibility": "Sichtbarkeit speichern",
     "delete": "🗑️ Löschen",
-    "deleteConfirm": "Diesen Flug wirklich löschen? Die Aktion kann nicht rückgängig gemacht werden."
+    "deleteConfirm": "Diesen Flug wirklich löschen? Die Aktion kann nicht rückgängig gemacht werden.",
+    "edit": "✏️ Bearbeiten"
   },
   "Pilots": {
     "pageTitle": "👨‍✈️ Pilot-Rangliste",
@@ -329,7 +330,12 @@
     "class15m": "15 m Klasse",
     "class18m": "18 m Klasse",
     "classOpen": "Offene Klasse",
-    "classTwoSeater": "Doppelsitzer"
+    "classTwoSeater": "Doppelsitzer",
+    "weatherMode": "Wettermodus",
+    "weatherModeUnknown": "Unbekannt",
+    "weatherModeLive": "Live-Wetter",
+    "weatherModePreset": "Voreinstellung",
+    "weatherModeCustom": "Benutzerdefiniert"    
   },
   "Login": {
     "title": "🔐 Anmeldung",
@@ -422,5 +428,33 @@
     "accessDeniedText": "Du bist angemeldet, hast aber nicht die erforderliche Administratorrolle, um Benutzer- und Pilotendaten einzusehen.",
     "saveRoles": "Rollen speichern",
     "adminOwnerRoleHint": "Admin- und Owner-Rollen können nur von Ownern geändert werden."    
+  },
+  "FlightEdit": {
+    "pageTitle": "Flug bearbeiten",
+    "subtitle": "Metadaten und Sichtbarkeit dieses Fluges anpassen.",
+    "backToFlight": "Zurück zum Flug",
+    "title": "Titel",
+    "simulator": "Simulator",
+    "simOther": "Sonstiger",
+    "visibility": "Sichtbarkeit",
+    "visibilityPublic": "Öffentlich",
+    "visibilityUnlisted": "Nicht gelistet",
+    "visibilityPrivate": "Privat",
+    "glider": "Segelflugzeug",
+    "registration": "Kennzeichen",
+    "competitionClass": "Wettbewerbs-Klasse",
+    "classClub": "Club Klasse",
+    "class15m": "15 m Klasse",
+    "class18m": "18 m Klasse",
+    "classOpen": "Offene Klasse",
+    "classTwoSeater": "Doppelsitzer",
+    "weatherMode": "Wettermodus",
+    "weatherModeUnknown": "Unbekannt",
+    "weatherModeLive": "Live-Wetter",
+    "weatherModePreset": "Voreinstellung",
+    "weatherModeCustom": "Benutzerdefiniert",
+    "comment": "Kommentar",
+    "save": "✓ Änderungen speichern",
+    "cancel": "Abbrechen"
   }
 }

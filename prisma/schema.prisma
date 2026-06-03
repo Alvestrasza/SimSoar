@@ -60,6 +60,7 @@ enum AuditAction {
   USER_DELETE
   PILOT_PROFILE_UPDATE
   FLIGHT_UPLOAD
+  FLIGHT_UPDATE
   FLIGHT_APPROVE
   FLIGHT_REJECT
   FLIGHT_HIDE
@@ -159,6 +160,7 @@ model Flight {
   glider            String?
   registration      String?
   competitionClass  String?
+  weatherMode       String                 @default("UNKNOWN")
   comment           String?
   visibility        FlightVisibility       @default(PUBLIC)
   moderationStatus  FlightModerationStatus @default(APPROVED)

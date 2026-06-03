@@ -6,6 +6,7 @@ import {
   deleteFlightAction,
   setFlightVisibilityAction
 } from "@/app/[locale]/profile/flight-actions";
+import {Link} from "@/i18n/navigation";
 
 type Visibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
 
@@ -61,6 +62,10 @@ export default function FlightOwnerActions({
           </button>
         </form>
       ) : null}
+
+      <Link className="btn btnSecondary" href={`/flights/${flightId}/edit`}>
+        {t("edit")}
+      </Link>
 
       {canDelete ? (
         <form
