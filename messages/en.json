@@ -478,5 +478,27 @@
     "reason": "Reason",
     "unblock": "Release hash",
     "unblockConfirm": "Really release the blocked IGC hash “{hash}…”? Afterwards, the same IGC file can be uploaded again."
+  },
+  "AdminPilots": {
+    "pageTitle": "Pilot administration",
+    "subtitle": "Overview of active pilot profiles, flight statistics, and public profile details.",
+    "backToAdmin": "Back to Admin Dashboard",
+    "noPilots": "No pilot profiles available.",
+    "unknownUser": "Unknown user",
+    "flightsShort": "flights",
+    "homeAirfield": "Home airfield",
+    "country": "Country",
+    "favoriteSim": "Favorite simulator",
+    "favoriteGlider": "Favorite aircraft",
+    "totalDistance": "Total distance",
+    "bestDistance": "Best distance",
+    "totalOlc": "Total OLC",
+    "lastFlight": "Last flight",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "showHomeAirfield": "Home airfield public",
+    "yes": "Yes",
+    "no": "No",
+    "openPublicPilots": "Open public pilot ranking"
   }
 }

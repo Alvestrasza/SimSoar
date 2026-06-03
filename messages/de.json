@@ -478,5 +478,27 @@
     "reason": "Grund",
     "unblock": "Hash freigeben",
     "unblockConfirm": "Den gesperrten IGC-Hash „{hash}…“ wirklich freigeben? Danach kann dieselbe IGC-Datei erneut hochgeladen werden."
+  },
+  "AdminPilots": {
+    "pageTitle": "Pilotenverwaltung",
+    "subtitle": "Übersicht über aktive Pilotprofile, Flugstatistiken und öffentliche Profilangaben.",
+    "backToAdmin": "Zurück zum Admin Dashboard",
+    "noPilots": "Keine Pilotprofile vorhanden.",
+    "unknownUser": "Unbekannter Benutzer",
+    "flightsShort": "Flüge",
+    "homeAirfield": "Heimatflugplatz",
+    "country": "Land",
+    "favoriteSim": "Lieblings-Simulator",
+    "favoriteGlider": "Lieblingsflugzeug",
+    "totalDistance": "Gesamtstrecke",
+    "bestDistance": "Beste Strecke",
+    "totalOlc": "Gesamt OLC",
+    "lastFlight": "Letzter Flug",
+    "createdAt": "Erstellt",
+    "updatedAt": "Aktualisiert",
+    "showHomeAirfield": "Heimatflugplatz öffentlich",
+    "yes": "Ja",
+    "no": "Nein",
+    "openPublicPilots": "Öffentliche Pilotenliste öffnen"
   }
 }
