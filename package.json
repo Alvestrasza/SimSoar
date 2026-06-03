@@ -21,9 +21,9 @@
     "@auth/prisma-adapter": "^2.10.0",
     "@prisma/client": "^6.9.0",
     "leaflet": "^1.9.4",
-    "next": "^16.0.0",
-    "next-auth": "^5.0.0-beta.29",
-    "next-intl": "^4.12.0",
+    "next": "^9.3.3",
+    "next-auth": "^3.29.10",
+    "next-intl": "^0.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "zod": "^3.25.0"
