@@ -6,6 +6,7 @@ import {Link} from "@/i18n/navigation";
 import AltitudeChart from "./AltitudeChart";
 import FlightTrackMap from "./FlightTrackMap";
 import FlightOwnerActions from "./FlightOwnerActions";
+import {updateScoringWindowAction} from "@/app/[locale]/flights/[id]/scoring-actions";
 
 type TrackPoint = {
   seq: number;
@@ -56,6 +57,12 @@ type FlightDetail = {
   scoringDistanceKm: number;
   scoringMultiplier: number;
   scoringClosedCourse: boolean;
+  suggestedScoringStartSeq?: number | null;
+  suggestedScoringEndSeq?: number | null;
+  scoringStartSeq?: number | null;
+  scoringEndSeq?: number | null;
+  scoringWindowMode: "AUTO" | "MANUAL";
+  scoringWindowReasons: string[];
   avgSpeedKmh: number;
   maxAltitudeM: number;
   minAltitudeM: number;
@@ -478,6 +485,47 @@ export default function FlightDetailClient({
               <p className="muted">
                 {flight.scoringClosedCourse ? t("closedCourseBonus") : t("openCourse")}
               </p>
+              <div className="scoringWindowSummary">
+                <span>{t("activeScoringWindow")}</span>
+                <strong>
+                  #{flight.scoringStartSeq ?? flight.track[0]?.seq ?? 0} – #{flight.scoringEndSeq ?? flight.track.at(-1)?.seq ?? 0}
+                </strong>
+                <small className="muted">
+                  {flight.scoringWindowMode === "MANUAL" ? t("windowManual") : t("windowAutomatic")}
+                </small>
+              </div>
+              <p className="muted">
+                {t("suggestedScoringWindow")}: #{flight.suggestedScoringStartSeq ?? flight.track[0]?.seq ?? 0} – #{flight.suggestedScoringEndSeq ?? flight.track.at(-1)?.seq ?? 0}
+              </p>
+              {flight.scoringWindowReasons.length > 0 ? (
+                <p className="muted">
+                  {t("windowDetection")}: {flight.scoringWindowReasons.map((reason) => t(`windowReason_${reason}`)).join(", ")}
+                </p>
+              ) : null}
+              {flight.canManage && flight.track.length > 1 ? (
+                <>
+                  <form className="scoringWindowForm" action={updateScoringWindowAction}>
+                    <input type="hidden" name="flightId" value={flight.id} />
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="mode" value="manual" />
+                    <label>
+                      {t("windowStartSeq")}
+                      <input name="startSeq" type="number" min={flight.track[0].seq} max={flight.track.at(-1)!.seq - 1} defaultValue={flight.scoringStartSeq ?? flight.track[0].seq} required />
+                    </label>
+                    <label>
+                      {t("windowEndSeq")}
+                      <input name="endSeq" type="number" min={flight.track[0].seq + 1} max={flight.track.at(-1)!.seq} defaultValue={flight.scoringEndSeq ?? flight.track.at(-1)!.seq} required />
+                    </label>
+                    <button className="btn btnPrimary" type="submit">{t("recalculateWindow")}</button>
+                  </form>
+                  <form action={updateScoringWindowAction}>
+                    <input type="hidden" name="flightId" value={flight.id} />
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="mode" value="suggested" />
+                    <button className="btn btnSecondary" type="submit">{t("restoreSuggestedWindow")}</button>
+                  </form>
+                </>
+              ) : null}
               {flight.scoringPoints.length > 0 ? (
                 <ol className="scoringPointList">
                   {flight.scoringPoints.map((point) => (

@@ -78,6 +78,7 @@ enum AuditAction {
   FLIGHT_COMMENT_CREATE
   FLIGHT_COMMENT_DELETE
   FLIGHT_COMMENT_REPORT
+  SCORING_WINDOW_UPDATE
 }
 
 enum HomeFeedMode {
@@ -96,6 +97,11 @@ enum NotificationType {
 enum UploadBatchItemStatus {
   IMPORTED
   FAILED
+}
+
+enum ScoringWindowMode {
+  AUTO
+  MANUAL
 }
 
 model User {
@@ -218,6 +224,12 @@ model Flight {
   scoringDistanceKm Float                  @default(0)
   scoringMultiplier Float                  @default(1.8)
   scoringClosedCourse Boolean              @default(false)
+  suggestedScoringStartSeq Int?
+  suggestedScoringEndSeq   Int?
+  scoringStartSeq          Int?
+  scoringEndSeq            Int?
+  scoringWindowMode        ScoringWindowMode @default(AUTO)
+  scoringWindowReasons     String[]          @default([])
   avgSpeedKmh       Float
   maxAltitudeM      Int
   minAltitudeM      Int

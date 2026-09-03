@@ -1,4 +1,5 @@
 import {calculateScore, type ScoringResult} from "./scoring.ts";
+import {detectScoringWindow, type DetectedScoringWindow} from "./scoring-window.ts";
 
 export type TrackPointInput = {
   seq: number;
@@ -32,6 +33,7 @@ export type ParsedIgc = {
   distanceKm: number;
   olcPoints: number;
   scoring: ScoringResult;
+  scoringWindow: DetectedScoringWindow;
   avgSpeedKmh: number;
   maxAltitudeM: number;
   minAltitudeM: number;
@@ -193,7 +195,8 @@ export function parseIgc(text: string): ParsedIgc {
   const varios = points.map((p) => p.varioMs ?? 0);
   const distanceKm = totalMeters / 1000;
   const avgSpeedKmh = durationSeconds > 0 ? distanceKm / (durationSeconds / 3600) : 0;
-  const scoring = calculateScore(points);
+  const scoringWindow = detectScoringWindow(points);
+  const scoring = calculateScore(points.slice(scoringWindow.startIndex, scoringWindow.endIndex + 1));
 
   return {
     pilot,
@@ -205,6 +208,7 @@ export function parseIgc(text: string): ParsedIgc {
     distanceKm,
     olcPoints: scoring.score,
     scoring,
+    scoringWindow,
     avgSpeedKmh,
     maxAltitudeM: Math.max(...altitudes),
     minAltitudeM: Math.min(...altitudes),
