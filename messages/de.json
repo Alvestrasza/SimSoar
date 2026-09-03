@@ -172,7 +172,12 @@
     "from": "Von",
     "to": "Bis",
     "applyFilters": "Filter anwenden",
-    "clearFilters": "Filter zurücksetzen"
+    "clearFilters": "Filter zurücksetzen",
+    "viewList": "Liste",
+    "viewMap": "Karte",
+    "mapFlights": "Flüge auf der Karte",
+    "mapStart": "Start",
+    "mapFinish": "Landung"
   },
   "Upload": {
     "pageTitle": "✈️ Flug hochladen",

@@ -172,7 +172,12 @@
     "from": "From",
     "to": "To",
     "applyFilters": "Apply filters",
-    "clearFilters": "Clear filters"
+    "clearFilters": "Clear filters",
+    "viewList": "List",
+    "viewMap": "Map",
+    "mapFlights": "Flights on the map",
+    "mapStart": "Start",
+    "mapFinish": "Landing"
   },
   "Upload": {
     "pageTitle": "✈️ Upload flight",
