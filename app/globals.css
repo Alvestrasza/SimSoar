@@ -1489,6 +1489,55 @@ body {
   justify-content: flex-end;
 }
 
+.flightCommunityWrap {
+  padding-top: 0;
+}
+
+.flightCommunityHead,
+.communityCommentMeta,
+.communityCommentActions,
+.communityReportForm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.flightCommunityBody,
+.communityComments,
+.communityCommentForm {
+  display: grid;
+  gap: 16px;
+}
+
+.communityCommentForm textarea {
+  min-height: 96px;
+}
+
+.communityCommentForm .btn {
+  justify-self: start;
+}
+
+.communityComment {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.communityCommentMeta {
+  justify-content: space-between;
+}
+
+.communityCommentText {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.communityReportForm input {
+  min-width: min(260px, 65vw);
+}
+
 @media (max-width: 980px) {
   .pilotAdminCard {
     grid-template-columns: 1fr;

@@ -295,6 +295,24 @@
     "mapSatellite": "Satellite",
     "mapTerrain": "Terrain"
   },
+  "FlightCommunity": {
+    "title": "Community",
+    "like": "♡ Like",
+    "unlike": "♥ Liked",
+    "likes": "{count, plural, one {# like} other {# likes}}",
+    "addComment": "Add a comment",
+    "commentPlaceholder": "Share a constructive thought about this flight…",
+    "submitComment": "Post comment",
+    "signInPrompt": "Sign in to like or comment on this public flight.",
+    "signIn": "Sign in",
+    "comments": "{count, plural, one {# comment} other {# comments}}",
+    "noComments": "No comments yet.",
+    "deletedComment": "This comment was removed.",
+    "deleteComment": "Remove",
+    "reportComment": "Report",
+    "reportReason": "Optional reason",
+    "reported": "Reported"
+  },
   "FlightOwnerActions": {
     "visibilityLabel": "Visibility",
     "visibilityPublic": "Public",

@@ -295,6 +295,24 @@
     "mapSatellite": "Satellit",
     "mapTerrain": "Gelände"  
   },
+  "FlightCommunity": {
+    "title": "Community",
+    "like": "♡ Gefällt mir",
+    "unlike": "♥ Gefällt mir",
+    "likes": "{count, plural, one {# Gefällt mir} other {# Gefällt mir}}",
+    "addComment": "Kommentar hinzufügen",
+    "commentPlaceholder": "Teile einen konstruktiven Gedanken zu diesem Flug…",
+    "submitComment": "Kommentar veröffentlichen",
+    "signInPrompt": "Melde dich an, um diesen öffentlichen Flug zu liken oder zu kommentieren.",
+    "signIn": "Anmelden",
+    "comments": "{count, plural, one {# Kommentar} other {# Kommentare}}",
+    "noComments": "Noch keine Kommentare vorhanden.",
+    "deletedComment": "Dieser Kommentar wurde entfernt.",
+    "deleteComment": "Entfernen",
+    "reportComment": "Melden",
+    "reportReason": "Optionaler Grund",
+    "reported": "Gemeldet"
+  },
   "FlightOwnerActions": {
     "visibilityLabel": "Sichtbarkeit",
     "visibilityPublic": "Öffentlich",
