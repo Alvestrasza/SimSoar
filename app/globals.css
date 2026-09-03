@@ -1250,11 +1250,18 @@ body {
   position: relative;
 }
 
-.mapModeToggle {
+.mapControls {
   position: absolute;
   top: 12px;
   right: 12px;
   z-index: 900;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.mapModeToggle {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1285,13 +1292,17 @@ body {
 }
 
 @media (max-width: 720px) {
-  .mapModeToggle {
+  .mapControls {
     top: 10px;
     right: 10px;
     max-width: calc(100% - 20px);
+  }
+  .mapModeToggle {
     font-size: 11px;
   }
 }
+
+.airspaceWarnings { padding: 16px 18px; border-top: 1px solid var(--border); }
 
 .adminWrap {
   width: 100%;

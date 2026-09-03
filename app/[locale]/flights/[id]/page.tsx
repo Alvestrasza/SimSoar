@@ -10,6 +10,7 @@ import {
   canInteractWithFlight
 } from "@/lib/flight-community";
 import {setRequestLocale} from "next-intl/server";
+import {findAirspaceCrossings} from "@/lib/airspace";
 
 export const dynamic = "force-dynamic";
 
@@ -111,6 +112,21 @@ export default async function FlightDetailPage({
   });
 
   const communityEnabled = canInteractWithFlight(flight);
+  const activeAirspaces = await prisma.airspace.findMany({
+    where: {active: true},
+    orderBy: {createdAt: "desc"},
+    take: 200,
+    include: {points: {orderBy: {seq: "asc"}}}
+  });
+  const airspaces = activeAirspaces.map((airspace) => ({
+    id: airspace.id,
+    name: airspace.name,
+    className: airspace.className,
+    floorLabel: airspace.floorLabel,
+    ceilingLabel: airspace.ceilingLabel,
+    points: airspace.points.map((point) => ({lat: point.lat, lon: point.lon}))
+  }));
+  const airspaceCrossings = findAirspaceCrossings(flight.track, airspaces);
   const [likeCount, viewerLike, communityComments] = communityEnabled
     ? await Promise.all([
         prisma.flightLike.count({where: {flightId: flight.id}}),
@@ -229,7 +245,9 @@ export default async function FlightDetailPage({
           lat: point.lat,
           lon: point.lon,
           legDistanceKm: point.legDistanceKm
-        }))
+        })),
+        airspaces,
+        airspaceCrossings
         }}
       />
 

@@ -48,6 +48,25 @@ type GlidePhase = {
   glideRatio: number;
 };
 
+type Airspace = {
+  id: string;
+  name: string;
+  className: string;
+  floorLabel: string;
+  ceilingLabel: string;
+  points: Array<{lat: number; lon: number}>;
+};
+
+type AirspaceCrossing = {
+  airspaceId: string;
+  name: string;
+  className: string;
+  floorLabel: string;
+  ceilingLabel: string;
+  firstTrackSeq: number;
+  lastTrackSeq: number;
+};
+
 type Visibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
 type MapModePreference = "STANDARD" | "SATELLITE" | "TERRAIN";
 
@@ -96,6 +115,8 @@ type FlightDetail = {
   thermals: Thermal[];
   glidePhases: GlidePhase[];
   scoringPoints: ScoringPoint[];
+  airspaces: Airspace[];
+  airspaceCrossings: AirspaceCrossing[];
 };
 
 type Props = {
@@ -339,9 +360,27 @@ export default function FlightDetailClient({
             <FlightTrackMap
               points={flight.track}
               thermals={flight.thermals}
+              airspaces={flight.airspaces}
               active={tab === "map"}
               mapMode={preferredMapMode}
             />
+            <div className="airspaceWarnings">
+              <strong>{t("airspaceCrossingsTitle")}</strong>
+              <p className="muted">{t("airspaceDisclaimer")}</p>
+              {flight.airspaceCrossings.length === 0 ? (
+                <p className="muted">{t("noAirspaceCrossings")}</p>
+              ) : (
+                <div className="thermalList">
+                  {flight.airspaceCrossings.map((crossing) => (
+                    <div className="thermalItem" key={crossing.airspaceId}>
+                      <div><strong>{crossing.name}</strong><div className="muted">
+                        {crossing.className} · {crossing.floorLabel} – {crossing.ceilingLabel} · {t("airspaceTrackRange", {start: crossing.firstTrackSeq, end: crossing.lastTrackSeq})}
+                      </div></div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div

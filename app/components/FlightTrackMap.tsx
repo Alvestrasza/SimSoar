@@ -1,6 +1,7 @@
 "use client";
 
 import {useEffect, useRef, useState} from "react";
+import {useTranslations} from "next-intl";
 
 type LeafletApi = typeof import("leaflet");
 
@@ -20,6 +21,15 @@ type Thermal = {
   durationSec: number;
 };
 
+type Airspace = {
+  id: string;
+  name: string;
+  className: string;
+  floorLabel: string;
+  ceilingLabel: string;
+  points: Array<{lat: number; lon: number}>;
+};
+
 type MapModePreference = "STANDARD" | "SATELLITE" | "TERRAIN";
 
 type TileLayerConfig = {
@@ -31,6 +41,7 @@ type TileLayerConfig = {
 type Props = {
   points: TrackPoint[];
   thermals?: Thermal[];
+  airspaces?: Airspace[];
   active?: boolean;
   mapMode?: MapModePreference;
 };
@@ -91,13 +102,16 @@ function mapModeLabel(mapMode: MapModePreference) {
 export default function FlightTrackMap({
   points,
   thermals = [],
+  airspaces = [],
   active = true,
   mapMode = "STANDARD"
 }: Props) {
+  const t = useTranslations("FlightDetail");
   const mapEl = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
 
   const [currentMapMode, setCurrentMapMode] = useState<MapModePreference>(mapMode);
+  const [showAirspaces, setShowAirspaces] = useState(false);
 
   useEffect(() => {
     setCurrentMapMode(mapMode);
@@ -126,6 +140,19 @@ export default function FlightTrackMap({
         maxZoom: tileLayer.maxZoom,
         attribution: tileLayer.attribution
       }).addTo(map);
+
+      if (showAirspaces) {
+        for (const airspace of airspaces) {
+          if (airspace.points.length < 3) continue;
+          const polygon = L.polygon(
+            airspace.points.map((point) => [point.lat, point.lon] as [number, number]),
+            {color: "#dc2626", weight: 2, opacity: 0.8, fillColor: "#ef4444", fillOpacity: 0.12}
+          ).addTo(map);
+          const tooltip = document.createElement("span");
+          tooltip.textContent = `${airspace.name} · ${airspace.className} · ${airspace.floorLabel} – ${airspace.ceilingLabel}`;
+          polygon.bindTooltip(tooltip);
+        }
+      }
 
       if (points.length > 1) {
         const latLngs = points.map((p) => L.latLng(p.lat, p.lon));
@@ -176,7 +203,7 @@ export default function FlightTrackMap({
         mapRef.current = null;
       }
     };
-  }, [points, thermals, currentMapMode]);
+  }, [points, thermals, airspaces, currentMapMode, showAirspaces]);
 
   useEffect(() => {
     if (active && mapRef.current) setTimeout(() => mapRef.current?.invalidateSize(), 80);
@@ -184,15 +211,25 @@ export default function FlightTrackMap({
 
   return (
     <div className="flightMapShell">
-      <button
-        className="mapModeToggle"
-        type="button"
-        onClick={() => setCurrentMapMode((value) => nextMapMode(value))}
-        title="Switch map mode"
-        aria-label="Switch map mode"
-      >
-        {mapModeLabel(currentMapMode)}
-      </button>
+      <div className="mapControls">
+        {airspaces.length > 0 ? <button
+          className="mapModeToggle"
+          type="button"
+          onClick={() => setShowAirspaces((value) => !value)}
+          aria-pressed={showAirspaces}
+        >
+          {showAirspaces ? t("hideAirspaces") : t("showAirspaces")}
+        </button> : null}
+        <button
+          className="mapModeToggle"
+          type="button"
+          onClick={() => setCurrentMapMode((value) => nextMapMode(value))}
+          title="Switch map mode"
+          aria-label="Switch map mode"
+        >
+          {mapModeLabel(currentMapMode)}
+        </button>
+      </div>
 
       <div ref={mapEl} className="leafletMap" />
     </div>
