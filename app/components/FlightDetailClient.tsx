@@ -31,6 +31,18 @@ type Thermal = {
   efficiencyPercent: number;
 };
 
+type GlidePhase = {
+  id: string;
+  seq: number;
+  startSeq: number;
+  endSeq: number;
+  durationSec: number;
+  distanceKm: number;
+  avgSpeedKmh: number;
+  avgSinkMs: number;
+  glideRatio: number;
+};
+
 type Visibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
 type MapModePreference = "STANDARD" | "SATELLITE" | "TERRAIN";
 
@@ -77,6 +89,7 @@ type FlightDetail = {
   canManage: boolean;
   track: TrackPoint[];
   thermals: Thermal[];
+  glidePhases: GlidePhase[];
   scoringPoints: ScoringPoint[];
 };
 
@@ -93,6 +106,12 @@ function durationLabel(seconds: number) {
   const m = Math.floor((safe % 3600) / 60);
 
   return `${h}:${String(m).padStart(2, "0")} h`;
+}
+
+function phaseDurationLabel(seconds: number) {
+  const safe = Math.max(0, Math.round(seconds || 0));
+  const minutes = Math.floor(safe / 60);
+  return `${minutes}:${String(safe % 60).padStart(2, "0")} min`;
 }
 
 function isoDateLabel(value: string | null | undefined, locale: string) {
@@ -186,6 +205,18 @@ export default function FlightDetailClient({
     .filter((point) => Number.isFinite(point.altM))
     .map((point) => point.seq);
   const sortedThermals = sortThermals(flight.thermals, thermalSort);
+  const thermalDurationSec = flight.thermals.reduce(
+    (total, thermal) => total + thermal.durationSec,
+    0
+  );
+  const glideDurationSec = flight.glidePhases.reduce(
+    (total, phase) => total + phase.durationSec,
+    0
+  );
+  const glideDistanceKm = flight.glidePhases.reduce(
+    (total, phase) => total + phase.distanceKm,
+    0
+  );
 
   return (
     <main className="wrap">
@@ -386,6 +417,39 @@ export default function FlightDetailClient({
                         {t("thermalDuration")}: {thermal.durationSec}s ·{" "}
                         {t("thermalMax")}{" "}
                         {thermal.maxClimbMs.toFixed(1)} m/s · {t("thermalEfficiency")}: {thermal.efficiencyPercent.toFixed(0)}%
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <h3 className="phaseSectionTitle">{t("glidesTitle")}</h3>
+            <p className="muted">{t("glidesDescription")}</p>
+
+            <div className="smallStats phaseSummary">
+              <span>{t("thermalTime")}: <strong>{phaseDurationLabel(thermalDurationSec)}</strong></span>
+              <span>{t("glideTime")}: <strong>{phaseDurationLabel(glideDurationSec)}</strong></span>
+              <span>{t("glideDistance")}: <strong>{glideDistanceKm.toFixed(1)} km</strong></span>
+            </div>
+
+            {flight.glidePhases.length === 0 ? (
+              <p className="muted emptyInline">{t("noGlides")}</p>
+            ) : (
+              <div className="thermalList">
+                {flight.glidePhases.map((phase) => (
+                  <div className="thermalItem" key={phase.id}>
+                    <div className="thermalBubble glideBubble">
+                      {Math.round(phase.avgSpeedKmh)}
+                    </div>
+                    <div>
+                      <strong>{t("glide")} #{phase.seq}</strong>
+                      <div className="muted">
+                        {t("glideDuration")}: {phaseDurationLabel(phase.durationSec)} ·{" "}
+                        {t("glideDistance")}: {phase.distanceKm.toFixed(1)} km ·{" "}
+                        {t("glideSpeed")}: {phase.avgSpeedKmh.toFixed(0)} km/h ·{" "}
+                        {t("glideSink")}: {phase.avgSinkMs.toFixed(1)} m/s ·{" "}
+                        {t("glideRatio")}: {phase.glideRatio > 0 ? `${phase.glideRatio.toFixed(1)}:1` : "–"}
                       </div>
                     </div>
                   </div>

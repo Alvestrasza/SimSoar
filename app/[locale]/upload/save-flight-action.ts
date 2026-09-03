@@ -255,6 +255,22 @@ async function importFlightFile({
             }))
           }
         },
+        glidePhases: {
+          createMany: {
+            data: parsed.glidePhases.map((phase: (typeof parsed.glidePhases)[number]) => ({
+              seq: phase.seq,
+              startSeq: phase.startSeq,
+              endSeq: phase.endSeq,
+              startTime: phase.startTime,
+              endTime: phase.endTime,
+              durationSec: phase.durationSec,
+              distanceKm: phase.distanceKm,
+              avgSpeedKmh: phase.avgSpeedKmh,
+              avgSinkMs: phase.avgSinkMs,
+              glideRatio: phase.glideRatio
+            }))
+          }
+        },
         scoringPoints: {
           createMany: {
             data: parsed.scoring.points.map((point) => ({

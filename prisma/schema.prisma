@@ -244,6 +244,7 @@ model Flight {
   user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   track    TrackPoint[]
   thermals Thermal[]
+  glidePhases GlidePhase[]
   likes    FlightLike[]
   comments FlightComment[]
   notifications Notification[]
@@ -303,6 +304,26 @@ model Thermal {
   gainM       Int
   durationSec Int
   efficiencyPercent Float @default(0)
+
+  flight Flight @relation(fields: [flightId], references: [id], onDelete: Cascade)
+
+  @@unique([flightId, seq])
+  @@index([flightId, seq])
+}
+
+model GlidePhase {
+  id          String    @id @default(cuid())
+  flightId    String
+  seq         Int
+  startSeq    Int
+  endSeq      Int
+  startTime   DateTime?
+  endTime     DateTime?
+  durationSec Int
+  distanceKm  Float
+  avgSpeedKmh Float
+  avgSinkMs   Float
+  glideRatio  Float
 
   flight Flight @relation(fields: [flightId], references: [id], onDelete: Cascade)
 

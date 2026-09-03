@@ -42,6 +42,11 @@ export default async function FlightDetailPage({
           seq: "asc"
         }
       },
+      glidePhases: {
+        orderBy: {
+          seq: "asc"
+        }
+      },
       scoringPoints: {
         orderBy: {
           order: "asc"
@@ -201,6 +206,17 @@ export default async function FlightDetailPage({
           gainM: t.gainM,
           durationSec: t.durationSec,
           efficiencyPercent: t.efficiencyPercent
+        })),
+        glidePhases: flight.glidePhases.map((phase: any) => ({
+          id: phase.id,
+          seq: phase.seq,
+          startSeq: phase.startSeq,
+          endSeq: phase.endSeq,
+          durationSec: phase.durationSec,
+          distanceKm: phase.distanceKm,
+          avgSpeedKmh: phase.avgSpeedKmh,
+          avgSinkMs: phase.avgSinkMs,
+          glideRatio: phase.glideRatio
         })),
         scoringPoints: flight.scoringPoints.map((point) => ({
           id: point.id,
