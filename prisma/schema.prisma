@@ -214,6 +214,10 @@ model Flight {
   durationSeconds   Int
   distanceKm        Float
   olcPoints         Float
+  scoringRule       String                 @default("LEGACY_DISTANCE_1_8")
+  scoringDistanceKm Float                  @default(0)
+  scoringMultiplier Float                  @default(1.8)
+  scoringClosedCourse Boolean              @default(false)
   avgSpeedKmh       Float
   maxAltitudeM      Int
   minAltitudeM      Int
@@ -231,6 +235,7 @@ model Flight {
   likes    FlightLike[]
   comments FlightComment[]
   notifications Notification[]
+  scoringPoints FlightScoringPoint[]
 
   @@index([visibility, createdAt])
   @@index([visibility, moderationStatus, createdAt])
@@ -254,6 +259,21 @@ model TrackPoint {
 
   @@unique([flightId, seq])
   @@index([flightId, seq])
+}
+
+model FlightScoringPoint {
+  id            String @id @default(cuid())
+  flightId      String
+  order         Int
+  trackSeq      Int
+  lat           Float
+  lon           Float
+  legDistanceKm Float
+
+  flight Flight @relation(fields: [flightId], references: [id], onDelete: Cascade)
+
+  @@unique([flightId, order])
+  @@index([flightId, order])
 }
 
 model Thermal {

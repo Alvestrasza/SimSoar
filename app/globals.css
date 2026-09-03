@@ -495,6 +495,9 @@ textarea { min-height: 120px; resize: vertical; }
 .uploadResultItem { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
 .uploadResultSuccess { border-color: #86efac; }
 .uploadResultFailure { border-color: #fca5a5; }
+.scoringFormula { font-size: 16px; line-height: 1.6; }
+.scoringPointList { display: grid; gap: 7px; margin: 14px 0 0; padding-left: 22px; }
+.scoringPointList li { display: flex; justify-content: space-between; gap: 10px; padding-left: 3px; }
 .parsedBox { margin-top: 14px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: #f8fafc; display: grid; gap: 7px; font-size: 13px; }
 .parsedBox > div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
 .parsedBox > div:last-of-type { border-bottom: none; }

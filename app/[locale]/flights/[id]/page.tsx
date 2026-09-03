@@ -41,6 +41,11 @@ export default async function FlightDetailPage({
         orderBy: {
           seq: "asc"
         }
+      },
+      scoringPoints: {
+        orderBy: {
+          order: "asc"
+        }
       }
     }
   });
@@ -159,6 +164,10 @@ export default async function FlightDetailPage({
         durationSeconds: flight.durationSeconds,
         distanceKm: flight.distanceKm,
         olcPoints: flight.olcPoints,
+        scoringRule: flight.scoringRule,
+        scoringDistanceKm: flight.scoringDistanceKm,
+        scoringMultiplier: flight.scoringMultiplier,
+        scoringClosedCourse: flight.scoringClosedCourse,
         avgSpeedKmh: flight.avgSpeedKmh,
         maxAltitudeM: flight.maxAltitudeM,
         minAltitudeM: flight.minAltitudeM,
@@ -183,6 +192,14 @@ export default async function FlightDetailPage({
           maxClimbMs: t.maxClimbMs,
           gainM: t.gainM,
           durationSec: t.durationSec
+        })),
+        scoringPoints: flight.scoringPoints.map((point) => ({
+          id: point.id,
+          order: point.order,
+          trackSeq: point.trackSeq,
+          lat: point.lat,
+          lon: point.lon,
+          legDistanceKm: point.legDistanceKm
         }))
         }}
       />
