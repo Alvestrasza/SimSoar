@@ -28,7 +28,8 @@ type FlightListItem = {
 
 type Props = {
   flights: FlightListItem[];
-  initialFilter?: FilterKey;
+  activeFilter: FilterKey;
+  filterLinks: Record<FilterKey, string>;
 };
 
 type SortKey = "olcPoints" | "distanceKm" | "maxVarioMs";
@@ -247,11 +248,10 @@ function SimDistributionChart({
 
 export default function FlightsExplorer({
   flights,
-  initialFilter = "all"
+  activeFilter,
+  filterLinks
 }: Props) {
   const t = useTranslations("Flights");
-
-  const [filter, setFilter] = useState<FilterKey>(initialFilter);
 
   const [sort, setSort] = useState<{key: SortKey; dir: 1 | -1}>({
     key: "olcPoints",
@@ -260,17 +260,11 @@ export default function FlightsExplorer({
 
   const filteredFlights = useMemo(() => {
     return [...flights]
-      .filter((f) => {
-        if (filter === "all") return true;
-        if (filter === "msfs") return f.simulator.includes("MSFS");
-        if (filter === "condor") return f.simulator.includes("Condor");
-        return f.simulator.includes("X-Plane");
-      })
       .sort(
         (a, b) =>
           sort.dir * ((a[sort.key] as number) - (b[sort.key] as number))
       );
-  }, [flights, filter, sort]);
+  }, [flights, sort]);
 
   function setSortKey(key: SortKey) {
     setSort((prev) =>
@@ -289,33 +283,33 @@ export default function FlightsExplorer({
             style={{paddingBottom: 0, borderBottom: "none"}}
           >
             <div className="tabs" style={{marginBottom: 0}}>
-              <button
-                className={`tab ${filter === "all" ? "active" : ""}`}
-                onClick={() => setFilter("all")}
+              <Link
+                className={`tab ${activeFilter === "all" ? "active" : ""}`}
+                href={filterLinks.all}
               >
                 {t("tabAll")}
-              </button>
+              </Link>
 
-              <button
-                className={`tab ${filter === "msfs" ? "active" : ""}`}
-                onClick={() => setFilter("msfs")}
+              <Link
+                className={`tab ${activeFilter === "msfs" ? "active" : ""}`}
+                href={filterLinks.msfs}
               >
                 {t("tabMsfs")}
-              </button>
+              </Link>
 
-              <button
-                className={`tab ${filter === "condor" ? "active" : ""}`}
-                onClick={() => setFilter("condor")}
+              <Link
+                className={`tab ${activeFilter === "condor" ? "active" : ""}`}
+                href={filterLinks.condor}
               >
                 {t("tabCondor")}
-              </button>
+              </Link>
 
-              <button
-                className={`tab ${filter === "xplane" ? "active" : ""}`}
-                onClick={() => setFilter("xplane")}
+              <Link
+                className={`tab ${activeFilter === "xplane" ? "active" : ""}`}
+                href={filterLinks.xplane}
               >
                 {t("tabXplane")}
-              </button>
+              </Link>
             </div>
           </div>
 

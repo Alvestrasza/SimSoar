@@ -176,10 +176,8 @@ const noticeStatus =
                 placeholder={t("homeAirfieldPlaceholder")}
                 autoCapitalize="words"
                 spellCheck={false}
+                title={t("homeAirfieldHint")}
               />
-              <p className="muted" style={{margin: "6px 0 0", fontSize: 13}}>
-                {t("homeAirfieldHint")}
-              </p>
             </div>
 
             <div className="formGroup">
