@@ -21,3 +21,17 @@ remain labelled `LEGACY_DISTANCE_1_8` until their IGC file is re-analysed.
 The flight detail page shows the formula and selected scoring points. The rule
 registry in `lib/scoring.ts` allows later rule versions to coexist with stored
 historical results instead of silently changing old scores.
+
+## Scoring window
+
+Before scoring, SimSoar suggests an active section of the track. The detector
+removes stationary edges, separates recording gaps longer than two minutes,
+keeps the continuous section with the greatest flown distance, and identifies
+the end of an initial tow or engine-like climb from altitude development. Its
+suggested start, end, and detection reasons remain stored with the flight.
+
+The flight owner or a moderator can set different start and end track points.
+Only points inside that window are passed to the scoring rule. Each manual
+change recalculates the stored score and scoring points and creates an audit
+entry. The original track and the automatic suggestion remain unchanged, so
+the suggested window can be restored later.
