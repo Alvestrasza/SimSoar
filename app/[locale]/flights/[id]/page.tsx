@@ -4,6 +4,11 @@ import {prisma} from "@/lib/db";
 import {hasRole} from "@/lib/rbac";
 import {resolveIgcDownloadMode} from "@/lib/igc-download";
 import FlightDetailClient from "@/app/components/FlightDetailClient";
+import FlightCommunitySection from "@/app/components/FlightCommunitySection";
+import {
+  canDeleteFlightComment,
+  canInteractWithFlight
+} from "@/lib/flight-community";
 import {setRequestLocale} from "next-intl/server";
 
 export const dynamic = "force-dynamic";
@@ -95,10 +100,52 @@ export default async function FlightDetailPage({
     isAdmin: hasRole(session?.user?.roles, "ADMIN")
   });
 
+  const communityEnabled = canInteractWithFlight(flight);
+  const [likeCount, viewerLike, communityComments] = communityEnabled
+    ? await Promise.all([
+        prisma.flightLike.count({where: {flightId: flight.id}}),
+        session?.user?.id
+          ? prisma.flightLike.findUnique({
+              where: {
+                flightId_userId: {
+                  flightId: flight.id,
+                  userId: session.user.id
+                }
+              },
+              select: {id: true}
+            })
+          : Promise.resolve(null),
+        prisma.flightComment.findMany({
+          where: {flightId: flight.id},
+          orderBy: {createdAt: "asc"},
+          take: 200,
+          select: {
+            id: true,
+            userId: true,
+            content: true,
+            createdAt: true,
+            deletedAt: true,
+            user: {
+              select: {
+                name: true,
+                profile: {select: {callsign: true}}
+              }
+            },
+            reports: {
+              where: {reporterId: session?.user?.id ?? "__anonymous__"},
+              select: {id: true},
+              take: 1
+            }
+          }
+        })
+      ])
+    : [0, null, []];
+
   return (
-    <FlightDetailClient
-      preferredMapMode={preferredMapMode}
-      flight={{
+    <>
+      <FlightDetailClient
+        preferredMapMode={preferredMapMode}
+        flight={{
         id: flight.id,
         title: flight.title,
         pilotCallsign: flight.pilotCallsign,
@@ -137,7 +184,40 @@ export default async function FlightDetailPage({
           gainM: t.gainM,
           durationSec: t.durationSec
         }))
-      }}
-    />
+        }}
+      />
+
+      {communityEnabled ? (
+        <FlightCommunitySection
+          locale={locale}
+          flightId={flight.id}
+          likeCount={likeCount}
+          likedByViewer={Boolean(viewerLike)}
+          isAuthenticated={Boolean(session?.user?.id)}
+          comments={communityComments.map((comment) => ({
+            id: comment.id,
+            content: comment.content,
+            author:
+              comment.user.profile?.callsign ??
+              comment.user.name ??
+              "Pilot",
+            createdAt: comment.createdAt,
+            deletedAt: comment.deletedAt,
+            canDelete: session?.user?.id
+              ? canDeleteFlightComment(
+                  session.user.id,
+                  comment.userId,
+                  flight.userId,
+                  canModerate
+                )
+              : false,
+            canReport: Boolean(
+              session?.user?.id && session.user.id !== comment.userId
+            ),
+            reportedByViewer: comment.reports.length > 0
+          }))}
+        />
+      ) : null}
+    </>
   );
 }
