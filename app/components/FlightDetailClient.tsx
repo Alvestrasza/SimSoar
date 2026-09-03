@@ -29,6 +29,15 @@ type Thermal = {
 type Visibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
 type MapModePreference = "STANDARD" | "SATELLITE" | "TERRAIN";
 
+type ScoringPoint = {
+  id: string;
+  order: number;
+  trackSeq: number;
+  lat: number;
+  lon: number;
+  legDistanceKm: number;
+};
+
 type FlightDetail = {
   id: string;
   title: string;
@@ -43,6 +52,10 @@ type FlightDetail = {
   durationSeconds: number;
   distanceKm: number;
   olcPoints: number;
+  scoringRule: string;
+  scoringDistanceKm: number;
+  scoringMultiplier: number;
+  scoringClosedCourse: boolean;
   avgSpeedKmh: number;
   maxAltitudeM: number;
   minAltitudeM: number;
@@ -53,6 +66,7 @@ type FlightDetail = {
   canManage: boolean;
   track: TrackPoint[];
   thermals: Thermal[];
+  scoringPoints: ScoringPoint[];
 };
 
 type Props = {
@@ -446,6 +460,36 @@ export default function FlightDetailClient({
                 <span>{t("thermals")}</span>
                 <strong>{flight.thermals.length}</strong>
               </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="cardHead">
+              <span className="cardTitle">{t("scoringTitle")}</span>
+            </div>
+
+            <div className="cardBody">
+              <p className="muted" style={{marginTop: 0}}>
+                {t("scoringRule")}: <strong>{flight.scoringRule}</strong>
+              </p>
+              <p className="scoringFormula">
+                {flight.scoringDistanceKm.toFixed(2)} km × {flight.scoringMultiplier.toFixed(2)} = <strong>{flight.olcPoints.toFixed(2)}</strong>
+              </p>
+              <p className="muted">
+                {flight.scoringClosedCourse ? t("closedCourseBonus") : t("openCourse")}
+              </p>
+              {flight.scoringPoints.length > 0 ? (
+                <ol className="scoringPointList">
+                  {flight.scoringPoints.map((point) => (
+                    <li key={point.id}>
+                      <span>{t("scoringPoint", {number: point.order + 1, trackSeq: point.trackSeq})}</span>
+                      <strong>{point.order === 0 ? t("scoringStart") : `${point.legDistanceKm.toFixed(2)} km`}</strong>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p className="muted">{t("legacyScoringHint")}</p>
+              )}
             </div>
           </div>
 

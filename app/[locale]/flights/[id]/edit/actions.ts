@@ -389,6 +389,10 @@ export async function updateFlightMetadataAction(formData: FormData) {
                 durationSeconds: replacement.parsed.durationSeconds,
                 distanceKm: replacement.parsed.distanceKm,
                 olcPoints: replacement.parsed.olcPoints,
+                scoringRule: replacement.parsed.scoring.ruleId,
+                scoringDistanceKm: replacement.parsed.scoring.distanceKm,
+                scoringMultiplier: replacement.parsed.scoring.multiplier,
+                scoringClosedCourse: replacement.parsed.scoring.isClosedCourse,
                 avgSpeedKmh: replacement.parsed.avgSpeedKmh,
                 maxAltitudeM: replacement.parsed.maxAltitudeM,
                 minAltitudeM: replacement.parsed.minAltitudeM,
@@ -433,6 +437,12 @@ export async function updateFlightMetadataAction(formData: FormData) {
           }
         });
 
+        await tx.flightScoringPoint.deleteMany({
+          where: {
+            flightId: currentFlight.id
+          }
+        });
+
         await tx.trackPoint.createMany({
           data: replacement.parsed.points
             .filter((_, i) =>
@@ -461,6 +471,17 @@ export async function updateFlightMetadataAction(formData: FormData) {
             maxClimbMs: thermal.maxClimbMs,
             gainM: thermal.gainM,
             durationSec: thermal.durationSec
+          }))
+        });
+
+        await tx.flightScoringPoint.createMany({
+          data: replacement.parsed.scoring.points.map((point) => ({
+            flightId: currentFlight.id,
+            order: point.order,
+            trackSeq: point.seq,
+            lat: point.lat,
+            lon: point.lon,
+            legDistanceKm: point.legDistanceKm
           }))
         });
       }

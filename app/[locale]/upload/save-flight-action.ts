@@ -205,6 +205,10 @@ async function importFlightFile({
         durationSeconds: parsed.durationSeconds,
         distanceKm: parsed.distanceKm,
         olcPoints: parsed.olcPoints,
+        scoringRule: parsed.scoring.ruleId,
+        scoringDistanceKm: parsed.scoring.distanceKm,
+        scoringMultiplier: parsed.scoring.multiplier,
+        scoringClosedCourse: parsed.scoring.isClosedCourse,
         avgSpeedKmh: parsed.avgSpeedKmh,
         maxAltitudeM: parsed.maxAltitudeM,
         minAltitudeM: parsed.minAltitudeM,
@@ -239,6 +243,17 @@ async function importFlightFile({
               maxClimbMs: thermal.maxClimbMs,
               gainM: thermal.gainM,
               durationSec: thermal.durationSec
+            }))
+          }
+        },
+        scoringPoints: {
+          createMany: {
+            data: parsed.scoring.points.map((point) => ({
+              order: point.order,
+              trackSeq: point.seq,
+              lat: point.lat,
+              lon: point.lon,
+              legDistanceKm: point.legDistanceKm
             }))
           }
         }
