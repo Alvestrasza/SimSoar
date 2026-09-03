@@ -1,6 +1,6 @@
 {
   "name": "simsoar-nextjs",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "private": true,
   "description": "SimSoar multi-user virtual gliding community portal",
   "scripts": {
@@ -9,6 +9,7 @@
     "start": "next start",
     "test:igc": "node --experimental-strip-types --test tests/igc-thermal.test.mjs",
     "test:igc-download": "node --experimental-strip-types --test tests/igc-download.test.mjs",
+    "test:airfield": "node --experimental-strip-types --test tests/airfield.test.mjs",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",

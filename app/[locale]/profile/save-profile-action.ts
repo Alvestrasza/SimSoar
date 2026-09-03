@@ -6,6 +6,7 @@ import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
 import {updateKeycloakUserCallsign} from "@/lib/keycloak-admin";
 import {writeAuditLog} from "@/lib/audit";
+import {normalizeHomeAirfield} from "@/lib/airfield";
 
 const schema = z.object({
   callsign: z
@@ -17,7 +18,11 @@ const schema = z.object({
       /^[A-Za-z0-9_-]+$/,
       "Callsign may only contain letters, numbers, underscore and hyphen."
     ),
-  homeAirfield: z.string().max(120).optional(),
+  homeAirfield: z
+    .string()
+    .trim()
+    .max(120)
+    .transform((value) => normalizeHomeAirfield(value)),
   favoriteGlider: z.string().max(80).optional(),
   country: z.string().max(80).optional(),
   bio: z.string().max(2000).optional(),
@@ -34,7 +39,7 @@ export async function saveProfileAction(formData: FormData) {
 
   const data = schema.parse({
     callsign: formData.get("callsign"),
-    homeAirfield: formData.get("homeAirfield") || undefined,
+    homeAirfield: String(formData.get("homeAirfield") ?? ""),
     favoriteGlider: formData.get("favoriteGlider") || undefined,
     country: formData.get("country") || undefined,
     bio: formData.get("bio") || undefined,
