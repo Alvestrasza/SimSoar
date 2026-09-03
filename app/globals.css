@@ -1538,6 +1538,68 @@ body {
   min-width: min(260px, 65vw);
 }
 
+.notificationNavLink {
+  position: relative;
+  min-width: 42px;
+  justify-content: center;
+}
+
+.notificationBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.notificationCount {
+  display: block;
+  margin-top: 4px;
+}
+
+.notificationList {
+  display: grid;
+  gap: 12px;
+}
+
+.notificationItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.notificationItem.isUnread {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-lt) 48%, var(--surface));
+}
+
+.notificationItem p {
+  margin: 0 0 6px;
+}
+
+.notificationActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .notificationItem {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 @media (max-width: 980px) {
   .pilotAdminCard {
     grid-template-columns: 1fr;

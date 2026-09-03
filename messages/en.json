@@ -12,7 +12,23 @@
     "login": "Sign in",
     "logout": "Sign out",
     "myProfile": "My Profile",
-    "admin": "Admin"
+    "admin": "Admin",
+    "notifications": "Notifications: {count} unread"
+  },
+  "Notifications": {
+    "pageTitle": "Notifications",
+    "unreadCount": "{count, plural, =0 {No unread notifications} one {# unread notification} other {# unread notifications}}",
+    "markAllRead": "Mark all as read",
+    "markRead": "Mark as read",
+    "empty": "No notifications yet.",
+    "openFlight": "Open flight",
+    "systemActor": "SimSoar",
+    "unknownFlight": "a flight",
+    "unknownStatus": "updated",
+    "flightLike": "{actor} liked “{flight}”.",
+    "flightComment": "{actor} commented on “{flight}”.",
+    "followedFlight": "{actor} published a new flight: “{flight}”.",
+    "flightModeration": "The moderation status of “{flight}” changed to {status}."
   },
   "Footer": {
     "copyright": "© {year} {holder1} / {holder2}. All rights reserved.",

@@ -3,6 +3,7 @@ import {auth} from "@/auth";
 import {hasRole} from "@/lib/rbac";
 import {signInWithKeycloak, signOutWithKeycloak} from "@/app/auth-actions";
 import {getTranslations} from "next-intl/server";
+import {prisma} from "@/lib/db";
 
 type AuthNavProps = {
   locale: string;
@@ -24,6 +25,9 @@ export async function AuthNav({locale}: AuthNavProps) {
   }
 
   const canUseAdmin = hasRole(session.user.roles, "MODERATOR");
+  const unreadNotifications = await prisma.notification.count({
+    where: {userId: session.user.id, readAt: null}
+  });
 
   return (
     <>
@@ -32,6 +36,19 @@ export async function AuthNav({locale}: AuthNavProps) {
           {nav("admin")}
         </Link>
       ) : null}
+
+      <Link
+        className="btn btnSecondary notificationNavLink"
+        href="/notifications"
+        aria-label={nav("notifications", {count: unreadNotifications})}
+      >
+        <span aria-hidden="true">🔔</span>
+        {unreadNotifications > 0 ? (
+          <span className="notificationBadge">
+            {unreadNotifications > 99 ? "99+" : unreadNotifications}
+          </span>
+        ) : null}
+      </Link>
 
       <Link className="btn btnSecondary" href="/profile">
         {nav("myProfile")}

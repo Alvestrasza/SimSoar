@@ -12,7 +12,23 @@
     "login": "Anmelden",
     "logout": "Abmelden",
     "myProfile": "Mein Profil",
-    "admin": "Admin"
+    "admin": "Admin",
+    "notifications": "Benachrichtigungen: {count} ungelesen"
+  },
+  "Notifications": {
+    "pageTitle": "Benachrichtigungen",
+    "unreadCount": "{count, plural, =0 {Keine ungelesenen Benachrichtigungen} one {# ungelesene Benachrichtigung} other {# ungelesene Benachrichtigungen}}",
+    "markAllRead": "Alle als gelesen markieren",
+    "markRead": "Als gelesen markieren",
+    "empty": "Noch keine Benachrichtigungen vorhanden.",
+    "openFlight": "Flug öffnen",
+    "systemActor": "SimSoar",
+    "unknownFlight": "einem Flug",
+    "unknownStatus": "aktualisiert",
+    "flightLike": "{actor} gefällt „{flight}“.",
+    "flightComment": "{actor} hat „{flight}“ kommentiert.",
+    "followedFlight": "{actor} hat einen neuen Flug veröffentlicht: „{flight}“.",
+    "flightModeration": "Der Moderationsstatus von „{flight}“ wurde auf {status} geändert."
   },
   "Footer": {
     "copyright": "© {year} {holder1} / {holder2}. Alle Rechte vorbehalten.",
