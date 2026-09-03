@@ -2,6 +2,8 @@ import {prisma} from "@/lib/db";
 import {Link} from "@/i18n/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import HomeMapPreview from "@/app/components/HomeMapPreview";
+import {auth} from "@/auth";
+import {buildHomeFeedWhere} from "@/lib/home-feed";
 
 export const dynamic = "force-dynamic";
 
@@ -16,44 +18,65 @@ export default async function HomePage({params}: HomePageProps) {
 
   const t = await getTranslations({locale, namespace: "Home"});
 
-  const [totalFlights, totalPilots, best] = await Promise.all([
+  let session = null;
+  try {
+    session = await auth();
+  } catch (error) {
+    console.error("SimSoar home session could not be loaded:", error);
+  }
+
+  const preferences = session?.user?.id
+    ? await prisma.userPreference.findUnique({
+        where: {userId: session.user.id},
+        select: {
+          homeFeedMode: true,
+          homeFeedSimulator: true,
+          homeFeedCompetitionClass: true
+        }
+      })
+    : null;
+
+  const feedWhere = buildHomeFeedWhere(session?.user?.id, preferences);
+
+  const [totalFlights, pilotGroups, best, recent] = await Promise.all([
     prisma.flight.count({
-      where: {
-        visibility: "PUBLIC",
-        moderationStatus: "APPROVED",
-        deletedAt: null
-      }
+      where: feedWhere
     }),
-    prisma.pilotProfile.count(),
+    prisma.flight.groupBy({
+      by: ["userId"],
+      where: feedWhere
+    }),
     prisma.flight.findFirst({
-      where: {
-        visibility: "PUBLIC",
-        moderationStatus: "APPROVED",
-        deletedAt: null
-      },
+      where: feedWhere,
       orderBy: {distanceKm: "desc"}
+    }),
+    prisma.flight.findMany({
+      where: feedWhere,
+      orderBy: {createdAt: "desc"},
+      take: 6,
+      select: {
+        id: true,
+        title: true,
+        pilotCallsign: true,
+        simulator: true,
+        distanceKm: true,
+        olcPoints: true,
+        avgSpeedKmh: true,
+        createdAt: true
+      }
     })
   ]);
 
-  const recent = await prisma.flight.findMany({
-    where: {
-      visibility: "PUBLIC",
-      moderationStatus: "APPROVED",
-      deletedAt: null
-    },
-    orderBy: {createdAt: "desc"},
-    take: 6,
-    select: {
-      id: true,
-      title: true,
-      pilotCallsign: true,
-      simulator: true,
-      distanceKm: true,
-      olcPoints: true,
-      avgSpeedKmh: true,
-      createdAt: true
-    }
-  });
+  const totalPilots = pilotGroups.length;
+  const effectiveFeedMode = session?.user?.id
+    ? preferences?.homeFeedMode ?? "PUBLIC"
+    : "PUBLIC";
+  const feedModeLabel =
+    effectiveFeedMode === "OWN"
+      ? t("feedOwn")
+      : effectiveFeedMode === "FOLLOWING"
+        ? t("feedFollowing")
+        : t("feedPublic");
 
   return (
     <>
@@ -135,11 +158,21 @@ export default async function HomePage({params}: HomePageProps) {
 
         <div className="card">
           <div className="cardHead">
-            <span className="cardTitle">{t("recentFlights")}</span>
+            <div>
+              <span className="cardTitle">{t("recentFlights")}</span>
+              <span className="muted homeFeedScope">{feedModeLabel}</span>
+            </div>
 
-            <Link className="muted" href="/flights">
-              {t("viewAll")}
-            </Link>
+            <div className="homeFeedLinks">
+              {session?.user?.id ? (
+                <Link className="muted" href="/profile">
+                  {t("configureFeed")}
+                </Link>
+              ) : null}
+              <Link className="muted" href="/flights">
+                {t("viewAll")}
+              </Link>
+            </div>
           </div>
 
           <div className="cardBody grid grid3">

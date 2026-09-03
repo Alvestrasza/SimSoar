@@ -75,6 +75,12 @@ enum AuditAction {
   PILOT_UNFOLLOW
 }
 
+enum HomeFeedMode {
+  PUBLIC
+  OWN
+  FOLLOWING
+}
+
 model User {
   id             String          @id @default(cuid())
   name           String?
@@ -251,6 +257,9 @@ model UserPreference {
   unitSystem               UnitSystemPreference      @default(METRIC)
   preferredLeaderboardView LeaderboardViewPreference @default(ALL)
   preferredMapMode         MapModePreference         @default(STANDARD)
+  homeFeedMode             HomeFeedMode              @default(PUBLIC)
+  homeFeedSimulator        String?
+  homeFeedCompetitionClass String?
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
 
