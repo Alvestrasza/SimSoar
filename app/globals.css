@@ -503,6 +503,8 @@ textarea { min-height: 120px; resize: vertical; }
 .scoringWindowForm label { display: grid; gap: 5px; color: var(--muted); font-size: 12px; }
 .scoringWindowForm input { width: 100%; }
 .scoringWindowForm .btn { grid-column: 1 / -1; justify-content: center; }
+.thermalSort { display: flex; align-items: center; gap: 10px; margin: 12px 0; color: var(--muted); font-size: 13px; }
+.thermalSort select { width: auto; min-width: 160px; }
 .parsedBox { margin-top: 14px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: #f8fafc; display: grid; gap: 7px; font-size: 13px; }
 .parsedBox > div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
 .parsedBox > div:last-of-type { border-bottom: none; }

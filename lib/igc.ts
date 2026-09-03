@@ -13,6 +13,8 @@ export type TrackPointInput = {
 
 export type ThermalInput = {
   seq: number;
+  startSeq: number;
+  endSeq: number;
   startTime?: Date;
   endTime?: Date;
   centerLat?: number;
@@ -21,6 +23,7 @@ export type ThermalInput = {
   maxClimbMs: number;
   gainM: number;
   durationSec: number;
+  efficiencyPercent: number;
 };
 
 export type ParsedIgc = {
@@ -253,6 +256,8 @@ export function detectThermals(points: TrackPointInput[]): ThermalInput[] {
 
       thermals.push({
         seq: thermals.length + 1,
+        startSeq: start.seq,
+        endSeq: end.seq,
         startTime: start.time,
         endTime: end.time,
         centerLat: center.lat,
@@ -260,7 +265,10 @@ export function detectThermals(points: TrackPointInput[]): ThermalInput[] {
         avgClimbMs: Number(avgClimbMs.toFixed(1)),
         maxClimbMs: varioValues.length > 0 ? Math.max(...varioValues) : 0,
         gainM: Math.round(gain),
-        durationSec
+        durationSec,
+        efficiencyPercent: Number(Math.min(100, Math.max(0,
+          (avgClimbMs / (varioValues.length > 0 ? Math.max(...varioValues) : avgClimbMs)) * 100
+        )).toFixed(1))
       });
     }
 

@@ -7,6 +7,7 @@ import AltitudeChart from "./AltitudeChart";
 import FlightTrackMap from "./FlightTrackMap";
 import FlightOwnerActions from "./FlightOwnerActions";
 import {updateScoringWindowAction} from "@/app/[locale]/flights/[id]/scoring-actions";
+import {sortThermals, type ThermalSortMode} from "@/lib/thermal-analysis";
 
 type TrackPoint = {
   seq: number;
@@ -19,12 +20,15 @@ type TrackPoint = {
 type Thermal = {
   id: string;
   seq: number;
+  startSeq?: number | null;
+  endSeq?: number | null;
   centerLat?: number | null;
   centerLon?: number | null;
   avgClimbMs: number;
   maxClimbMs: number;
   gainM: number;
   durationSec: number;
+  efficiencyPercent: number;
 };
 
 type Visibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
@@ -173,10 +177,15 @@ export default function FlightDetailClient({
   const t = useTranslations("FlightDetail");
   const locale = useLocale();
   const [tab, setTab] = useState<Tab>("map");
+  const [thermalSort, setThermalSort] = useState<ThermalSortMode>("strength");
 
   const altProfile = flight.track
     .map((p) => p.altM)
     .filter((alt) => Number.isFinite(alt));
+  const altitudePointSequences = flight.track
+    .filter((point) => Number.isFinite(point.altM))
+    .map((point) => point.seq);
+  const sortedThermals = sortThermals(flight.thermals, thermalSort);
 
   return (
     <main className="wrap">
@@ -307,6 +316,8 @@ export default function FlightDetailClient({
               <>
                 <AltitudeChart
                   profile={altProfile}
+                  pointSequences={altitudePointSequences}
+                  thermalRanges={flight.thermals}
                   minAlt={flight.minAltitudeM}
                   maxAlt={flight.maxAltitudeM}
                 />
@@ -347,11 +358,19 @@ export default function FlightDetailClient({
 
             <p className="muted">{t("thermalsDescription")}</p>
 
+            <label className="thermalSort">
+              {t("thermalSort")}
+              <select value={thermalSort} onChange={(event) => setThermalSort(event.target.value as ThermalSortMode)}>
+                <option value="strength">{t("thermalSortStrength")}</option>
+                <option value="gain">{t("thermalSortGain")}</option>
+              </select>
+            </label>
+
             {flight.thermals.length === 0 ? (
               <p className="muted emptyInline">{t("noThermals")}</p>
             ) : (
               <div className="thermalList">
-                {flight.thermals.map((thermal) => (
+                {sortedThermals.map((thermal) => (
                   <div className="thermalItem" key={thermal.id}>
                     <div className="thermalBubble">
                       +{thermal.avgClimbMs.toFixed(1)}
@@ -366,7 +385,7 @@ export default function FlightDetailClient({
                         {t("thermalGain")}: +{thermal.gainM} m ·{" "}
                         {t("thermalDuration")}: {thermal.durationSec}s ·{" "}
                         {t("thermalMax")}{" "}
-                        {thermal.maxClimbMs.toFixed(1)} m/s
+                        {thermal.maxClimbMs.toFixed(1)} m/s · {t("thermalEfficiency")}: {thermal.efficiencyPercent.toFixed(0)}%
                       </div>
                     </div>
                   </div>

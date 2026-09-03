@@ -469,6 +469,8 @@ export async function updateFlightMetadataAction(formData: FormData) {
           data: replacement.parsed.thermals.map((thermal) => ({
             flightId: currentFlight.id,
             seq: thermal.seq,
+            startSeq: thermal.startSeq,
+            endSeq: thermal.endSeq,
             startTime: thermal.startTime,
             endTime: thermal.endTime,
             centerLat: thermal.centerLat,
@@ -476,7 +478,8 @@ export async function updateFlightMetadataAction(formData: FormData) {
             avgClimbMs: thermal.avgClimbMs,
             maxClimbMs: thermal.maxClimbMs,
             gainM: thermal.gainM,
-            durationSec: thermal.durationSec
+            durationSec: thermal.durationSec,
+            efficiencyPercent: thermal.efficiencyPercent
           }))
         });
 

@@ -292,6 +292,8 @@ model Thermal {
   id          String    @id @default(cuid())
   flightId    String
   seq         Int
+  startSeq    Int?
+  endSeq      Int?
   startTime   DateTime?
   endTime     DateTime?
   centerLat   Float?
@@ -300,6 +302,7 @@ model Thermal {
   maxClimbMs  Float
   gainM       Int
   durationSec Int
+  efficiencyPercent Float @default(0)
 
   flight Flight @relation(fields: [flightId], references: [id], onDelete: Cascade)
 

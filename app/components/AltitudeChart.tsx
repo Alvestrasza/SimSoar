@@ -4,11 +4,13 @@ import { useEffect, useRef } from "react";
 
 type Props = {
   profile: number[];
+  pointSequences?: number[];
+  thermalRanges?: Array<{startSeq?: number | null; endSeq?: number | null}>;
   minAlt: number;
   maxAlt: number;
 };
 
-export default function AltitudeChart({ profile, minAlt, maxAlt }: Props) {
+export default function AltitudeChart({profile, pointSequences = [], thermalRanges = [], minAlt, maxAlt}: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -39,6 +41,19 @@ export default function AltitudeChart({ profile, minAlt, maxAlt }: Props) {
       y: height - pad - ((alt - minAlt) / range) * (height - pad * 2)
     });
 
+    ctx.fillStyle = "rgba(245, 158, 11, 0.16)";
+    for (const thermal of thermalRanges) {
+      if (thermal.startSeq == null || thermal.endSeq == null || pointSequences.length !== profile.length) continue;
+      const startIndex = pointSequences.findIndex((seq) => seq >= thermal.startSeq!);
+      let endIndex = pointSequences.length - 1;
+      while (endIndex >= 0 && pointSequences[endIndex] > thermal.endSeq) endIndex -= 1;
+      if (startIndex < 0) continue;
+      if (endIndex < startIndex) endIndex = startIndex;
+      const startX = point(profile[startIndex], startIndex).x;
+      const endX = point(profile[endIndex], endIndex).x;
+      ctx.fillRect(startX, pad, Math.max(3, endX - startX), height - pad * 2);
+    }
+
     ctx.beginPath();
     profile.forEach((alt, index) => {
       const p = point(alt, index);
@@ -66,7 +81,7 @@ export default function AltitudeChart({ profile, minAlt, maxAlt }: Props) {
     ctx.font = "11px Inter, sans-serif";
     ctx.fillText(`${maxAlt} m`, pad + 4, 16);
     ctx.fillText(`${minAlt} m`, pad + 4, height - 4);
-  }, [profile, minAlt, maxAlt]);
+  }, [profile, pointSequences, thermalRanges, minAlt, maxAlt]);
 
   return <canvas ref={canvasRef} className="altitudeCanvas" />;
 }
