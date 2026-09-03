@@ -2,7 +2,6 @@ import {auth} from "@/auth";
 import FollowPilotButton from "@/app/components/FollowPilotButton";
 import {Link} from "@/i18n/navigation";
 import {prisma} from "@/lib/db";
-import {buildFollowedPublicFlightsWhere} from "@/lib/pilot-follow";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 export const dynamic = "force-dynamic";
@@ -106,28 +105,12 @@ export default async function PilotsPage({params}: PilotsPageProps) {
     console.error("SimSoar pilots session could not be loaded:", error);
   }
 
-  const [{pilots, error}, followed, personalFeed] = await Promise.all([
+  const [{pilots, error}, followed] = await Promise.all([
     getPilots(t("loadError")),
     session?.user?.id
       ? prisma.pilotFollow.findMany({
           where: {followerId: session.user.id},
           select: {followingId: true}
-        })
-      : Promise.resolve([]),
-    session?.user?.id
-      ? prisma.flight.findMany({
-          where: buildFollowedPublicFlightsWhere(session.user.id),
-          orderBy: {createdAt: "desc"},
-          take: 12,
-          select: {
-            id: true,
-            title: true,
-            pilotCallsign: true,
-            simulator: true,
-            distanceKm: true,
-            olcPoints: true,
-            createdAt: true
-          }
         })
       : Promise.resolve([])
   ]);
@@ -136,36 +119,6 @@ export default async function PilotsPage({params}: PilotsPageProps) {
 
   return (
     <main className="wrap">
-      {session?.user?.id ? (
-        <section className="card" style={{marginBottom: 24}}>
-          <div className="cardHead">
-            <span className="cardTitle">{t("personalFeedTitle")}</span>
-          </div>
-          <div className="cardBody grid grid3">
-            {personalFeed.length === 0 ? (
-              <p className="muted">{t("personalFeedEmpty")}</p>
-            ) : (
-              personalFeed.map((flight) => (
-                <Link
-                  className="card featureTile"
-                  href={`/flights/${flight.id}`}
-                  key={flight.id}
-                >
-                  <strong>{flight.title}</strong>
-                  <p className="muted">
-                    {flight.pilotCallsign} · {flight.simulator}
-                  </p>
-                  <p>
-                    <strong>{Math.round(flight.distanceKm)} km</strong> ·{" "}
-                    {Math.round(flight.olcPoints)} OLC
-                  </p>
-                </Link>
-              ))
-            )}
-          </div>
-        </section>
-      ) : null}
-
       <section className="card">
         <div className="cardHead">
           <span className="cardTitle">{t("pageTitle")}</span>
