@@ -93,6 +93,11 @@ enum NotificationType {
   FOLLOWED_PILOT_FLIGHT
 }
 
+enum UploadBatchItemStatus {
+  IMPORTED
+  FAILED
+}
+
 model User {
   id             String          @id @default(cuid())
   name           String?
@@ -115,6 +120,7 @@ model User {
   commentReports FlightCommentReport[]
   notifications  Notification[]        @relation("NotificationRecipient")
   notificationsSent Notification[]     @relation("NotificationActor")
+  uploadBatches     UploadBatch[]
 }
 
 model Account {
@@ -365,6 +371,29 @@ model Notification {
 
   @@index([userId, readAt, createdAt])
   @@index([flightId])
+}
+
+model UploadBatch {
+  id        String            @id @default(cuid())
+  userId    String
+  createdAt DateTime          @default(now())
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     UploadBatchItem[]
+
+  @@index([userId, createdAt])
+}
+
+model UploadBatchItem {
+  id               String                @id @default(cuid())
+  batchId          String
+  originalFileName String
+  status           UploadBatchItemStatus
+  errorCode        String?
+  flightId         String?
+  createdAt        DateTime              @default(now())
+  batch            UploadBatch           @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId, createdAt])
 }
 
 model AuditLog {

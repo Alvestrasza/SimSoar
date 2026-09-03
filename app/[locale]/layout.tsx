@@ -19,6 +19,7 @@ import LocaleSwitcher from "@/app/components/LocaleSwitcher";
 import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
 import QuickThemeToggle from "@/app/components/QuickThemeToggle";
+import {NotificationNav} from "@/app/components/NotificationNav";
 
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -138,6 +139,9 @@ try {
             </div>
 
             <div className="navRight">
+              <Suspense fallback={null}>
+                <NotificationNav locale={locale} />
+              </Suspense>
               <QuickThemeToggle />
               <LocaleSwitcher />
               <Suspense fallback={null}>

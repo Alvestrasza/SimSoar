@@ -6,6 +6,7 @@ import UploadIgcPreview from "@/app/components/UploadIgcPreview";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {hasRole} from "@/lib/rbac";
 import {Link} from "@/i18n/navigation";
+import {getBulkUploadLimits} from "@/lib/bulk-upload-policy";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -92,12 +93,18 @@ export default async function UploadPage({
     })
   ]);
 
+  const uploadLimits = getBulkUploadLimits();
+
   return (
     <main className="wrap" style={{maxWidth: 860}}>
       <div className="card">
         <div className="cardHead">
           <span className="cardTitle">{t("pageTitle")}</span>
-          <span className="muted">{t("fileHint")}</span>
+          <span className="muted">{t("fileHint", {
+            count: uploadLimits.maxFiles,
+            perFile: Math.round(uploadLimits.maxFileBytes / 1024 / 1024),
+            total: Math.round(uploadLimits.maxTotalBytes / 1024 / 1024)
+          })}</span>
         </div>
         {uploadError ? (
           <div

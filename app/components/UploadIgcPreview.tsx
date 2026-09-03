@@ -160,11 +160,12 @@ function durationLabel(seconds: number) {
 export default function UploadIgcPreview() {
   const t = useTranslations("Upload");
 
-  const [preview, setPreview] = useState<Preview | null>(null);
-  const [fileInfo, setFileInfo] = useState<{
+  const [files, setFiles] = useState<Array<{
     name: string;
     size: string;
-  } | null>(null);
+    preview: Preview | null;
+  }>>([]);
+  const preview = files.find((file) => file.preview)?.preview ?? null;
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -224,20 +225,20 @@ export default function UploadIgcPreview() {
     ctx.stroke();
   }, [preview]);
 
-  async function handleFile(file: File | null) {
-    if (!file) {
+  async function handleFiles(fileList: FileList | null) {
+    if (!fileList) {
       return;
     }
 
-    setFileInfo({
-      name: file.name,
-      size: `${(file.size / 1024).toFixed(1)} KB`
-    });
-
-    const text = await file.text();
-    const parsed = parsePreview(text);
-
-    setPreview(parsed);
+    const parsedFiles = await Promise.all(
+      Array.from(fileList).map(async (file) => ({
+        name: file.name,
+        size: `${(file.size / 1024).toFixed(1)} KB`,
+        preview: parsePreview(await file.text())
+      }))
+    );
+    setFiles(parsedFiles);
+    const parsed = parsedFiles.find((file) => file.preview)?.preview ?? null;
 
     if (parsed?.pilot) {
       const pilotInput = document.querySelector<HTMLInputElement>(
@@ -275,17 +276,22 @@ export default function UploadIgcPreview() {
           name="igc"
           type="file"
           accept=".igc"
+          multiple
           required
-          onChange={(event) =>
-            handleFile(event.target.files?.[0] ?? null)
-          }
+          onChange={(event) => handleFiles(event.target.files)}
         />
       </div>
 
-      {fileInfo ? (
-        <div className="fileOk">
-          <strong>{fileInfo.name}</strong>
-          <span className="muted">{fileInfo.size}</span>
+      {files.length > 0 ? (
+        <div className="uploadFileList">
+          {files.map((file, index) => (
+            <div className={file.preview ? "fileOk" : "fileOk uploadFileInvalid"} key={`${file.name}-${index}`}>
+              <strong>{file.name}</strong>
+              <span className="muted">
+                {file.size} · {file.preview ? t("clientValid") : t("clientInvalid")}
+              </span>
+            </div>
+          ))}
         </div>
       ) : null}
 
@@ -335,7 +341,7 @@ export default function UploadIgcPreview() {
 
           <canvas ref={canvasRef} className="uploadAltCanvas" />
         </div>
-      ) : fileInfo ? (
+      ) : files.length > 0 ? (
         <div className="parsedBox warn">
           {t("noValidRecords")}
         </div>
