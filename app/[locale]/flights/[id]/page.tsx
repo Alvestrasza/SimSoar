@@ -205,7 +205,11 @@ export default async function FlightDetailPage({
           maxClimbMs: t.maxClimbMs,
           gainM: t.gainM,
           durationSec: t.durationSec,
-          efficiencyPercent: t.efficiencyPercent
+          efficiencyPercent: t.efficiencyPercent,
+          windDirectionDeg: t.windDirectionDeg,
+          windSpeedKmh: t.windSpeedKmh,
+          windConfidence: t.windConfidence,
+          windDriftDistanceM: t.windDriftDistanceM
         })),
         glidePhases: flight.glidePhases.map((phase: any) => ({
           id: phase.id,

@@ -1,5 +1,6 @@
 import {calculateScore, type ScoringResult} from "./scoring.ts";
 import {detectScoringWindow, type DetectedScoringWindow} from "./scoring-window.ts";
+import {estimateThermalWind, type WindConfidence} from "./wind-estimation.ts";
 
 export type TrackPointInput = {
   seq: number;
@@ -24,6 +25,10 @@ export type ThermalInput = {
   gainM: number;
   durationSec: number;
   efficiencyPercent: number;
+  windDirectionDeg?: number;
+  windSpeedKmh?: number;
+  windConfidence?: WindConfidence;
+  windDriftDistanceM?: number;
 };
 
 export type GlidePhaseInput = {
@@ -269,6 +274,7 @@ export function detectThermals(points: TrackPointInput[]): ThermalInput[] {
         .map((point) => point.varioMs)
         .filter((value): value is number => Number.isFinite(value));
       const center = segment[Math.floor(segment.length / 2)] ?? start;
+      const wind = estimateThermalWind(segment);
 
       thermals.push({
         seq: thermals.length + 1,
@@ -284,7 +290,11 @@ export function detectThermals(points: TrackPointInput[]): ThermalInput[] {
         durationSec,
         efficiencyPercent: Number(Math.min(100, Math.max(0,
           (avgClimbMs / (varioValues.length > 0 ? Math.max(...varioValues) : avgClimbMs)) * 100
-        )).toFixed(1))
+        )).toFixed(1)),
+        windDirectionDeg: wind?.directionDeg,
+        windSpeedKmh: wind?.speedKmh,
+        windConfidence: wind?.confidence,
+        windDriftDistanceM: wind?.driftDistanceM
       });
     }
 
