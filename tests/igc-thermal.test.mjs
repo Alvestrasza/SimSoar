@@ -41,6 +41,9 @@ test("keeps a sustained thermal as one complete segment", () => {
   assert.equal(thermals[0].durationSec, 180);
   assert.equal(thermals[0].gainM, 180);
   assert.equal(thermals[0].avgClimbMs, 1);
+  assert.equal(thermals[0].startSeq, 0);
+  assert.equal(thermals[0].endSeq, 180);
+  assert.equal(thermals[0].efficiencyPercent, 100);
 });
 
 test("keeps a thermal together across a brief interruption", () => {

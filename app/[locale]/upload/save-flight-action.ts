@@ -241,6 +241,8 @@ async function importFlightFile({
           createMany: {
             data: parsed.thermals.map((thermal: (typeof parsed.thermals)[number]) => ({
               seq: thermal.seq,
+              startSeq: thermal.startSeq,
+              endSeq: thermal.endSeq,
               startTime: thermal.startTime,
               endTime: thermal.endTime,
               centerLat: thermal.centerLat,
@@ -248,7 +250,8 @@ async function importFlightFile({
               avgClimbMs: thermal.avgClimbMs,
               maxClimbMs: thermal.maxClimbMs,
               gainM: thermal.gainM,
-              durationSec: thermal.durationSec
+              durationSec: thermal.durationSec,
+              efficiencyPercent: thermal.efficiencyPercent
             }))
           }
         },

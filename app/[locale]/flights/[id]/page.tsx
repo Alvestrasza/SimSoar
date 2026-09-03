@@ -192,12 +192,15 @@ export default async function FlightDetailPage({
         thermals: flight.thermals.map((t: any) => ({
           id: t.id,
           seq: t.seq,
+          startSeq: t.startSeq,
+          endSeq: t.endSeq,
           centerLat: t.centerLat,
           centerLon: t.centerLon,
           avgClimbMs: t.avgClimbMs,
           maxClimbMs: t.maxClimbMs,
           gainM: t.gainM,
-          durationSec: t.durationSec
+          durationSec: t.durationSec,
+          efficiencyPercent: t.efficiencyPercent
         })),
         scoringPoints: flight.scoringPoints.map((point) => ({
           id: point.id,
