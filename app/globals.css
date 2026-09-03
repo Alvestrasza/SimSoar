@@ -173,7 +173,6 @@ html[data-theme="dark"] .btnSecondary:hover:not(:disabled) {
 .grid2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .twoCol { display: grid; grid-template-columns: 1fr 330px; gap: 22px; align-items: start; }
 .featureTile { padding: 28px; }
-.featureIcon { font-size: 32px; margin-bottom: 12px; }
 
 .tableWrap {
   overflow-x: auto;

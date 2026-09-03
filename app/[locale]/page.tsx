@@ -136,26 +136,6 @@ export default async function HomePage({params}: HomePageProps) {
       </section>
 
       <main className="wrap">
-        <section className="grid grid3" style={{marginBottom: 34}}>
-          <div className="card featureTile">
-            <div className="featureIcon">📂</div>
-            <h3>{t("featureUploadTitle")}</h3>
-            <p className="muted">{t("featureUploadText")}</p>
-          </div>
-
-          <div className="card featureTile">
-            <div className="featureIcon">🌡️</div>
-            <h3>{t("featureThermalTitle")}</h3>
-            <p className="muted">{t("featureThermalText")}</p>
-          </div>
-
-          <div className="card featureTile">
-            <div className="featureIcon">🔐</div>
-            <h3>{t("featureMultiUserTitle")}</h3>
-            <p className="muted">{t("featureMultiUserText")}</p>
-          </div>
-        </section>
-
         <div className="card">
           <div className="cardHead">
             <div>
