@@ -11,6 +11,11 @@ import { writeAuditLog } from "@/lib/audit";
 import { notifyFollowersAboutFlight } from "@/lib/notifications";
 import { hasRole } from "@/lib/rbac";
 import { Prisma } from "@prisma/client";
+import {
+  displayUploadFileName,
+  getBulkUploadLimits,
+  validateBatchLimits
+} from "@/lib/bulk-upload-policy";
 
 const formSchema = z.object({
   locale: z.enum(["de", "en"]).default("de"),
@@ -36,7 +41,16 @@ type UploadErrorCode =
   | "invalid-extension"
   | "invalid-mime"
   | "invalid-content"
-  | "duplicate";
+  | "duplicate"
+  | "too-many-files"
+  | "total-size"
+  | "processing-failed";
+
+class UploadFileError extends Error {
+  constructor(readonly code: UploadErrorCode) {
+    super(code);
+  }
+}
 
 function getLocale(formData: FormData): "de" | "en" {
   return formData.get("locale") === "en" ? "en" : "de";
@@ -93,138 +107,90 @@ async function cleanupUploadedFile(objectPath: string) {
   }
 }
 
-export async function saveFlightAction(formData: FormData) {
-  const locale = getLocale(formData);
+type UploadFields = z.infer<typeof formSchema>;
 
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    throw new Error("Not authenticated.");
-  }
-
-  if (!hasRole(session.user.roles, "PILOT")) {
-    throw new Error("Pilot role required to upload flights.");
-  }
-
-  const file = formData.get("igc");
-
-  if (!(file instanceof File)) {
-    redirectUploadError(locale, "missing-file");
-  }
-
-  const maxBytes = Number(process.env.MAX_IGC_UPLOAD_BYTES ?? 10 * 1024 * 1024);
-
-  if (file.size <= 0 || file.size > maxBytes) {
-    redirectUploadError(locale, "invalid-size");
+async function importFlightFile({
+  file,
+  fields,
+  userId,
+  userEmail,
+  maxFileBytes
+}: {
+  file: File;
+  fields: UploadFields;
+  userId: string;
+  userEmail?: string | null;
+  maxFileBytes: number;
+}) {
+  if (file.size <= 0 || file.size > maxFileBytes) {
+    throw new UploadFileError("invalid-size");
   }
 
   if (!file.name.toLowerCase().endsWith(".igc")) {
-    redirectUploadError(locale, "invalid-extension");
+    throw new UploadFileError("invalid-extension");
   }
 
   const mimeType = file.type.toLowerCase();
-
   if (!allowedIgcMimeTypes.has(mimeType)) {
-    redirectUploadError(locale, "invalid-mime");
+    throw new UploadFileError("invalid-mime");
   }
 
-  const fields = formSchema.parse({
-    locale,
-    pilotCallsign: formData.get("pilotCallsign"),
-    simulator: formData.get("simulator"),
-    registration: formData.get("registration") || undefined,
-    glider: formData.get("glider") || undefined,
-    competitionClass: formData.get("competitionClass") || undefined,
-    visibility: formData.get("visibility"),
-    comment: formData.get("comment") || undefined
-  });
-
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-
+  const buffer = Buffer.from(await file.arrayBuffer());
   if (hasNullBytes(buffer)) {
-    redirectUploadError(locale, "invalid-content");
+    throw new UploadFileError("invalid-content");
   }
 
   const text = buffer.toString("utf8");
-
   if (!hasValidIgcStructure(text)) {
-    redirectUploadError(locale, "invalid-content");
+    throw new UploadFileError("invalid-content");
   }
 
   const sha = sha256Buffer(buffer);
-
   const [duplicateFlight, blockedUpload] = await Promise.all([
-    prisma.flight.findFirst({
-      where: {
-        igcSha256: sha
-      },
-      select: {
-        id: true
-      }
-    }),
-    prisma.igcUploadBlock.findUnique({
-      where: {
-        igcSha256: sha
-      },
-      select: {
-        id: true
-      }
-    })
+    prisma.flight.findFirst({where: {igcSha256: sha}, select: {id: true}}),
+    prisma.igcUploadBlock.findUnique({where: {igcSha256: sha}, select: {id: true}})
   ]);
 
   if (duplicateFlight || blockedUpload) {
-    redirectUploadError(locale, "duplicate");
+    throw new UploadFileError("duplicate");
   }
 
   let parsed;
-
   try {
     parsed = parseIgc(text);
   } catch (error) {
     console.warn("SimSoar IGC upload rejected during parser validation:", {
-      userId: session.user.id,
-      fileName: file.name,
+      userId,
+      fileName: displayUploadFileName(file.name),
       mimeType,
       size: file.size,
       error
     });
-
-    redirectUploadError(locale, "invalid-content");
+    throw new UploadFileError("invalid-content");
   }
 
-  const uploadRoot = trimTrailingPathSeparators(
-    process.env.UPLOAD_DIR ?? "uploads"
-  );
+  const uploadRoot = trimTrailingPathSeparators(process.env.UPLOAD_DIR ?? "uploads");
+  const uploadDir = [uploadRoot, sha.slice(0, 2), sha.slice(2, 4)].join("/");
+  const objectPath = [uploadDir, `${sha}-${safeFilename(file.name)}`].join("/");
 
-  const uploadDir = [
-    uploadRoot,
-    sha.slice(0, 2),
-    sha.slice(2, 4)
-  ].join("/");
-
-  const objectPath = [
-    uploadDir,
-    `${sha}-${safeFilename(file.name)}`
-  ].join("/");
-
-  await fs.mkdir(/* turbopackIgnore: true */ uploadDir, { recursive: true });
-
-  await fs.writeFile(
-    /* turbopackIgnore: true */ objectPath,
-    buffer,
-    {
+  await fs.mkdir(/* turbopackIgnore: true */ uploadDir, {recursive: true});
+  try {
+    await fs.writeFile(/* turbopackIgnore: true */ objectPath, buffer, {
       flag: "wx",
       mode: 0o640
+    });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EEXIST") {
+      throw new UploadFileError("duplicate");
     }
-  );
+    throw error;
+  }
 
   let flight;
-
   try {
     flight = await prisma.flight.create({
       data: {
-        userId: session.user.id,
+        userId,
         pilotCallsign: fields.pilotCallsign,
         title: `${fields.pilotCallsign} · ${Math.round(parsed.distanceKm)} km`,
         simulator: fields.simulator,
@@ -250,29 +216,29 @@ export async function saveFlightAction(formData: FormData) {
         track: {
           createMany: {
             data: parsed.points
-              .filter((_, i) => i % Math.max(1, Math.floor(parsed.points.length / 2500)) === 0)
-              .map((p) => ({
-                seq: p.seq,
-                time: p.time,
-                lat: p.lat,
-                lon: p.lon,
-                altM: p.altM,
-                varioMs: p.varioMs
+              .filter((_: unknown, index: number) => index % Math.max(1, Math.floor(parsed.points.length / 2500)) === 0)
+              .map((point: (typeof parsed.points)[number]) => ({
+                seq: point.seq,
+                time: point.time,
+                lat: point.lat,
+                lon: point.lon,
+                altM: point.altM,
+                varioMs: point.varioMs
               }))
           }
         },
         thermals: {
           createMany: {
-            data: parsed.thermals.map((t) => ({
-              seq: t.seq,
-              startTime: t.startTime,
-              endTime: t.endTime,
-              centerLat: t.centerLat,
-              centerLon: t.centerLon,
-              avgClimbMs: t.avgClimbMs,
-              maxClimbMs: t.maxClimbMs,
-              gainM: t.gainM,
-              durationSec: t.durationSec
+            data: parsed.thermals.map((thermal: (typeof parsed.thermals)[number]) => ({
+              seq: thermal.seq,
+              startTime: thermal.startTime,
+              endTime: thermal.endTime,
+              centerLat: thermal.centerLat,
+              centerLon: thermal.centerLon,
+              avgClimbMs: thermal.avgClimbMs,
+              maxClimbMs: thermal.maxClimbMs,
+              gainM: thermal.gainM,
+              durationSec: thermal.durationSec
             }))
           }
         }
@@ -280,41 +246,111 @@ export async function saveFlightAction(formData: FormData) {
     });
   } catch (error) {
     await cleanupUploadedFile(objectPath);
-
     if (isUniqueConstraintError(error, "igcSha256")) {
-      redirectUploadError(locale, "duplicate");
+      throw new UploadFileError("duplicate");
     }
-
     throw error;
   }
 
-  await writeAuditLog({
-    actorUserId: session.user.id,
-    actorEmail: session.user.email,
-    action: "FLIGHT_UPLOAD",
-    targetType: "Flight",
-    targetId: flight.id,
-    summary: "Flight uploaded and automatically approved.",
-    metadata: {
-      title: flight.title,
-      visibility: fields.visibility,
-      moderationStatus: "APPROVED",
-      simulator: fields.simulator,
-      distanceKm: parsed.distanceKm,
-      olcPoints: parsed.olcPoints,
-      igcSha256: sha,
-      originalFileName: file.name,
-      mimeType,
-      sizeBytes: file.size,
-      storagePath: objectPath
+  const followUpResults = await Promise.allSettled([
+    writeAuditLog({
+      actorUserId: userId,
+      actorEmail: userEmail,
+      action: "FLIGHT_UPLOAD",
+      targetType: "Flight",
+      targetId: flight.id,
+      summary: "Flight uploaded and automatically approved.",
+      metadata: {
+        title: flight.title,
+        visibility: fields.visibility,
+        moderationStatus: "APPROVED",
+        simulator: fields.simulator,
+        distanceKm: parsed.distanceKm,
+        olcPoints: parsed.olcPoints,
+        igcSha256: sha,
+        originalFileName: displayUploadFileName(file.name),
+        mimeType,
+        sizeBytes: file.size,
+        storagePath: objectPath
+      }
+    }),
+    notifyFollowersAboutFlight({
+      pilotUserId: userId,
+      flightId: flight.id,
+      isPublicAndApproved: fields.visibility === "PUBLIC"
+    })
+  ]);
+
+  if (followUpResults.some((result) => result.status === "rejected")) {
+    console.error("SimSoar upload follow-up failed after a successful import.", {
+      userId,
+      flightId: flight.id
+    });
+  }
+
+  return flight;
+}
+
+export async function saveFlightAction(formData: FormData) {
+  const locale = getLocale(formData);
+
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("Not authenticated.");
+  }
+
+  if (!hasRole(session.user.roles, "PILOT")) {
+    throw new Error("Pilot role required to upload flights.");
+  }
+
+  const fields = formSchema.parse({
+    locale,
+    pilotCallsign: formData.get("pilotCallsign"),
+    simulator: formData.get("simulator"),
+    registration: formData.get("registration") || undefined,
+    glider: formData.get("glider") || undefined,
+    competitionClass: formData.get("competitionClass") || undefined,
+    visibility: formData.get("visibility"),
+    comment: formData.get("comment") || undefined
+  });
+
+  const files = formData.getAll("igc").filter((entry): entry is File => entry instanceof File);
+  const limits = getBulkUploadLimits();
+  const batchLimitError = validateBatchLimits(files, limits);
+  if (batchLimitError) {
+    redirectUploadError(locale, batchLimitError);
+  }
+
+  const batch = await prisma.uploadBatch.create({data: {userId: session.user.id}});
+
+  for (const file of files) {
+    const originalFileName = displayUploadFileName(file.name);
+    try {
+      const flight = await importFlightFile({
+        file,
+        fields,
+        userId: session.user.id,
+        userEmail: session.user.email,
+        maxFileBytes: limits.maxFileBytes
+      });
+      await prisma.uploadBatchItem.create({
+        data: {batchId: batch.id, originalFileName, status: "IMPORTED", flightId: flight.id}
+      });
+    } catch (error) {
+      const errorCode = error instanceof UploadFileError ? error.code : "processing-failed";
+      console.error("SimSoar bulk upload item failed.", {
+        userId: session.user.id,
+        batchId: batch.id,
+        originalFileName,
+        errorCode,
+        error: error instanceof UploadFileError ? undefined : error
+      });
+      await prisma.uploadBatchItem.create({
+        data: {batchId: batch.id, originalFileName, status: "FAILED", errorCode}
+      });
     }
-  });
+  }
 
-  await notifyFollowersAboutFlight({
-    pilotUserId: session.user.id,
-    flightId: flight.id,
-    isPublicAndApproved: fields.visibility === "PUBLIC"
-  });
-
-  redirect(`/${fields.locale}/flights/${flight.id}`);
+  redirect(`/${fields.locale}/upload/results/${batch.id}`);
 }
