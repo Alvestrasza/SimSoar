@@ -172,7 +172,14 @@ const noticeStatus =
               <input
                 name="homeAirfield"
                 defaultValue={profile?.homeAirfield ?? ""}
+                maxLength={120}
+                placeholder={t("homeAirfieldPlaceholder")}
+                autoCapitalize="characters"
+                spellCheck={false}
               />
+              <p className="muted" style={{margin: "6px 0 0", fontSize: 13}}>
+                {t("homeAirfieldHint")}
+              </p>
             </div>
 
             <div className="formGroup">
