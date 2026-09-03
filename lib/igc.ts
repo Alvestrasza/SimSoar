@@ -26,6 +26,19 @@ export type ThermalInput = {
   efficiencyPercent: number;
 };
 
+export type GlidePhaseInput = {
+  seq: number;
+  startSeq: number;
+  endSeq: number;
+  startTime?: Date;
+  endTime?: Date;
+  durationSec: number;
+  distanceKm: number;
+  avgSpeedKmh: number;
+  avgSinkMs: number;
+  glideRatio: number;
+};
+
 export type ParsedIgc = {
   pilot?: string;
   glider?: string;
@@ -43,6 +56,7 @@ export type ParsedIgc = {
   maxVarioMs: number;
   points: TrackPointInput[];
   thermals: ThermalInput[];
+  glidePhases: GlidePhaseInput[];
 };
 
 const GLIDER_MAP: Record<string, string> = {
@@ -200,6 +214,7 @@ export function parseIgc(text: string): ParsedIgc {
   const avgSpeedKmh = durationSeconds > 0 ? distanceKm / (durationSeconds / 3600) : 0;
   const scoringWindow = detectScoringWindow(points);
   const scoring = calculateScore(points.slice(scoringWindow.startIndex, scoringWindow.endIndex + 1));
+  const thermals = detectThermals(points);
 
   return {
     pilot,
@@ -217,7 +232,8 @@ export function parseIgc(text: string): ParsedIgc {
     minAltitudeM: Math.min(...altitudes),
     maxVarioMs: Math.max(...varios),
     points,
-    thermals: detectThermals(points)
+    thermals,
+    glidePhases: detectGlidePhases(points, thermals)
   };
 }
 
@@ -313,4 +329,84 @@ export function detectThermals(points: TrackPointInput[]): ThermalInput[] {
   finishCandidate();
 
   return thermals;
+}
+
+const GLIDE_MIN_DURATION_SECONDS = 30;
+const GLIDE_MIN_DISTANCE_METERS = 250;
+
+export function detectGlidePhases(
+  points: TrackPointInput[],
+  thermals: ThermalInput[] = detectThermals(points)
+): GlidePhaseInput[] {
+  const phases: GlidePhaseInput[] = [];
+  if (points.length < 2) return phases;
+
+  const thermalSequences = new Set<number>();
+  for (const thermal of thermals) {
+    for (let seq = thermal.startSeq; seq <= thermal.endSeq; seq += 1) {
+      thermalSequences.add(seq);
+    }
+  }
+
+  let startIndex: number | null = null;
+  let endIndex: number | null = null;
+
+  const finishPhase = () => {
+    if (startIndex === null || endIndex === null) return;
+
+    const start = points[startIndex];
+    const end = points[endIndex];
+    const durationSec = secondsDelta(end.secondsOfDay, start.secondsOfDay);
+    let distanceM = 0;
+
+    for (let index = startIndex + 1; index <= endIndex; index += 1) {
+      const previous = points[index - 1];
+      const current = points[index];
+      distanceM += haversine(previous.lat, previous.lon, current.lat, current.lon);
+    }
+
+    if (
+      durationSec >= GLIDE_MIN_DURATION_SECONDS &&
+      distanceM >= GLIDE_MIN_DISTANCE_METERS
+    ) {
+      const altitudeLossM = start.altM - end.altM;
+      phases.push({
+        seq: phases.length + 1,
+        startSeq: start.seq,
+        endSeq: end.seq,
+        startTime: start.time,
+        endTime: end.time,
+        durationSec,
+        distanceKm: Number((distanceM / 1000).toFixed(2)),
+        avgSpeedKmh: Number(((distanceM / durationSec) * 3.6).toFixed(1)),
+        avgSinkMs: Number(((end.altM - start.altM) / durationSec).toFixed(2)),
+        glideRatio: altitudeLossM > 1
+          ? Number((distanceM / altitudeLossM).toFixed(1))
+          : 0
+      });
+    }
+
+    startIndex = null;
+    endIndex = null;
+  };
+
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1];
+    const current = points[index];
+    const sampleDuration = secondsDelta(current.secondsOfDay, previous.secondsOfDay);
+    const isContinuous = sampleDuration > 0 && sampleDuration <= 30;
+    const isOutsideThermal =
+      !thermalSequences.has(previous.seq) && !thermalSequences.has(current.seq);
+
+    if (!isContinuous || !isOutsideThermal) {
+      finishPhase();
+      continue;
+    }
+
+    startIndex ??= index - 1;
+    endIndex = index;
+  }
+
+  finishPhase();
+  return phases;
 }

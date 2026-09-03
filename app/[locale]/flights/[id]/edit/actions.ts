@@ -443,6 +443,12 @@ export async function updateFlightMetadataAction(formData: FormData) {
           }
         });
 
+        await tx.glidePhase.deleteMany({
+          where: {
+            flightId: currentFlight.id
+          }
+        });
+
         await tx.flightScoringPoint.deleteMany({
           where: {
             flightId: currentFlight.id
@@ -480,6 +486,22 @@ export async function updateFlightMetadataAction(formData: FormData) {
             gainM: thermal.gainM,
             durationSec: thermal.durationSec,
             efficiencyPercent: thermal.efficiencyPercent
+          }))
+        });
+
+        await tx.glidePhase.createMany({
+          data: replacement.parsed.glidePhases.map((phase) => ({
+            flightId: currentFlight.id,
+            seq: phase.seq,
+            startSeq: phase.startSeq,
+            endSeq: phase.endSeq,
+            startTime: phase.startTime,
+            endTime: phase.endTime,
+            durationSec: phase.durationSec,
+            distanceKm: phase.distanceKm,
+            avgSpeedKmh: phase.avgSpeedKmh,
+            avgSinkMs: phase.avgSinkMs,
+            glideRatio: phase.glideRatio
           }))
         });
 
