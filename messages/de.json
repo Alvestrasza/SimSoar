@@ -485,6 +485,15 @@
     "description": "SimSoar nutzt eine OIDC Benutzerverwaltung, MFA und Passwortregeln bleiben zentral.",
     "button": "Anmelden"
   },
+  "FlightStory": {
+    "title": "Fluggeschichte",
+    "empty": "Für diesen Flug wurde noch keine Geschichte geschrieben.",
+    "storyText": "Geschichte",
+    "images": "Bilder",
+    "limits": "JPEG, PNG oder WebP; höchstens {count} Bilder mit jeweils bis zu {megabytes} MB.",
+    "save": "Geschichte speichern",
+    "removeImage": "Bild entfernen"
+  },
   "LocaleSwitcher": {
     "label": "Sprache wechseln"
   },

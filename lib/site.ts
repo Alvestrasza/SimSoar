@@ -1,5 +1,5 @@
 export const SITE_NAME = "SimSoar";
-export const SITE_VERSION = "0.4.17";
+export const SITE_VERSION = "0.4.18";
 export const SITE_COPYRIGHT_HOLDER1 = "SimSoar Project Team";
 export const SITE_COPYRIGHT_HOLDER2 = "Tim Richter";
 export const SITE_COPYRIGHT_YEAR = "2026";

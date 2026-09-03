@@ -485,6 +485,15 @@
     "description": "SimSoar uses an user management system, MFA and password policies remain centralized.",
     "button": "Sign in"
   },
+  "FlightStory": {
+    "title": "Flight story",
+    "empty": "No story has been written for this flight yet.",
+    "storyText": "Story",
+    "images": "Images",
+    "limits": "JPEG, PNG, or WebP; up to {count} images of {megabytes} MB each.",
+    "save": "Save story",
+    "removeImage": "Remove image"
+  },
   "LocaleSwitcher": {
     "label": "Change language"
   },

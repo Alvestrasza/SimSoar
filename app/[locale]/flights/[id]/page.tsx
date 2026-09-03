@@ -5,6 +5,7 @@ import {hasRole} from "@/lib/rbac";
 import {resolveIgcDownloadMode} from "@/lib/igc-download";
 import FlightDetailClient from "@/app/components/FlightDetailClient";
 import FlightCommunitySection from "@/app/components/FlightCommunitySection";
+import FlightStorySection from "@/app/components/FlightStorySection";
 import {
   canDeleteFlightComment,
   canInteractWithFlight
@@ -52,6 +53,9 @@ export default async function FlightDetailPage({
         orderBy: {
           order: "asc"
         }
+      },
+      storyImages: {
+        orderBy: {createdAt: "asc"}
       }
     }
   });
@@ -249,6 +253,15 @@ export default async function FlightDetailPage({
         airspaces,
         airspaceCrossings
         }}
+      />
+
+      <FlightStorySection
+        locale={locale}
+        flightId={flight.id}
+        storyText={flight.storyText}
+        images={flight.storyImages.map((image) => ({id: image.id, fileName: image.fileName}))}
+        canEdit={(isOwner && !isLockedByModeration) || hasRole(session?.user?.roles, "ADMIN")}
+        canRemove={isOwner || canModerate}
       />
 
       {communityEnabled ? (
