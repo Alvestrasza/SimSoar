@@ -79,6 +79,8 @@ enum AuditAction {
   FLIGHT_COMMENT_DELETE
   FLIGHT_COMMENT_REPORT
   SCORING_WINDOW_UPDATE
+  AIRSPACE_IMPORT
+  AIRSPACE_DELETE
 }
 
 enum HomeFeedMode {
@@ -339,6 +341,34 @@ model GlidePhase {
 
   @@unique([flightId, seq])
   @@index([flightId, seq])
+}
+
+model Airspace {
+  id           String   @id @default(cuid())
+  name         String
+  className    String
+  floorLabel   String
+  ceilingLabel String
+  sourceName   String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  importedByUserId String
+  points       AirspacePoint[]
+
+  @@index([active, createdAt])
+}
+
+model AirspacePoint {
+  id         String @id @default(cuid())
+  airspaceId String
+  seq        Int
+  lat        Float
+  lon        Float
+
+  airspace Airspace @relation(fields: [airspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([airspaceId, seq])
+  @@index([airspaceId, seq])
 }
 
 model UserPreference {

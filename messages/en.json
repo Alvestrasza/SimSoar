@@ -472,7 +472,13 @@
     "igcDownloadTitle": "IGC file",
     "downloadIgc": "Download IGC",
     "igcDownloadPublicHint": "IGC download is publicly enabled for this flight.",
-    "igcDownloadPrivateHint": "You can download this IGC file because you are the owner or an administrator."    
+    "igcDownloadPrivateHint": "You can download this IGC file because you are the owner or an administrator.",
+    "showAirspaces": "Show airspaces",
+    "hideAirspaces": "Hide airspaces",
+    "airspaceCrossingsTitle": "Possible airspace crossings",
+    "airspaceDisclaimer": "Technical visualization based on imported polygons only; not legal advice or an operational flight clearance.",
+    "noAirspaceCrossings": "No possible crossing was detected in the available dataset.",
+    "airspaceTrackRange": "track points {start} to {end}"
   },
   "Login": {
     "title": "🔐 Sign in",
@@ -504,7 +510,26 @@
     "openPilotAdmin": "Open pilot administration",
     "igcBlocksTitle": "Blocked IGC hashes",
     "igcBlocksText": "IGC files that remain blocked for re-upload after permanent deletion.",
-    "openIgcBlocks": "Manage IGC hashes"
+    "openIgcBlocks": "Manage IGC hashes",
+    "airspacesTitle": "Airspace data",
+    "airspacesText": "Imported OpenAir polygons for maps and technical crossing checks.",
+    "openAirspaces": "Manage airspace data"
+  },
+  "AdminAirspaces": {
+    "pageTitle": "Airspace data",
+    "subtitle": "Import OpenAir polygons for technical map checks.",
+    "backToAdmin": "Back to Admin Dashboard",
+    "file": "OpenAir file",
+    "formatHint": "Supports .txt, .air, and .openair files with AC, AN, AL, AH, and DP polygon points.",
+    "import": "Import",
+    "imported": "{count} airspaces were imported.",
+    "available": "Imported airspaces",
+    "empty": "No airspaces have been imported yet.",
+    "points": "points",
+    "delete": "Remove",
+    "error_size": "The file is empty or exceeds the configured size limit.",
+    "error_type": "The file type is not supported.",
+    "error_content": "The file contains no valid or too many OpenAir polygons."
   },
   "AdminFlights": {
     "pageTitle": "Flight Moderation",

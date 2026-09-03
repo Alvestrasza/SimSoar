@@ -472,7 +472,13 @@
     "igcDownloadTitle": "IGC-Datei",
     "downloadIgc": "IGC herunterladen",
     "igcDownloadPublicHint": "Der IGC-Download ist für diesen Flug öffentlich freigegeben.",
-    "igcDownloadPrivateHint": "Du kannst diese IGC-Datei herunterladen, weil du Besitzer oder Administrator bist."      
+    "igcDownloadPrivateHint": "Du kannst diese IGC-Datei herunterladen, weil du Besitzer oder Administrator bist.",
+    "showAirspaces": "Lufträume einblenden",
+    "hideAirspaces": "Lufträume ausblenden",
+    "airspaceCrossingsTitle": "Mögliche Luftraumkreuzungen",
+    "airspaceDisclaimer": "Rein technische Visualisierung anhand der importierten Polygone; keine Rechtsberatung und keine flugbetriebliche Freigabe.",
+    "noAirspaceCrossings": "Im verfügbaren Datensatz wurde keine mögliche Kreuzung erkannt.",
+    "airspaceTrackRange": "Trackpunkte {start} bis {end}"
   },
   "Login": {
     "title": "🔐 Anmeldung",
@@ -504,7 +510,26 @@
     "openPilotAdmin": "Pilotenverwaltung öffnen",
     "igcBlocksTitle": "Gesperrte IGC-Hashes",
     "igcBlocksText": "IGC-Dateien, die nach endgültiger Löschung weiterhin für Re-Uploads blockiert sind.",
-    "openIgcBlocks": "IGC-Hashes verwalten"
+    "openIgcBlocks": "IGC-Hashes verwalten",
+    "airspacesTitle": "Luftraumdaten",
+    "airspacesText": "Importierte OpenAir-Polygone für Karten und technische Kreuzungsprüfung.",
+    "openAirspaces": "Luftraumdaten verwalten"
+  },
+  "AdminAirspaces": {
+    "pageTitle": "Luftraumdaten",
+    "subtitle": "OpenAir-Polygone importieren und für technische Kartenprüfungen bereitstellen.",
+    "backToAdmin": "Zurück zum Admin-Dashboard",
+    "file": "OpenAir-Datei",
+    "formatHint": "Unterstützt werden .txt, .air und .openair mit AC, AN, AL, AH und DP-Polygonpunkten.",
+    "import": "Importieren",
+    "imported": "{count} Lufträume wurden importiert.",
+    "available": "Importierte Lufträume",
+    "empty": "Noch keine Lufträume importiert.",
+    "points": "Punkte",
+    "delete": "Entfernen",
+    "error_size": "Die Datei ist leer oder überschreitet die konfigurierte Größenbegrenzung.",
+    "error_type": "Der Dateityp wird nicht unterstützt.",
+    "error_content": "Die Datei enthält keine gültigen oder zu viele OpenAir-Polygone."
   },
   "AdminFlights": {
     "pageTitle": "Flugmoderation",
