@@ -81,6 +81,8 @@ enum AuditAction {
   SCORING_WINDOW_UPDATE
   AIRSPACE_IMPORT
   AIRSPACE_DELETE
+  FLIGHT_STORY_UPDATE
+  FLIGHT_STORY_IMAGE_DELETE
 }
 
 enum HomeFeedMode {
@@ -214,6 +216,7 @@ model Flight {
   competitionClass  String?
   weatherMode       String                 @default("UNKNOWN")
   comment           String?
+  storyText         String?
   visibility        FlightVisibility       @default(PUBLIC)
   publicIgcDownloadEnabled Boolean         @default(false)
   moderationStatus  FlightModerationStatus @default(APPROVED)
@@ -257,6 +260,7 @@ model Flight {
   comments FlightComment[]
   notifications Notification[]
   scoringPoints FlightScoringPoint[]
+  storyImages FlightStoryImage[]
 
   @@index([visibility, createdAt])
   @@index([visibility, moderationStatus, createdAt])
@@ -369,6 +373,23 @@ model AirspacePoint {
 
   @@unique([airspaceId, seq])
   @@index([airspaceId, seq])
+}
+
+model FlightStoryImage {
+  id         String   @id @default(cuid())
+  flightId   String
+  objectPath String
+  fileName   String
+  mimeType   String
+  sizeBytes  Int
+  sha256     String
+  createdAt  DateTime @default(now())
+  uploadedByUserId String
+
+  flight Flight @relation(fields: [flightId], references: [id], onDelete: Cascade)
+
+  @@unique([flightId, sha256])
+  @@index([flightId, createdAt])
 }
 
 model UserPreference {

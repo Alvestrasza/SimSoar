@@ -184,7 +184,8 @@ export async function softDeleteFlightAction(formData: FormData) {
       igcSha256: true,
       deletedAt: true,
       deletedByUserId: true,
-      igcObjectPath: true
+      igcObjectPath: true,
+      storyImages: {select: {objectPath: true}}
     }
   });
 
@@ -223,6 +224,7 @@ export async function softDeleteFlightAction(formData: FormData) {
     });
 
     await cleanupFlightFile(flight.igcObjectPath);
+    await Promise.all(flight.storyImages.map((image) => cleanupFlightFile(image.objectPath)));
 
     await writeAuditLog({
       actorUserId: session.user.id,
