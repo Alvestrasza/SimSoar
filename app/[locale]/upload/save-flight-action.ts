@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { parseIgc } from "@/lib/igc";
 import { safeFilename, sha256Buffer } from "@/lib/security";
 import { writeAuditLog } from "@/lib/audit";
+import { notifyFollowersAboutFlight } from "@/lib/notifications";
 import { hasRole } from "@/lib/rbac";
 import { Prisma } from "@prisma/client";
 
@@ -307,6 +308,12 @@ export async function saveFlightAction(formData: FormData) {
       sizeBytes: file.size,
       storagePath: objectPath
     }
+  });
+
+  await notifyFollowersAboutFlight({
+    pilotUserId: session.user.id,
+    flightId: flight.id,
+    isPublicAndApproved: fields.visibility === "PUBLIC"
   });
 
   redirect(`/${fields.locale}/flights/${flight.id}`);

@@ -8,6 +8,7 @@ import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
 import {hasRole} from "@/lib/rbac";
 import {writeAuditLog} from "@/lib/audit";
+import {createNotification} from "@/lib/notifications";
 import fs from "node:fs/promises";
 
 const moderationSchema = z.object({
@@ -113,6 +114,7 @@ export async function moderateFlightAction(formData: FormData) {
     },
     select: {
       id: true,
+      userId: true,
       title: true,
       pilotCallsign: true,
       visibility: true,
@@ -135,6 +137,14 @@ export async function moderateFlightAction(formData: FormData) {
       moderationStatus: flight.moderationStatus,
       moderationNote: flight.moderationNote
     }
+  });
+
+  await createNotification({
+    recipientUserId: flight.userId,
+    actorUserId: session.user.id,
+    type: "FLIGHT_MODERATION",
+    flightId: flight.id,
+    moderationStatus: flight.moderationStatus
   });
 
   revalidateFlightAdminViews(flight.id);
@@ -166,6 +176,7 @@ export async function softDeleteFlightAction(formData: FormData) {
     },
     select: {
       id: true,
+      userId: true,
       title: true,
       pilotCallsign: true,
       visibility: true,
@@ -281,6 +292,14 @@ export async function softDeleteFlightAction(formData: FormData) {
     }
   });
 
+  await createNotification({
+    recipientUserId: flight.userId,
+    actorUserId: session.user.id,
+    type: "FLIGHT_MODERATION",
+    flightId: updatedFlight.id,
+    moderationStatus: updatedFlight.moderationStatus
+  });
+
   revalidateFlightAdminViews(updatedFlight.id);
 
   redirect(`${returnTo}?updated=1`);
@@ -310,6 +329,7 @@ export async function restoreFlightAction(formData: FormData) {
     },
     select: {
       id: true,
+      userId: true,
       title: true,
       pilotCallsign: true,
       visibility: true,
@@ -372,6 +392,14 @@ export async function restoreFlightAction(formData: FormData) {
       moderationNote: restoredFlight.moderationNote,
       restoredAt: restoredFlight.moderatedAt?.toISOString() ?? null
     }
+  });
+
+  await createNotification({
+    recipientUserId: flight.userId,
+    actorUserId: session.user.id,
+    type: "FLIGHT_MODERATION",
+    flightId: restoredFlight.id,
+    moderationStatus: restoredFlight.moderationStatus
   });
 
   revalidateFlightAdminViews(restoredFlight.id);

@@ -1,6 +1,6 @@
 {
   "name": "simsoar-nextjs",
-  "version": "0.4.9",
+  "version": "0.4.10",
   "private": true,
   "description": "SimSoar multi-user virtual gliding community portal",
   "scripts": {
@@ -15,6 +15,7 @@
     "test:pilot-follow": "node --experimental-strip-types --test tests/pilot-follow.test.mjs",
     "test:home-feed": "node --experimental-strip-types --test tests/home-feed.test.mjs",
     "test:flight-community": "node --experimental-strip-types --test tests/flight-community.test.mjs",
+    "test:notifications": "node --experimental-strip-types --test tests/notifications.test.mjs",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",

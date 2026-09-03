@@ -8,6 +8,7 @@ import {
   canInteractWithFlight
 } from "@/lib/flight-community";
 import {hasRole} from "@/lib/rbac";
+import {createNotification} from "@/lib/notifications";
 import {revalidatePath} from "next/cache";
 import {z} from "zod";
 
@@ -80,6 +81,13 @@ export async function toggleFlightLikeAction(formData: FormData) {
     await prisma.flightLike.create({
       data: {flightId: flight.id, userId: session.user.id}
     });
+
+    await createNotification({
+      recipientUserId: flight.userId,
+      actorUserId: session.user.id,
+      type: "FLIGHT_LIKE",
+      flightId: flight.id
+    });
   }
 
   await writeAuditLog({
@@ -111,6 +119,14 @@ export async function createFlightCommentAction(formData: FormData) {
       content: fields.content
     },
     select: {id: true}
+  });
+
+  await createNotification({
+    recipientUserId: flight.userId,
+    actorUserId: session.user.id,
+    type: "FLIGHT_COMMENT",
+    flightId: flight.id,
+    commentId: comment.id
   });
 
   await writeAuditLog({
