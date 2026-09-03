@@ -21,7 +21,14 @@ const preferencesSchema = z.object({
   ]),
   unitSystem: z.enum(["METRIC", "IMPERIAL"]),
   preferredLeaderboardView: z.enum(["ALL", "MSFS", "CONDOR", "XPLANE"]),
-  preferredMapMode: z.enum(["STANDARD", "SATELLITE", "TERRAIN"])
+  preferredMapMode: z.enum(["STANDARD", "SATELLITE", "TERRAIN"]),
+  homeFeedMode: z.enum(["PUBLIC", "OWN", "FOLLOWING"]),
+  homeFeedSimulator: z.string().trim().max(80).transform((value) => value || null),
+  homeFeedCompetitionClass: z
+    .string()
+    .trim()
+    .max(80)
+    .transform((value) => value || null)
 });
 
 export async function savePreferencesAction(formData: FormData) {
@@ -37,7 +44,10 @@ export async function savePreferencesAction(formData: FormData) {
     preferredSimulator: formData.get("preferredSimulator") || "MSFS 2024",
     unitSystem: formData.get("unitSystem") || "METRIC",
     preferredLeaderboardView: formData.get("preferredLeaderboardView") || "ALL",
-    preferredMapMode: formData.get("preferredMapMode") || "STANDARD"
+    preferredMapMode: formData.get("preferredMapMode") || "STANDARD",
+    homeFeedMode: formData.get("homeFeedMode") || "PUBLIC",
+    homeFeedSimulator: formData.get("homeFeedSimulator") || "",
+    homeFeedCompetitionClass: formData.get("homeFeedCompetitionClass") || ""
   });
 
   await prisma.userPreference.upsert({
@@ -50,14 +60,20 @@ export async function savePreferencesAction(formData: FormData) {
       preferredSimulator: fields.preferredSimulator,
       unitSystem: fields.unitSystem,
       preferredLeaderboardView: fields.preferredLeaderboardView,
-      preferredMapMode: fields.preferredMapMode
+      preferredMapMode: fields.preferredMapMode,
+      homeFeedMode: fields.homeFeedMode,
+      homeFeedSimulator: fields.homeFeedSimulator,
+      homeFeedCompetitionClass: fields.homeFeedCompetitionClass
     },
     update: {
       theme: fields.theme,
       preferredSimulator: fields.preferredSimulator,
       unitSystem: fields.unitSystem,
       preferredLeaderboardView: fields.preferredLeaderboardView,
-      preferredMapMode: fields.preferredMapMode
+      preferredMapMode: fields.preferredMapMode,
+      homeFeedMode: fields.homeFeedMode,
+      homeFeedSimulator: fields.homeFeedSimulator,
+      homeFeedCompetitionClass: fields.homeFeedCompetitionClass
     }
   });
 
@@ -73,7 +89,10 @@ export async function savePreferencesAction(formData: FormData) {
       preferredSimulator: fields.preferredSimulator,
       unitSystem: fields.unitSystem,
       preferredLeaderboardView: fields.preferredLeaderboardView,
-      preferredMapMode: fields.preferredMapMode
+      preferredMapMode: fields.preferredMapMode,
+      homeFeedMode: fields.homeFeedMode,
+      homeFeedSimulator: fields.homeFeedSimulator,
+      homeFeedCompetitionClass: fields.homeFeedCompetitionClass
     }
   });
 
