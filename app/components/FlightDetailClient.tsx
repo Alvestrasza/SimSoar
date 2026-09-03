@@ -8,6 +8,7 @@ import FlightTrackMap from "./FlightTrackMap";
 import FlightOwnerActions from "./FlightOwnerActions";
 import {updateScoringWindowAction} from "@/app/[locale]/flights/[id]/scoring-actions";
 import {sortThermals, type ThermalSortMode} from "@/lib/thermal-analysis";
+import {summarizeWindEstimates, type WindConfidence} from "@/lib/wind-estimation";
 
 type TrackPoint = {
   seq: number;
@@ -29,6 +30,10 @@ type Thermal = {
   gainM: number;
   durationSec: number;
   efficiencyPercent: number;
+  windDirectionDeg?: number | null;
+  windSpeedKmh?: number | null;
+  windConfidence?: WindConfidence | null;
+  windDriftDistanceM?: number | null;
 };
 
 type GlidePhase = {
@@ -205,6 +210,11 @@ export default function FlightDetailClient({
     .filter((point) => Number.isFinite(point.altM))
     .map((point) => point.seq);
   const sortedThermals = sortThermals(flight.thermals, thermalSort);
+  const flightWind = summarizeWindEstimates(flight.thermals.map((thermal) => ({
+    directionDeg: thermal.windDirectionDeg ?? null,
+    speedKmh: thermal.windSpeedKmh ?? null,
+    confidence: thermal.windConfidence ?? null
+  })));
   const thermalDurationSec = flight.thermals.reduce(
     (total, thermal) => total + thermal.durationSec,
     0
@@ -389,6 +399,22 @@ export default function FlightDetailClient({
 
             <p className="muted">{t("thermalsDescription")}</p>
 
+            <div className="windEstimate cardBody">
+              <strong>{t("windEstimateTitle")}</strong>
+              {flightWind ? (
+                <p>
+                  {t("windEstimateValue", {
+                    direction: flightWind.directionDeg,
+                    speed: flightWind.speedKmh.toFixed(1),
+                    confidence: t(`windConfidence_${flightWind.confidence}`)
+                  })}
+                </p>
+              ) : (
+                <p className="muted">{t("windEstimateUnavailable")}</p>
+              )}
+              <p className="muted">{t("windEstimateDisclaimer")}</p>
+            </div>
+
             <label className="thermalSort">
               {t("thermalSort")}
               <select value={thermalSort} onChange={(event) => setThermalSort(event.target.value as ThermalSortMode)}>
@@ -418,6 +444,15 @@ export default function FlightDetailClient({
                         {t("thermalMax")}{" "}
                         {thermal.maxClimbMs.toFixed(1)} m/s · {t("thermalEfficiency")}: {thermal.efficiencyPercent.toFixed(0)}%
                       </div>
+                      {thermal.windDirectionDeg != null && thermal.windSpeedKmh != null && thermal.windConfidence ? (
+                        <div className="muted thermalWind">
+                          {t("thermalWindEstimate", {
+                            direction: thermal.windDirectionDeg,
+                            speed: thermal.windSpeedKmh.toFixed(1),
+                            confidence: t(`windConfidence_${thermal.windConfidence}`)
+                          })}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 ))}

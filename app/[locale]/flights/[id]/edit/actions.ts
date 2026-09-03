@@ -485,7 +485,11 @@ export async function updateFlightMetadataAction(formData: FormData) {
             maxClimbMs: thermal.maxClimbMs,
             gainM: thermal.gainM,
             durationSec: thermal.durationSec,
-            efficiencyPercent: thermal.efficiencyPercent
+            efficiencyPercent: thermal.efficiencyPercent,
+            windDirectionDeg: thermal.windDirectionDeg,
+            windSpeedKmh: thermal.windSpeedKmh,
+            windConfidence: thermal.windConfidence,
+            windDriftDistanceM: thermal.windDriftDistanceM
           }))
         });
 

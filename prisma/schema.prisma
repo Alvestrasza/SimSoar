@@ -104,6 +104,12 @@ enum ScoringWindowMode {
   MANUAL
 }
 
+enum WindEstimateConfidence {
+  LOW
+  MEDIUM
+  HIGH
+}
+
 model User {
   id             String          @id @default(cuid())
   name           String?
@@ -304,6 +310,10 @@ model Thermal {
   gainM       Int
   durationSec Int
   efficiencyPercent Float @default(0)
+  windDirectionDeg  Int?
+  windSpeedKmh      Float?
+  windConfidence    WindEstimateConfidence?
+  windDriftDistanceM Int?
 
   flight Flight @relation(fields: [flightId], references: [id], onDelete: Cascade)
 

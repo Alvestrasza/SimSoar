@@ -473,6 +473,9 @@ textarea { min-height: 120px; resize: vertical; }
 .glideBubble { background: var(--accent); }
 .phaseSectionTitle { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--border); }
 .phaseSummary { margin: 12px 0; }
+.windEstimate { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
+.windEstimate p { margin: 6px 0 0; }
+.thermalWind { margin-top: 4px; }
 .emptyInline { text-align: center; padding: 28px; }
 .detailRows { display: grid; gap: 0; }
 .detailRows > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
