@@ -210,48 +210,91 @@ export function parseIgc(text: string): ParsedIgc {
   };
 }
 
-function detectThermals(points: TrackPointInput[]): ThermalInput[] {
-  const thermals: ThermalInput[] = [];
-  if (points.length < 20) return thermals;
+const THERMAL_SAMPLE_CLIMB_THRESHOLD_MS = 0.3;
+const THERMAL_MIN_AVG_CLIMB_MS = 0.5;
+const THERMAL_MIN_DURATION_SECONDS = 60;
+const THERMAL_MIN_GAIN_METERS = 30;
+const THERMAL_MAX_INTERRUPTION_SECONDS = 20;
 
-  let i = 0;
-  while (i < points.length - 10) {
-    let j = i;
-    while (j < points.length - 1 && secondsDelta(points[j].secondsOfDay, points[i].secondsOfDay) < 60) j += 1;
-    if (j === i) {
-      i += 1;
+export function detectThermals(points: TrackPointInput[]): ThermalInput[] {
+  const thermals: ThermalInput[] = [];
+  if (points.length < 2) return thermals;
+
+  let candidateStartIndex: number | null = null;
+  let lastClimbIndex: number | null = null;
+
+  const finishCandidate = () => {
+    if (candidateStartIndex === null || lastClimbIndex === null) return;
+
+    const start = points[candidateStartIndex];
+    const end = points[lastClimbIndex];
+    const durationSec = secondsDelta(end.secondsOfDay, start.secondsOfDay);
+    const gain = end.altM - start.altM;
+    const avgClimbMs = durationSec > 0 ? gain / durationSec : 0;
+
+    if (
+      durationSec >= THERMAL_MIN_DURATION_SECONDS &&
+      gain > THERMAL_MIN_GAIN_METERS &&
+      avgClimbMs > THERMAL_MIN_AVG_CLIMB_MS
+    ) {
+      const segment = points.slice(candidateStartIndex, lastClimbIndex + 1);
+      const varioValues = segment
+        .map((point) => point.varioMs)
+        .filter((value): value is number => Number.isFinite(value));
+      const center = segment[Math.floor(segment.length / 2)] ?? start;
+
+      thermals.push({
+        seq: thermals.length + 1,
+        startTime: start.time,
+        endTime: end.time,
+        centerLat: center.lat,
+        centerLon: center.lon,
+        avgClimbMs: Number(avgClimbMs.toFixed(1)),
+        maxClimbMs: varioValues.length > 0 ? Math.max(...varioValues) : 0,
+        gainM: Math.round(gain),
+        durationSec
+      });
+    }
+
+    candidateStartIndex = null;
+    lastClimbIndex = null;
+  };
+
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1];
+    const current = points[index];
+    const sampleDuration = secondsDelta(
+      current.secondsOfDay,
+      previous.secondsOfDay
+    );
+
+    if (sampleDuration <= 0 || sampleDuration > 30) {
+      finishCandidate();
       continue;
     }
 
-    const gain = points[j].altM - points[i].altM;
-    const durationSec = secondsDelta(points[j].secondsOfDay, points[i].secondsOfDay);
-    if (durationSec > 0 && gain > 30) {
-      const avgClimbMs = gain / durationSec;
-      if (avgClimbMs > 0.5) {
-        const segment = points.slice(i, j + 1);
-        const varioValues = segment.map((p) => p.varioMs ?? 0);
-        const center = segment[Math.round(segment.length / 2)] ?? segment[0];
-        thermals.push({
-          seq: thermals.length + 1,
-          startTime: points[i].time,
-          endTime: points[j].time,
-          centerLat: center.lat,
-          centerLon: center.lon,
-          avgClimbMs: Number(avgClimbMs.toFixed(1)),
-          maxClimbMs: Math.max(...varioValues),
-          gainM: Math.round(gain),
-          durationSec
-        });
-        i = j;
-      } else {
-        i += 1;
-      }
-    } else {
-      i += 1;
+    const sampleClimbMs =
+      current.varioMs ?? (current.altM - previous.altM) / sampleDuration;
+
+    if (sampleClimbMs >= THERMAL_SAMPLE_CLIMB_THRESHOLD_MS) {
+      candidateStartIndex ??= index - 1;
+      lastClimbIndex = index;
+      continue;
     }
 
-    if (thermals.length >= 8) break;
+    if (candidateStartIndex !== null && lastClimbIndex !== null) {
+      const interruptionSeconds = secondsDelta(
+        current.secondsOfDay,
+        points[lastClimbIndex].secondsOfDay
+      );
+
+      if (interruptionSeconds > THERMAL_MAX_INTERRUPTION_SECONDS) {
+        finishCandidate();
+      }
+    }
   }
+
+  finishCandidate();
 
   return thermals;
 }
