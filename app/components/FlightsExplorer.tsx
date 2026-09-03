@@ -3,6 +3,7 @@
 import {useEffect, useMemo, useRef, useState} from "react";
 import {useTranslations} from "next-intl";
 import {Link} from "@/i18n/navigation";
+import FlightsOverviewMap from "@/app/components/FlightsOverviewMap";
 
 type TrackPoint = {
   lat: number;
@@ -253,6 +254,9 @@ export default function FlightsExplorer({
 }: Props) {
   const t = useTranslations("Flights");
 
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [highlightedFlightId, setHighlightedFlightId] = useState<string | null>(null);
+
   const [sort, setSort] = useState<{key: SortKey; dir: 1 | -1}>({
     key: "olcPoints",
     dir: -1
@@ -311,8 +315,29 @@ export default function FlightsExplorer({
                 {t("tabXplane")}
               </Link>
             </div>
+
+            <div className="tabs" style={{marginBottom: 0}}>
+              <button
+                type="button"
+                className={`tab ${viewMode === "list" ? "active" : ""}`}
+                aria-pressed={viewMode === "list"}
+                onClick={() => setViewMode("list")}
+              >
+                {t("viewList")}
+              </button>
+              <button
+                type="button"
+                className={`tab ${viewMode === "map" ? "active" : ""}`}
+                aria-pressed={viewMode === "map"}
+                onClick={() => setViewMode("map")}
+              >
+                {t("viewMap")}
+              </button>
+            </div>
           </div>
 
+          {viewMode === "list" ? (
+            <>
           <div className="tableWrap desktopTableOnly">
             <table>
               <thead>
@@ -454,6 +479,41 @@ export default function FlightsExplorer({
               ))
             )}
           </div>
+            </>
+          ) : (
+            <div className="flightsMapLayout">
+              <FlightsOverviewMap
+                flights={filteredFlights}
+                highlightedFlightId={highlightedFlightId}
+                startLabel={t("mapStart")}
+                finishLabel={t("mapFinish")}
+              />
+
+              <div className="flightsMapSelector" aria-label={t("mapFlights")}>
+                {filteredFlights.length === 0 ? (
+                  <p className="muted emptyInline">{t("noFlights")}</p>
+                ) : (
+                  filteredFlights.map((flight) => (
+                    <Link
+                      key={flight.id}
+                      href={`/flights/${flight.id}`}
+                      className={`flightsMapSelectorItem ${
+                        highlightedFlightId === flight.id ? "active" : ""
+                      }`}
+                      onMouseEnter={() => setHighlightedFlightId(flight.id)}
+                      onMouseLeave={() => setHighlightedFlightId(null)}
+                      onFocus={() => setHighlightedFlightId(flight.id)}
+                      onBlur={() => setHighlightedFlightId(null)}
+                    >
+                      <strong>{flight.pilotCallsign}</strong>
+                      <span>{flight.glider ?? t("unknownGlider")}</span>
+                      <small>{Math.round(flight.distanceKm)} km · {Math.round(flight.olcPoints)} OLC</small>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="sectionHead">
