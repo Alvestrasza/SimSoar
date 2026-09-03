@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {homeAirfieldSearchQuery} from "@/lib/airfield";
+import {resolveHomeAirfieldLocation} from "@/lib/airfield";
 
 type LeafletApi = typeof import("leaflet");
 
@@ -111,7 +111,20 @@ async function ipLocation(): Promise<PreviewLocation> {
 }
 
 async function homeAirfieldLocation(homeAirfield: string): Promise<PreviewLocation> {
-  const query = encodeURIComponent(homeAirfieldSearchQuery(homeAirfield));
+  const location = resolveHomeAirfieldLocation(homeAirfield);
+
+  if (!location) throw new Error("Home airfield is empty.");
+
+  if (location.kind === "coordinates") {
+    return {
+      lat: location.lat,
+      lon: location.lon,
+      label: location.label,
+      source: "home"
+    };
+  }
+
+  const query = encodeURIComponent(location.query);
   const response = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${query}`, { cache: "force-cache" });
   if (!response.ok) throw new Error("Home airfield geocoding failed.");
   const data = await response.json() as Array<{ lat?: string; lon?: string; display_name?: string }>;
@@ -121,7 +134,7 @@ async function homeAirfieldLocation(homeAirfield: string): Promise<PreviewLocati
   return {
     lat: Number(first.lat),
     lon: Number(first.lon),
-    label: homeAirfield,
+    label: location.label,
     source: "home"
   };
 }

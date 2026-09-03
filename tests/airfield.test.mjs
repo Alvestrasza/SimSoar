@@ -4,7 +4,9 @@ import test from "node:test";
 import {
   homeAirfieldSearchQuery,
   isIcaoCode,
-  normalizeHomeAirfield
+  normalizeHomeAirfield,
+  parseHomeAirfieldCoordinates,
+  resolveHomeAirfieldLocation
 } from "../lib/airfield.ts";
 
 test("recognizes four-letter ICAO codes", () => {
@@ -36,5 +38,41 @@ test("uses airport-aware search queries for ICAO codes", () => {
   assert.equal(
     homeAirfieldSearchQuery("Frankfurt Airport"),
     "Frankfurt Airport"
+  );
+});
+
+test("accepts coordinates for airfields without an ICAO code", () => {
+  assert.deepEqual(
+    parseHomeAirfieldCoordinates("50.4970, 9.9520"),
+    {lat: 50.497, lon: 9.952}
+  );
+  assert.equal(
+    normalizeHomeAirfield(" 50.4970; 9.9520 "),
+    "50.497, 9.952"
+  );
+  assert.deepEqual(
+    resolveHomeAirfieldLocation("50.4970, 9.9520"),
+    {
+      kind: "coordinates",
+      lat: 50.497,
+      lon: 9.952,
+      label: "50.497, 9.952"
+    }
+  );
+});
+
+test("rejects out-of-range coordinate pairs as coordinates", () => {
+  assert.equal(parseHomeAirfieldCoordinates("91, 9.952"), null);
+  assert.equal(parseHomeAirfieldCoordinates("50.497, 181"), null);
+});
+
+test("resolves named glider airfields through search", () => {
+  assert.deepEqual(
+    resolveHomeAirfieldLocation("Wasserkuppe, Gersfeld"),
+    {
+      kind: "search",
+      query: "Wasserkuppe, Gersfeld",
+      label: "Wasserkuppe, Gersfeld"
+    }
   );
 });

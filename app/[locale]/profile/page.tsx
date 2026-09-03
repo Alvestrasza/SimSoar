@@ -174,7 +174,7 @@ const noticeStatus =
                 defaultValue={profile?.homeAirfield ?? ""}
                 maxLength={120}
                 placeholder={t("homeAirfieldPlaceholder")}
-                autoCapitalize="characters"
+                autoCapitalize="words"
                 spellCheck={false}
               />
               <p className="muted" style={{margin: "6px 0 0", fontSize: 13}}>
