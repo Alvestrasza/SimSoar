@@ -2,6 +2,7 @@ import {notFound} from "next/navigation";
 import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
 import {hasRole} from "@/lib/rbac";
+import {resolveIgcDownloadMode} from "@/lib/igc-download";
 import FlightDetailClient from "@/app/components/FlightDetailClient";
 import {setRequestLocale} from "next-intl/server";
 
@@ -89,6 +90,11 @@ export default async function FlightDetailPage({
   const isLockedByModeration =
     isDeleted || flight.moderationStatus !== "APPROVED";
 
+  const igcDownloadMode = resolveIgcDownloadMode(flight, {
+    userId: session?.user?.id,
+    isAdmin: hasRole(session?.user?.roles, "ADMIN")
+  });
+
   return (
     <FlightDetailClient
       preferredMapMode={preferredMapMode}
@@ -112,14 +118,7 @@ export default async function FlightDetailPage({
         maxVarioMs: flight.maxVarioMs,
         visibility: flight.visibility,
         publicIgcDownloadEnabled: flight.publicIgcDownloadEnabled,
-        canDownloadIgc:
-          hasRole(session?.user?.roles, "ADMIN") ||
-          isOwner ||
-          (
-            flight.publicIgcDownloadEnabled &&
-            isApprovedAndActive &&
-            flight.visibility !== "PRIVATE"
-          ),        
+        canDownloadIgc: igcDownloadMode !== null,
         canManage: canModerate || (isOwner && !isLockedByModeration),
         track: flight.track.map((p: any) => ({
           seq: p.seq,

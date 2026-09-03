@@ -3,6 +3,10 @@ import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
 import {hasRole} from "@/lib/rbac";
 import {writeAuditLog} from "@/lib/audit";
+import {
+  buildIgcFileName,
+  resolveIgcDownloadMode
+} from "@/lib/igc-download";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -13,46 +17,6 @@ type IgcDownloadRouteContext = {
     id: string;
   }>;
 };
-
-function safeDownloadPart(value: string | null | undefined, fallback: string) {
-  const cleaned = (value ?? fallback)
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^[._-]+|[._-]+$/g, "")
-    .slice(0, 80);
-
-  return cleaned || fallback;
-}
-
-function buildIgcFileName(flight: {
-  id: string;
-  pilotCallsign: string;
-  startTime: Date | null;
-  createdAt: Date;
-}) {
-  const datePart = (flight.startTime ?? flight.createdAt)
-    .toISOString()
-    .slice(0, 10);
-
-  const callsignPart = safeDownloadPart(flight.pilotCallsign, "pilot");
-
-  return `${datePart}_${callsignPart}_${flight.id}.igc`;
-}
-
-function canPublicDownload(flight: {
-  visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
-  moderationStatus: "APPROVED" | "REJECTED" | "HIDDEN" | "PENDING";
-  deletedAt: Date | null;
-  publicIgcDownloadEnabled: boolean;
-}) {
-  return (
-    flight.publicIgcDownloadEnabled &&
-    flight.deletedAt === null &&
-    flight.moderationStatus === "APPROVED" &&
-    flight.visibility !== "PRIVATE"
-  );
-}
 
 export async function GET(
   _request: Request,
@@ -94,16 +58,12 @@ export async function GET(
     console.error("SimSoar IGC download auth session could not be loaded:", error);
   }
 
-  const isOwner = session?.user?.id === flight.userId;
-  const canAdminDownload = hasRole(session?.user?.roles, "ADMIN");
-  const isPublicDownload = canPublicDownload(flight);
+  const downloadMode = resolveIgcDownloadMode(flight, {
+    userId: session?.user?.id,
+    isAdmin: hasRole(session?.user?.roles, "ADMIN")
+  });
 
-  const canDownload =
-    canAdminDownload ||
-    isOwner ||
-    isPublicDownload;
-
-  if (!canDownload) {
+  if (!downloadMode) {
     return new Response("Not found.", {
       status: 404
     });
@@ -144,11 +104,7 @@ export async function GET(
       pilotCallsign: flight.pilotCallsign,
       visibility: flight.visibility,
       publicIgcDownloadEnabled: flight.publicIgcDownloadEnabled,
-      downloadMode: canAdminDownload
-        ? "admin"
-        : isOwner
-          ? "owner"
-          : "public",
+      downloadMode,
       fileName,
       igcSha256: flight.igcSha256
     }
