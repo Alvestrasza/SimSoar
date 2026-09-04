@@ -21,6 +21,7 @@ import {prisma} from "@/lib/db";
 import QuickThemeToggle from "@/app/components/QuickThemeToggle";
 import {hasRole} from "@/lib/rbac";
 import type {Session} from "next-auth";
+import ClosableNavigationMenu from "@/app/components/ClosableNavigationMenu";
 
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -124,11 +125,11 @@ export default async function LocaleLayout({
     {href: "/" as const, label: nav("home")},
     {href: "/flights" as const, label: nav("flights")},
     {href: "/upload" as const, label: nav("upload")},
-    {href: "/pilots" as const, label: nav("pilots")}
+    {href: "/pilots" as const, label: nav("pilots")},
+    {href: "/clubs" as const, label: nav("clubs")},
+    {href: "/competitions" as const, label: nav("competitions")}
   ];
   const secondaryItems = [
-    {href: "/clubs" as const, label: nav("clubs")},
-    {href: "/competitions" as const, label: nav("competitions")},
     {href: "/leagues" as const, label: nav("leagues")},
     {href: "/tasks" as const, label: nav("tasks")},
     {href: "/segments" as const, label: nav("segments")}
@@ -157,12 +158,13 @@ export default async function LocaleLayout({
 
                 <div className="navLinks">
                   {primaryItems.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
-                  <details className="navMore">
-                    <summary>{nav("more")}</summary>
-                    <div className="navMorePanel">
-                      {secondaryItems.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
-                    </div>
-                  </details>
+                  <ClosableNavigationMenu
+                    className="navMore"
+                    panelClassName="navMorePanel"
+                    summary={nav("more")}
+                  >
+                    {secondaryItems.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+                  </ClosableNavigationMenu>
                 </div>
 
                 <div className="navRight">
@@ -181,22 +183,23 @@ export default async function LocaleLayout({
                     </Suspense>
                   </div>
 
-                  <details className="mobileMenu">
-                    <summary aria-label={nav("menu")} title={nav("menu")}>
-                      <span aria-hidden="true" className="menuIcon"><i /><i /><i /></span>
-                    </summary>
-                    <div className="mobileMenuPanel">
-                      <div className="mobileMenuLinks">
-                        {allItems.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
-                      </div>
-                      <div className="mobileMenuUtilities">
-                        <LocaleSwitcher />
-                        <Suspense fallback={null}>
-                          <AuthNav locale={locale} isAuthenticated={isAuthenticated} canUseAdmin={canUseAdmin} />
-                        </Suspense>
-                      </div>
+                  <ClosableNavigationMenu
+                    className="mobileMenu"
+                    panelClassName="mobileMenuPanel"
+                    summary={<span aria-hidden="true" className="menuIcon"><i /><i /><i /></span>}
+                    summaryAriaLabel={nav("menu")}
+                    summaryTitle={nav("menu")}
+                  >
+                    <div className="mobileMenuLinks">
+                      {allItems.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
                     </div>
-                  </details>
+                    <div className="mobileMenuUtilities">
+                      <LocaleSwitcher />
+                      <Suspense fallback={null}>
+                        <AuthNav locale={locale} isAuthenticated={isAuthenticated} canUseAdmin={canUseAdmin} />
+                      </Suspense>
+                    </div>
+                  </ClosableNavigationMenu>
                 </div>
               </div>
             </nav>
