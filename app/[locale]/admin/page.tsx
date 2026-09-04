@@ -44,7 +44,8 @@ export default async function AdminPage({params}: AdminPageProps) {
     airspaceCount,
     enabledBadgeCount,
     clubsCount,
-    competitionsCount
+    competitionsCount,
+    leaguesCount
   ] = await Promise.all([
     prisma.user.count(),
     prisma.pilotProfile.count(),
@@ -76,7 +77,8 @@ export default async function AdminPage({params}: AdminPageProps) {
     prisma.airspace.count(),
     prisma.badgeDefinition.count({where: {enabled: true}}),
     prisma.club.count(),
-    prisma.competition.count()
+    prisma.competition.count(),
+    prisma.league.count()
   ]);
 
   return (
@@ -204,6 +206,11 @@ export default async function AdminPage({params}: AdminPageProps) {
             {canViewAudit ? <Link className="btn btnPrimary" href="/admin/competitions">
               {t("openCompetitions")}
             </Link> : <p className="muted">{t("auditRestricted")}</p>}
+          </div>
+
+          <div className="card adminDashboardTile">
+            <div><span className="adminTileIcon">📆</span><h3>{t("leaguesTitle")}</h3><p className="statValue">{leaguesCount}</p><p className="muted">{t("leaguesText")}</p></div>
+            {canViewAudit ? <Link className="btn btnPrimary" href="/admin/leagues">{t("openLeagues")}</Link> : <p className="muted">{t("auditRestricted")}</p>}
           </div>
         </div>
       </section>

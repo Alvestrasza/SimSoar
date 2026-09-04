@@ -93,6 +93,9 @@ enum AuditAction {
   COMPETITION_UPDATE
   COMPETITION_CLOSE
   COMPETITION_DELETE
+  LEAGUE_CREATE
+  LEAGUE_UPDATE
+  LEAGUE_DELETE
 }
 
 enum ClubMemberRole {
@@ -109,6 +112,21 @@ enum CompetitionStatus {
 enum CompetitionScoringRule {
   OLC_POINTS
   DISTANCE
+}
+
+enum LeagueMode {
+  WEEKLY
+  WEEKEND
+}
+
+enum LeagueScope {
+  GLOBAL
+  CLUB
+}
+
+enum LeagueRoundStatus {
+  ACTIVE
+  CLOSED
 }
 
 enum HomeFeedMode {
@@ -166,6 +184,7 @@ model User {
   badges            UserBadge[]
   clubMemberships   ClubMembership[]
   competitionEntries CompetitionEntry[]
+  leagueEntries      LeagueRoundEntry[]
 }
 
 model Account {
@@ -271,6 +290,7 @@ model Club {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   memberships ClubMembership[]
+  leagues      League[]
 
   @@index([name])
 }
@@ -326,6 +346,64 @@ model CompetitionEntry {
   @@unique([competitionId, flightId])
   @@index([competitionId, score])
   @@index([competitionId, userId])
+  @@index([flightId])
+}
+
+model League {
+  id             String                 @id @default(cuid())
+  slug           String                 @unique
+  name           String
+  description    String?
+  mode           LeagueMode
+  scope          LeagueScope            @default(GLOBAL)
+  clubId         String?
+  startDayUtc    Int                    @default(1)
+  startHourUtc   Int                    @default(0)
+  durationHours  Int                    @default(168)
+  scoringRule    CompetitionScoringRule @default(OLC_POINTS)
+  active         Boolean                @default(true)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  club   Club?         @relation(fields: [clubId], references: [id], onDelete: SetNull)
+  rounds LeagueRound[]
+
+  @@index([active, mode])
+  @@index([clubId])
+}
+
+model LeagueRound {
+  id        String            @id @default(cuid())
+  leagueId  String
+  startsAt  DateTime
+  endsAt    DateTime
+  status    LeagueRoundStatus @default(ACTIVE)
+  createdAt DateTime          @default(now())
+  closedAt  DateTime?
+
+  league  League             @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  entries LeagueRoundEntry[]
+
+  @@unique([leagueId, startsAt])
+  @@index([leagueId, status, startsAt])
+  @@index([endsAt])
+}
+
+model LeagueRoundEntry {
+  id        String   @id @default(cuid())
+  roundId   String
+  flightId  String
+  userId    String
+  score     Float
+  createdAt DateTime @default(now())
+
+  round  LeagueRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  flight Flight      @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roundId, flightId])
+  @@index([roundId, score])
+  @@index([roundId, userId])
   @@index([flightId])
 }
 
@@ -386,6 +464,7 @@ model Flight {
   scoringPoints FlightScoringPoint[]
   storyImages FlightStoryImage[]
   competitionEntries CompetitionEntry[]
+  leagueEntries      LeagueRoundEntry[]
 
   @@index([visibility, createdAt])
   @@index([visibility, moderationStatus, createdAt])
