@@ -137,6 +137,7 @@ export default async function FlightsPage({
     <main className="wrap">
       <div className="sectionHead">
         <span className="cardTitle">{t("pageTitle")}</span>
+        <Link className="btn btnPrimary" href="/flights/compare">{t("compareFlights")}</Link>
       </div>
 
       <section className="card" style={{marginBottom: 22}}>
