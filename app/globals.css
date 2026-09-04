@@ -2082,6 +2082,13 @@ h1 {
 }
 
 @media (max-width: 1080px) {
+  .heroInner,
+  .twoCol,
+  .grid3,
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+
   .navLinks,
   .desktopNavUtilities {
     display: none;
@@ -2179,10 +2186,6 @@ h1 {
 }
 
 @media (max-width: 430px) {
-  .logo > span:last-child {
-    display: none;
-  }
-
   .mobileMenuLinks {
     grid-template-columns: 1fr;
   }
