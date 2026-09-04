@@ -105,6 +105,7 @@ enum AuditAction {
   TASK_CREATE
   TASK_UPDATE
   TASK_DELETE
+  CUP_IMPORT
 }
 
 enum ClubMemberRole {
@@ -195,6 +196,7 @@ model User {
   competitionEntries CompetitionEntry[]
   leagueEntries      LeagueRoundEntry[]
   tasks              FlightTask[]
+  cupImports         CupImport[]
 }
 
 model FlightTask {
@@ -228,6 +230,41 @@ model TaskWaypoint {
 
   @@unique([taskId, seq])
   @@index([taskId, seq])
+}
+
+model CupImport {
+  id         String   @id @default(cuid())
+  ownerId    String
+  sourceName String
+  sha256     String
+  createdAt  DateTime @default(now())
+
+  owner     User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  waypoints ImportedWaypoint[]
+
+  @@unique([ownerId, sha256])
+  @@index([ownerId, createdAt])
+}
+
+model ImportedWaypoint {
+  id         String  @id @default(cuid())
+  importId   String
+  seq        Int
+  name       String
+  code       String?
+  country    String?
+  lat        Float
+  lon        Float
+  elevationM Float?
+  style      Int?
+  description String?
+
+  cupImport CupImport @relation(fields: [importId], references: [id], onDelete: Cascade)
+
+  @@unique([importId, seq])
+  @@index([importId, seq])
+  @@index([name])
+  @@index([code])
 }
 
 model Account {
