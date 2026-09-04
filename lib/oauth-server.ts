@@ -42,7 +42,7 @@ async function verifyAccessToken(token: string) {
   const issuer = process.env.AUTH_KEYCLOAK_ISSUER?.replace(/\/$/, "");
   const audience = process.env.SIMSOAR_OAUTH_AUDIENCE;
   if (!issuer || !audience) throw new OAuthPolicyError("oauth_not_configured");
-  const key = (await loadJwks(issuer)).find((candidate) => candidate.kid === header.kid && (!candidate.alg || candidate.alg === "RS256") && (!candidate.use || candidate.use === "sig"));
+  const key = (await loadJwks(issuer)).find((candidate: JsonWebKeyWithKid) => candidate.kid === header.kid && (!candidate.alg || candidate.alg === "RS256") && (!candidate.use || candidate.use === "sig"));
   if (!key) throw new OAuthPolicyError("invalid_token");
   let publicKey: crypto.KeyObject;
   try { publicKey = crypto.createPublicKey({key, format: "jwk"}); } catch { throw new OAuthPolicyError("invalid_token"); }
