@@ -3,11 +3,11 @@
 <!--
 doc_type: Installation Documentation
 template_version: v0.1.0
-document_version: v0.1.2
+document_version: v0.2.0
 created: 2026-05-14
-last_updated: 2026-05-28
-status: Draft
-classification: Internal
+last_updated: 2026-09-04
+status: Active
+classification: Public
 owner: FlightClub / Alvestrasza Corporation
 technical_owner: Internal IT
 service_area: simsoar / flightclub
@@ -66,7 +66,7 @@ The project should stay focused, clean, and practical. It should serve the flyin
 
 ## Core Features
 
-Planned and partially implemented core features include:
+The v0.5.0 feature baseline includes:
 
 - multi-user platform for virtual glider pilots
 - login through an external identity provider
@@ -79,7 +79,12 @@ Planned and partially implemented core features include:
 - thermal detection
 - public flight overview
 - public leaderboard
-- prepared map-based flight visualization
+- interactive 2D and 3D flight visualization and replay
+- flight comparison, group replay, scoring, and leaderboards
+- thermal, glide, wind, and airspace analysis
+- social feeds, follows, comments, likes, notifications, and flight stories
+- clubs, competitions, leagues, tasks, segments, and CUP exchange
+- moderation, audit logging, administrative workflows, and a public API
 
 ---
 
@@ -166,31 +171,22 @@ It must not contain:
 
 ## Current Project Status
 
-SimSoar is currently in active development.
+SimSoar v0.5.0 is the consolidated feature baseline currently deployed to the development environment. It brings together the flight logbook, analysis, community, competition, administration, import/export, and responsive user-interface work completed during the v0.4.x development series.
 
-The foundation is being prepared for a proper multi-user architecture, persistent database storage, authenticated access, and future public flight comparison features.
+This version declaration does not promote the build to production. Production deployment remains a separate, explicitly controlled operation. Interfaces, data models, and deployment details may still change while the platform is being stabilized.
 
-The project is not yet considered a finished production platform. Interfaces, data models, and deployment details may still change while the core system is being stabilized.
+See the [changelog](CHANGELOG.md) for the release summary.
 
 ---
 
 ## Planned Roadmap
 
-Possible next development stages include:
+Development is organized by explicit milestone boundaries:
 
-- stable pilot profile system
-- improved IGC parser and validation
-- proper track visualization on interactive maps
-- detailed altitude and climb charts
-- improved thermal detection
-- public and private flight visibility options
-- map-based task planning with public, unlisted, and private routes
-- moderation workflow for public uploads
-- event and competition support
-- role-based administration
-- audit logging
-- optional object storage for uploaded files
-- improved scoring and leaderboard logic
+- **v0.5.0:** completed and documented feature baseline
+- **v0.6.0:** follow-up work tracked in GitHub issues #46 through #70
+
+Work assigned to a later milestone is not included in an earlier release unless that scope change is explicitly reviewed and documented.
 
 ---
 
