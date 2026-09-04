@@ -4,16 +4,16 @@ export type FlightMapPoint = {
   altM?: number;
 };
 
-export function simplifyFlightTrack(
-  points: FlightMapPoint[],
+export function simplifyFlightTrack<T extends FlightMapPoint>(
+  points: T[],
   maxPoints = 120
-): FlightMapPoint[] {
+): T[] {
   if (points.length <= maxPoints || maxPoints < 2) {
     return [...points];
   }
 
   const lastIndex = points.length - 1;
-  const result: FlightMapPoint[] = [];
+  const result: T[] = [];
 
   for (let index = 0; index < maxPoints; index += 1) {
     const sourceIndex = Math.round((index * lastIndex) / (maxPoints - 1));
