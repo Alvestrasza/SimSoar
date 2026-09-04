@@ -61,7 +61,7 @@ export function validateEd25519PublicJwk(value: unknown) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new AuthenticityError("invalid_public_key");
   const jwk = value as Record<string, unknown>;
   if (Object.keys(jwk).some((key) => !["kty", "crv", "x"].includes(key)) || jwk.kty !== "OKP" || jwk.crv !== "Ed25519" || typeof jwk.x !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(jwk.x)) throw new AuthenticityError("invalid_public_key");
-  try { crypto.createPublicKey({key: jwk as JsonWebKey, format: "jwk"}); } catch { throw new AuthenticityError("invalid_public_key"); }
+  try { crypto.createPublicKey({key: jwk as crypto.JsonWebKey, format: "jwk"}); } catch { throw new AuthenticityError("invalid_public_key"); }
   return {kty: "OKP", crv: "Ed25519", x: jwk.x} as const;
 }
 
