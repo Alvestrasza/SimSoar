@@ -170,7 +170,14 @@
     "flightsTitle": "Scored flights",
     "date": "Date",
     "flight": "Flight",
-    "unnamedPilot": "Pilot without a public profile"
+    "unnamedPilot": "Pilot without a public profile",
+    "evidenceTitle": "Authenticity evidence",
+    "evidencePolicy": "Signed evidence required: {signed}",
+    "evidenceNoFields": "No additional required fields",
+    "evidence": "Evidence",
+    "evidenceMissing": "Not submitted",
+    "yes": "Yes",
+    "no": "No"
   },
   "Leagues": {
     "title": "Weekly and club leagues",
@@ -879,7 +886,14 @@
     "save": "Save and recalculate",
     "open": "Open",
     "delete": "Delete",
-    "error_slug": "The public URL slug is invalid."
+    "error_slug": "The public URL slug is invalid.",
+    "error_evidence": "The evidence policy contains an invalid field.",
+    "evidenceRequired": "Require authenticity evidence for this competition",
+    "requireSignedEvidence": "Require signed companion evidence",
+    "evidenceSimulators": "Apply evidence policy to simulators",
+    "evidenceSimulatorsHint": "Comma separated; leave blank for all simulators",
+    "requiredTaskPackageId": "Required task package ID",
+    "requiredEvidenceFields": "Required evidence fields"
   },
   "AdminLeagues": {
     "title": "Manage leagues", "subtitle": "Configure recurring UTC windows and scoring scope.",
@@ -993,6 +1007,8 @@
     "flight": "Flight",
     "pilot": "Pilot",
     "stats": "Stats",
+    "authenticity": "Authenticity evidence",
+    "authenticityMissing": "Not submitted",
     "visibility": "Visibility",
     "status": "Status",
     "createdAt": "Created",
@@ -1015,6 +1031,28 @@
     "purgeConfirm": "Permanently remove the soft-deleted flight “{title}”? The flight, track data, thermals, and IGC file will be deleted. The IGC hash remains blocked so the same file cannot be uploaded again.",
     "restore": "Restore",
     "restoreConfirm": "Restore the soft-deleted flight “{title}”? The flight will be approved again and become available according to its visibility setting."
+  },
+  "Authenticity": {
+    "title": "Authenticity evidence",
+    "subtitle": "Immutable evidence revisions; findings never change a flight or score automatically.",
+    "revision": "Revision {revision}",
+    "status_VERIFIED": "Verified",
+    "status_INCOMPLETE": "Incomplete",
+    "status_FLAGGED": "Flagged",
+    "status_UNSUPPORTED": "Unsupported",
+    "signatureValid": "Signature valid",
+    "signatureInvalid": "Signature invalid",
+    "signatureMissing": "No signature",
+    "noFindings": "No findings",
+    "appeal": "Appeal",
+    "resolution": "Decision rationale",
+    "appealReason": "Appeal reason",
+    "submitAppeal": "Submit appeal",
+    "decision": "Decision",
+    "accept": "Accept",
+    "reject": "Reject",
+    "reviewAppeal": "Review appeal",
+    "empty": "No companion evidence has been submitted for this flight."
   },
   "AdminAudit": {
     "pageTitle": "Audit Log",

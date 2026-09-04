@@ -85,7 +85,12 @@ export default async function AdminFlightsPage({
       createdAt: true,
       moderatedAt: true,
       deletedAt: true,
-      deletedByUserId: true
+      deletedByUserId: true,
+      authenticitySubmissions: {
+        orderBy: {revision: "desc"},
+        take: 1,
+        select: {status: true, revision: true, appealStatus: true}
+      }
     }
   });
 
@@ -158,6 +163,7 @@ export default async function AdminFlightsPage({
                             {Math.round(flight.olcPoints)} OLC
                           </strong>
                         </div>
+                        <div><span>{t("authenticity")}</span><strong>{flight.authenticitySubmissions[0] ? `${flight.authenticitySubmissions[0].status} · r${flight.authenticitySubmissions[0].revision}` : t("authenticityMissing")}</strong></div>
 
                         <div>
                           <span>{t("visibility")}</span>

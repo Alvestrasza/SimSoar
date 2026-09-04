@@ -10,12 +10,14 @@ import {
   canDeleteFlightComment,
   canInteractWithFlight
 } from "@/lib/flight-community";
-import {setRequestLocale} from "next-intl/server";
+import {getTranslations, setRequestLocale} from "next-intl/server";
 import {airspaceBounds, findAirspaceCrossings} from "@/lib/airspace";
 import type {Metadata} from "next";
 import FlightSharePanel from "@/app/components/FlightSharePanel";
 import {buildFlightShareUrls, configuredPublicOrigin, flightShareDescription} from "@/lib/flight-sharing";
 import {PUBLIC_FLIGHT_WHERE} from "@/lib/public-api";
+import {appealAuthenticityAction, reviewAuthenticityAppealAction} from "./authenticity-actions";
+import type {AuthenticityFinding} from "@/lib/authenticity";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +51,7 @@ export default async function FlightDetailPage({
   const {locale, id} = await params;
 
   setRequestLocale(locale);
+  const tAuthenticity = await getTranslations({locale, namespace: "Authenticity"});
 
   const flight = await prisma.flight.findUnique({
     where: {
@@ -130,6 +133,8 @@ export default async function FlightDetailPage({
 
   const isLockedByModeration =
     isDeleted || flight.moderationStatus !== "APPROVED";
+
+  const authenticitySubmissions = isOwner || canModerate ? await prisma.flightAuthenticitySubmission.findMany({where: {flightId: flight.id}, orderBy: {revision: "desc"}, take: 20}) : [];
 
   const igcDownloadMode = resolveIgcDownloadMode(flight, {
     userId: session?.user?.id,
@@ -286,6 +291,14 @@ export default async function FlightDetailPage({
       />
 
       {shareUrls ? <FlightSharePanel title={flight.title} shareUrl={shareUrls.shareUrl} embedUrl={shareUrls.embedUrl} /> : null}
+
+      {isOwner || canModerate ? <section className="card" style={{marginTop: 20}}><div className="cardHead"><div><span className="cardTitle">{tAuthenticity("title")}</span><p className="muted">{tAuthenticity("subtitle")}</p></div></div><div className="cardBody moderationCardGrid">{authenticitySubmissions.length ? authenticitySubmissions.map((submission) => {
+        const findings = submission.findings as unknown as AuthenticityFinding[];
+        return <article className="moderationCard" key={submission.id}><div><strong>{tAuthenticity("revision", {revision: submission.revision})} · {tAuthenticity(`status_${submission.status}`)}</strong><p className="muted">{submission.createdAt.toLocaleString(locale)} · SHA-256 {submission.evidenceSha256.slice(0, 12)}… · {submission.signed ? tAuthenticity(submission.signatureValid ? "signatureValid" : "signatureInvalid") : tAuthenticity("signatureMissing")}</p><p>{findings.length ? findings.map((finding) => `${finding.code} (${finding.severity})`).join(", ") : tAuthenticity("noFindings")}</p>{submission.appealText ? <div className="moderationNotice"><strong>{tAuthenticity("appeal")}: {submission.appealStatus}</strong><p>{submission.appealText}</p>{submission.appealResolution ? <p>{tAuthenticity("resolution")}: {submission.appealResolution}</p> : null}</div> : null}</div>
+          {isOwner && submission.status !== "VERIFIED" && submission.appealStatus !== "OPEN" ? <form action={appealAuthenticityAction}><input type="hidden" name="locale" value={locale} /><input type="hidden" name="submissionId" value={submission.id} /><label><span>{tAuthenticity("appealReason")}</span><textarea name="text" minLength={20} maxLength={2000} required /></label><button className="btn btnSecondary" type="submit">{tAuthenticity("submitAppeal")}</button></form> : null}
+          {canModerate && submission.appealStatus === "OPEN" ? <form action={reviewAuthenticityAppealAction} className="formGrid"><input type="hidden" name="locale" value={locale} /><input type="hidden" name="submissionId" value={submission.id} /><label><span>{tAuthenticity("decision")}</span><select name="decision"><option value="ACCEPTED">{tAuthenticity("accept")}</option><option value="REJECTED">{tAuthenticity("reject")}</option></select></label><label className="full"><span>{tAuthenticity("resolution")}</span><textarea name="resolution" minLength={10} maxLength={2000} required /></label><button className="btn btnPrimary" type="submit">{tAuthenticity("reviewAppeal")}</button></form> : null}
+        </article>;
+      }) : <p className="muted">{tAuthenticity("empty")}</p>}</div></section> : null}
 
       <FlightStorySection
         locale={locale}
