@@ -8,6 +8,7 @@ import {prisma} from "@/lib/db";
 import {hasRole} from "@/lib/rbac";
 import {writeAuditLog} from "@/lib/audit";
 import {normalizeClubSlug} from "@/lib/club-policy";
+import {refreshClubLeagues, refreshLeague} from "@/lib/leagues";
 
 const clubSchema = z.object({
   clubId: z.string().optional(),
@@ -69,6 +70,7 @@ export async function saveClubAction(formData: FormData) {
     summary: values.clubId ? "Club details were updated." : "A club was created.",
     metadata: {name: club.name, slug: club.slug}
   });
+  await refreshClubLeagues(club.id);
   revalidateClubPages(locale, club.slug);
   redirect(`/${locale}/admin/clubs?updated=1`);
 }
@@ -77,6 +79,9 @@ export async function deleteClubAction(formData: FormData) {
   const session = await requireAdmin();
   const locale = safeLocale(formData.get("locale"));
   const clubId = String(formData.get("clubId") ?? "");
+  const affectedLeagues = await prisma.league.findMany({where: {clubId}, select: {id: true}});
+  await prisma.league.updateMany({where: {clubId}, data: {active: false}});
+  for (const league of affectedLeagues) await refreshLeague(league.id);
   const club = await prisma.club.delete({where: {id: clubId}});
   await writeAuditLog({
     actorUserId: session.user.id,
@@ -114,6 +119,7 @@ export async function assignClubMemberAction(formData: FormData) {
     summary: "A user was assigned to a club.",
     metadata: {clubId: values.clubId, userId: values.userId, role: values.role}
   });
+  await refreshClubLeagues(membership.clubId);
   revalidateClubPages(locale, membership.club.slug);
   redirect(`/${locale}/admin/clubs?updated=1`);
 }
@@ -135,6 +141,7 @@ export async function removeClubMemberAction(formData: FormData) {
     summary: "A user was removed from a club.",
     metadata: {clubId: membership.clubId, userId: membership.userId}
   });
+  await refreshClubLeagues(membership.clubId);
   revalidateClubPages(locale, membership.club.slug);
   redirect(`/${locale}/admin/clubs?updated=1`);
 }

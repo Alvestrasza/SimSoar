@@ -11,6 +11,7 @@ import { writeAuditLog } from "@/lib/audit";
 import { notifyFollowersAboutFlight } from "@/lib/notifications";
 import { recalculateUserBadges } from "@/lib/badges";
 import { recalculateFlightCompetitions } from "@/lib/competitions";
+import { recalculateFlightLeagueEntries } from "@/lib/leagues";
 import { hasRole } from "@/lib/rbac";
 import { Prisma } from "@prisma/client";
 import {
@@ -326,7 +327,8 @@ async function importFlightFile({
       isPublicAndApproved: fields.visibility === "PUBLIC"
     }),
     recalculateUserBadges(userId),
-    recalculateFlightCompetitions(flight.id)
+    recalculateFlightCompetitions(flight.id),
+    recalculateFlightLeagueEntries(flight.id)
   ]);
 
   if (followUpResults.some((result) => result.status === "rejected")) {

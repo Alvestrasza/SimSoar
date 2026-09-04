@@ -11,6 +11,7 @@ import {hasRole} from "@/lib/rbac";
 import {writeAuditLog} from "@/lib/audit";
 import {recalculateUserBadges} from "@/lib/badges";
 import {recalculateFlightCompetitions} from "@/lib/competitions";
+import {recalculateFlightLeagueEntries} from "@/lib/leagues";
 import {parseIgc} from "@/lib/igc";
 import {safeFilename, sha256Buffer} from "@/lib/security";
 
@@ -589,6 +590,7 @@ export async function updateFlightMetadataAction(formData: FormData) {
 
   await recalculateUserBadges(session.user.id);
   await recalculateFlightCompetitions(updatedFlight.id);
+  await recalculateFlightLeagueEntries(updatedFlight.id);
   revalidateFlightViews(fields.locale, updatedFlight.id);
 
   redirect(`/${fields.locale}/flights/${updatedFlight.id}`);

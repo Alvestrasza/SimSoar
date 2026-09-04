@@ -1,6 +1,6 @@
 {
   "name": "simsoar-nextjs",
-  "version": "0.4.22",
+  "version": "0.4.23",
   "private": true,
   "description": "SimSoar multi-user virtual gliding community portal",
   "scripts": {
@@ -27,6 +27,7 @@
     "test:badges": "node --experimental-strip-types --test tests/badges.test.mjs",
     "test:clubs": "node --experimental-strip-types --test tests/clubs.test.mjs",
     "test:competitions": "node --experimental-strip-types --test tests/competitions.test.mjs",
+    "test:leagues": "node --experimental-strip-types --test tests/leagues.test.mjs",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
