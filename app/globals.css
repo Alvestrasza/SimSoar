@@ -1304,6 +1304,15 @@ body {
 
 .airspaceWarnings { padding: 16px 18px; border-top: 1px solid var(--border); }
 .pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+.badgeGallery { margin-top: 20px; }
+.badgeGalleryHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.badgeGalleryHead h3 { margin: 0; }
+.badgeLevel { border: 1px solid var(--border); border-radius: 999px; padding: 6px 10px; color: var(--muted); }
+.badgeGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-top: 12px; }
+.achievementBadge { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); border-radius: 14px; padding: 12px; background: var(--panel); }
+.achievementBadgeIcon { font-size: 1.75rem; }
+.achievementBadge span:last-child { display: grid; gap: 3px; }
+.achievementBadge small { color: var(--muted); }
 .flightStoryCard { margin-top: 18px; }
 .flightStoryText { white-space: pre-wrap; line-height: 1.65; }
 .flightStoryGallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 18px; }

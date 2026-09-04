@@ -494,6 +494,28 @@
     "save": "Geschichte speichern",
     "removeImage": "Bild entfernen"
   },
+  "Badges": {
+    "title": "Abzeichen und Level",
+    "empty": "Noch keine Abzeichen erreicht.",
+    "level": "Level: {level}",
+    "level_ROOKIE": "Anfänger",
+    "level_EXPLORER": "Entdecker",
+    "level_ACHIEVER": "Leistungspilot",
+    "level_LEGEND": "Legende",
+    "awarded": "Erhalten am {date}",
+    "badge_FIRST_FLIGHT_name": "Erster Flug",
+    "badge_FIRST_FLIGHT_description": "Den ersten freigegebenen Flug hochgeladen.",
+    "badge_DISTANCE_100_name": "100 km",
+    "badge_DISTANCE_100_description": "Einen freigegebenen Flug über mindestens 100 km absolviert.",
+    "badge_DISTANCE_300_name": "300 km",
+    "badge_DISTANCE_300_description": "Einen freigegebenen Flug über mindestens 300 km absolviert.",
+    "badge_DISTANCE_500_name": "500 km",
+    "badge_DISTANCE_500_description": "Einen freigegebenen Flug über mindestens 500 km absolviert.",
+    "badge_BEST_THERMAL_name": "Starke Thermik",
+    "badge_BEST_THERMAL_description": "Eine Thermik mit mindestens 5 m/s maximalem Steigen aufgezeichnet.",
+    "badge_WEEKLY_ACTIVITY_name": "Wochenaktivität",
+    "badge_WEEKLY_ACTIVITY_description": "An drei verschiedenen Tagen innerhalb einer Woche Flüge hochgeladen."
+  },
   "LocaleSwitcher": {
     "label": "Sprache wechseln"
   },
@@ -522,7 +544,19 @@
     "openIgcBlocks": "IGC-Hashes verwalten",
     "airspacesTitle": "Luftraumdaten",
     "airspacesText": "Importierte OpenAir-Polygone für Karten und technische Kreuzungsprüfung.",
-    "openAirspaces": "Luftraumdaten verwalten"
+    "openAirspaces": "Luftraumdaten verwalten",
+    "badgesTitle": "Abzeichen",
+    "badgesText": "Automatisch vergebene Leistungen und Pilot-Level.",
+    "openBadges": "Abzeichen verwalten"
+  },
+  "AdminBadges": {
+    "title": "Abzeichen verwalten",
+    "subtitle": "Automatische Auszeichnungen aktivieren oder deaktivieren.",
+    "back": "Zurück zum Admin-Dashboard",
+    "updated": "Die Abzeicheneinstellung wurde aktualisiert.",
+    "awarded": "{count} Vergaben",
+    "enable": "Aktivieren",
+    "disable": "Deaktivieren"
   },
   "AdminAirspaces": {
     "pageTitle": "Luftraumdaten",

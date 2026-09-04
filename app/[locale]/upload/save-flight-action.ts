@@ -9,6 +9,7 @@ import { parseIgc } from "@/lib/igc";
 import { safeFilename, sha256Buffer } from "@/lib/security";
 import { writeAuditLog } from "@/lib/audit";
 import { notifyFollowersAboutFlight } from "@/lib/notifications";
+import { recalculateUserBadges } from "@/lib/badges";
 import { hasRole } from "@/lib/rbac";
 import { Prisma } from "@prisma/client";
 import {
@@ -322,7 +323,8 @@ async function importFlightFile({
       pilotUserId: userId,
       flightId: flight.id,
       isPublicAndApproved: fields.visibility === "PUBLIC"
-    })
+    }),
+    recalculateUserBadges(userId)
   ]);
 
   if (followUpResults.some((result) => result.status === "rejected")) {

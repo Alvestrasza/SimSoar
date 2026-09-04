@@ -9,6 +9,7 @@ import {prisma} from "@/lib/db";
 import {hasRole} from "@/lib/rbac";
 import {writeAuditLog} from "@/lib/audit";
 import {createNotification} from "@/lib/notifications";
+import {recalculateUserBadges} from "@/lib/badges";
 import fs from "node:fs/promises";
 
 const moderationSchema = z.object({
@@ -147,6 +148,8 @@ export async function moderateFlightAction(formData: FormData) {
     moderationStatus: flight.moderationStatus
   });
 
+  await recalculateUserBadges(flight.userId);
+
   revalidateFlightAdminViews(flight.id);
 
   redirect(`${returnTo}?updated=1`);
@@ -245,6 +248,8 @@ export async function softDeleteFlightAction(formData: FormData) {
       }
     });
 
+    await recalculateUserBadges(flight.userId);
+
     revalidateFlightAdminViews(flight.id);
 
     redirect(`${returnTo}?updated=1`);
@@ -301,6 +306,8 @@ export async function softDeleteFlightAction(formData: FormData) {
     flightId: updatedFlight.id,
     moderationStatus: updatedFlight.moderationStatus
   });
+
+  await recalculateUserBadges(flight.userId);
 
   revalidateFlightAdminViews(updatedFlight.id);
 
@@ -403,6 +410,8 @@ export async function restoreFlightAction(formData: FormData) {
     flightId: restoredFlight.id,
     moderationStatus: restoredFlight.moderationStatus
   });
+
+  await recalculateUserBadges(flight.userId);
 
   revalidateFlightAdminViews(restoredFlight.id);
 
