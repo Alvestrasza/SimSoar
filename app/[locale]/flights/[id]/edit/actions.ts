@@ -10,6 +10,7 @@ import {prisma} from "@/lib/db";
 import {hasRole} from "@/lib/rbac";
 import {writeAuditLog} from "@/lib/audit";
 import {recalculateUserBadges} from "@/lib/badges";
+import {recalculateFlightCompetitions} from "@/lib/competitions";
 import {parseIgc} from "@/lib/igc";
 import {safeFilename, sha256Buffer} from "@/lib/security";
 
@@ -587,6 +588,7 @@ export async function updateFlightMetadataAction(formData: FormData) {
   });
 
   await recalculateUserBadges(session.user.id);
+  await recalculateFlightCompetitions(updatedFlight.id);
   revalidateFlightViews(fields.locale, updatedFlight.id);
 
   redirect(`/${fields.locale}/flights/${updatedFlight.id}`);

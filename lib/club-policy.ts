@@ -1,6 +1,6 @@
 const NON_SLUG_CHARACTERS = /[^a-z0-9]+/g;
 
-export function normalizeClubSlug(value: string) {
+export function normalizePublicSlug(value: string) {
   return value
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -10,6 +10,8 @@ export function normalizeClubSlug(value: string) {
     .replace(/^-+|-+$/g, "")
     .slice(0, 80);
 }
+
+export const normalizeClubSlug = normalizePublicSlug;
 
 export function clubRanking<T extends {callsign: string; flights: Array<{distanceKm: number; olcPoints: number}>}>(members: T[]) {
   return members.map((member) => ({

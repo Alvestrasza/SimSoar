@@ -89,11 +89,26 @@ enum AuditAction {
   CLUB_DELETE
   CLUB_MEMBER_ASSIGN
   CLUB_MEMBER_REMOVE
+  COMPETITION_CREATE
+  COMPETITION_UPDATE
+  COMPETITION_CLOSE
+  COMPETITION_DELETE
 }
 
 enum ClubMemberRole {
   MEMBER
   MANAGER
+}
+
+enum CompetitionStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+enum CompetitionScoringRule {
+  OLC_POINTS
+  DISTANCE
 }
 
 enum HomeFeedMode {
@@ -150,6 +165,7 @@ model User {
   uploadBatches     UploadBatch[]
   badges            UserBadge[]
   clubMemberships   ClubMembership[]
+  competitionEntries CompetitionEntry[]
 }
 
 model Account {
@@ -274,6 +290,45 @@ model ClubMembership {
   @@index([userId])
 }
 
+model Competition {
+  id               String                 @id @default(cuid())
+  slug             String                 @unique
+  name             String
+  description      String?
+  rules            String?
+  startAt          DateTime
+  endAt            DateTime
+  status           CompetitionStatus      @default(DRAFT)
+  scoringRule      CompetitionScoringRule @default(OLC_POINTS)
+  simulator        String?
+  competitionClass String?
+  closedAt         DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  entries          CompetitionEntry[]
+
+  @@index([status, startAt, endAt])
+  @@index([endAt])
+}
+
+model CompetitionEntry {
+  id            String   @id @default(cuid())
+  competitionId String
+  flightId      String
+  userId        String
+  score         Float
+  assignedAt    DateTime @default(now())
+
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  flight      Flight      @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([competitionId, flightId])
+  @@index([competitionId, score])
+  @@index([competitionId, userId])
+  @@index([flightId])
+}
+
 model Flight {
   id                String                 @id @default(cuid())
   userId            String
@@ -330,6 +385,7 @@ model Flight {
   notifications Notification[]
   scoringPoints FlightScoringPoint[]
   storyImages FlightStoryImage[]
+  competitionEntries CompetitionEntry[]
 
   @@index([visibility, createdAt])
   @@index([visibility, moderationStatus, createdAt])

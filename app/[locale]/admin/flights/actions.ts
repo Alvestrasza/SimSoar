@@ -10,6 +10,7 @@ import {hasRole} from "@/lib/rbac";
 import {writeAuditLog} from "@/lib/audit";
 import {createNotification} from "@/lib/notifications";
 import {recalculateUserBadges} from "@/lib/badges";
+import {recalculateFlightCompetitions} from "@/lib/competitions";
 import fs from "node:fs/promises";
 
 const moderationSchema = z.object({
@@ -149,6 +150,7 @@ export async function moderateFlightAction(formData: FormData) {
   });
 
   await recalculateUserBadges(flight.userId);
+  await recalculateFlightCompetitions(flight.id);
 
   revalidateFlightAdminViews(flight.id);
 
@@ -249,6 +251,7 @@ export async function softDeleteFlightAction(formData: FormData) {
     });
 
     await recalculateUserBadges(flight.userId);
+    await recalculateFlightCompetitions(flight.id);
 
     revalidateFlightAdminViews(flight.id);
 
@@ -308,6 +311,7 @@ export async function softDeleteFlightAction(formData: FormData) {
   });
 
   await recalculateUserBadges(flight.userId);
+  await recalculateFlightCompetitions(updatedFlight.id);
 
   revalidateFlightAdminViews(updatedFlight.id);
 
@@ -412,6 +416,7 @@ export async function restoreFlightAction(formData: FormData) {
   });
 
   await recalculateUserBadges(flight.userId);
+  await recalculateFlightCompetitions(restoredFlight.id);
 
   revalidateFlightAdminViews(restoredFlight.id);
 
