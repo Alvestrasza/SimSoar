@@ -144,3 +144,44 @@ export function parseCup(text: string): CupData {
   if (tasks.length > 100) throw new CupParseError("too-many-tasks");
   return {waypoints, tasks};
 }
+
+function csvField(value: string) {
+  return /[",\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
+export function formatCupCoordinate(value: number, axis: "lat" | "lon") {
+  if (!Number.isFinite(value) || Math.abs(value) > (axis === "lat" ? 90 : 180)) throw new Error(`Invalid ${axis}.`);
+  const hemisphere = axis === "lat" ? (value < 0 ? "S" : "N") : (value < 0 ? "W" : "E");
+  const degreeWidth = axis === "lat" ? 2 : 3;
+  const absolute = Math.abs(value);
+  let degrees = Math.floor(absolute);
+  let minutes = Number(((absolute - degrees) * 60).toFixed(3));
+  if (minutes >= 60) { degrees += 1; minutes = 0; }
+  return `${String(degrees).padStart(degreeWidth, "0")}${minutes.toFixed(3).padStart(6, "0")}${hemisphere}`;
+}
+
+export function exportTaskToCup(task: {name: string; waypoints: TaskPoint[]}) {
+  if (task.waypoints.length < 2) throw new Error("A CUP task requires at least two waypoints.");
+  const usedNames = new Map<string, number>();
+  const named = task.waypoints.map((point, index) => {
+    const base = (point.name || point.code || `Waypoint ${index + 1}`).trim().slice(0, 110);
+    const normalized = base.toLocaleLowerCase("en");
+    const count = (usedNames.get(normalized) ?? 0) + 1;
+    usedNames.set(normalized, count);
+    return {...point, exportName: count === 1 ? base : `${base} (${count})`};
+  });
+  const header = "name,code,country,lat,lon,elev,style,rwdir,rwlen,rwwidth,freq,desc";
+  const waypointRows = named.map((point, index) => [
+    point.exportName,
+    point.code || `WP${String(index + 1).padStart(3, "0")}`,
+    "",
+    formatCupCoordinate(point.lat, "lat"),
+    formatCupCoordinate(point.lon, "lon"),
+    "0m",
+    "1",
+    "", "", "", "", ""
+  ].map(csvField).join(","));
+  const taskRow = [task.name, ...named.map((point) => point.exportName)].map(csvField).join(",");
+  const zones = named.map((point, index) => `ObsZone=${index},Style=0,R1=${Math.round(point.radiusM ?? 500)}m,A1=180`);
+  return [header, ...waypointRows, "-----Related Tasks-----", taskRow, "Options,WpDis=True", ...zones, ""].join("\r\n");
+}

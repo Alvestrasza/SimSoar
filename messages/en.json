@@ -65,7 +65,8 @@
     "importSuccess": "Imported {waypoints} waypoints and created {tasks} tasks.",
     "library": "Imported waypoint library",
     "chooseLibraryWaypoint": "Choose an imported waypoint",
-    "addLibraryWaypoint": "Add waypoint"
+    "addLibraryWaypoint": "Add waypoint",
+    "downloadCup": "Download CUP"
   },
   "CupImport": {
     "title": "Import CUP waypoints and tasks",
