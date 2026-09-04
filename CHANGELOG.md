@@ -2,6 +2,32 @@
 
 All notable changes to SimSoar are documented in this file.
 
+## [0.6.0] - 2026-09-04
+
+SimSoar v0.6.0 consolidates the security, trust, integration, and Sim2Real controls assigned to the v0.6.0 milestone. It is deployed to the development environment only and is not a production promotion.
+
+### Security hardening
+
+- Updated vulnerable framework and production dependencies and retained a zero-critical deployment gate (#71).
+- Enforced exact environment-scoped identity groups and fail-closed role mapping (#72).
+- Bound IGC uploads to the authenticated pilot profile instead of submitted identity metadata (#73).
+- Prevented shared caching of protected flight-story images (#74).
+- Added scoped, revocable OAuth with PKCE, strict redirect validation, endpoint scopes, idempotency, rate limits, and sanitized audit records (#69).
+
+### Trusted data exchange
+
+- Added versioned, bounded, data-only task packages with compatibility declarations and per-file SHA-256 verification (#51).
+- Added revisioned Ed25519 authenticity evidence, transparent findings, moderator decisions, corrections, and appeals without automatic disqualification (#60).
+- Added an explicit Sim2Real review gate with revisioned data provenance, fail-closed airspace checks, required assumptions and alternatives, and clearly labelled planning exports (#47).
+- Added an optional Windows-first companion with exact user-approved roots, explicit upload consent, OAuth-only authentication, signed update verification, rollback backups, and no downloaded-script or arbitrary-command execution path (#53).
+
+### Verification and residual risk
+
+- The exact release commit passed 145 tests, Prisma validation and client generation, TypeScript checking, and an optimized production build.
+- All intended DEV application instances reported the same commit and rendered v0.6.0; public health checks passed and protected write endpoints returned `401` without authorization.
+- The dependency audit reported no critical findings. Three high findings map to one recursive-merge denial-of-service advisory in the Prisma CLI/configuration toolchain. The Prisma CLI is not a direct web-runtime dependency; remediation requires a separately validated Prisma major upgrade.
+- See [Security Review — v0.6.0](docs/security-review-v0.6.0.md) for scope, evidence, limitations, and follow-up guidance.
+
 ## [0.5.0] - 2026-09-04
 
 SimSoar v0.5.0 consolidates the functionality delivered throughout the v0.4.x development series into a defined development-environment feature baseline. It is not a production promotion.

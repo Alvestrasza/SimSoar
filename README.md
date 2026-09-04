@@ -66,7 +66,7 @@ The project should stay focused, clean, and practical. It should serve the flyin
 
 ## Core Features
 
-The v0.5.0 feature baseline includes:
+The v0.6.0 development baseline includes:
 
 - multi-user platform for virtual glider pilots
 - login through an external identity provider
@@ -85,6 +85,7 @@ The v0.5.0 feature baseline includes:
 - social feeds, follows, comments, likes, notifications, and flight stories
 - clubs, competitions, leagues, tasks, segments, and CUP exchange
 - moderation, audit logging, administrative workflows, and a public API
+- exact environment-scoped authorization, identity-bound uploads, protected media caching, scoped OAuth, authenticity evidence, and an optional data-only companion
 
 ---
 
@@ -171,7 +172,7 @@ It must not contain:
 
 ## Current Project Status
 
-SimSoar v0.5.0 is the consolidated feature baseline currently deployed to the development environment. It brings together the flight logbook, analysis, community, competition, administration, import/export, and responsive user-interface work completed during the v0.4.x development series.
+SimSoar v0.6.0 is the consolidated security and integration baseline currently deployed to the development environment. It includes the v0.5.0 flight, analysis, community, competition, administration, import/export, and responsive UI baseline plus the security controls documented in the [v0.6.0 security review](docs/security-review-v0.6.0.md).
 
 This version declaration does not promote the build to production. Production deployment remains a separate, explicitly controlled operation. Interfaces, data models, and deployment details may still change while the platform is being stabilized.
 
@@ -184,7 +185,7 @@ See the [changelog](CHANGELOG.md) for the release summary.
 Development is organized by explicit milestone boundaries:
 
 - **v0.5.0:** completed and documented feature baseline
-- **v0.6.0:** follow-up work tracked in GitHub issues #46 through #70
+- **v0.6.0:** current DEV security and integration baseline
 
 Work assigned to a later milestone is not included in an earlier release unless that scope change is explicitly reviewed and documented.
 
