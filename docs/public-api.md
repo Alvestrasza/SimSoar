@@ -1,5 +1,7 @@
 # SimSoar public API v1
 
+Protected user APIs and external client registration are documented in [OAuth integrations and protected API](oauth-integrations.md).
+
 SimSoar exposes a read-only JSON API for approved public data. Private, unlisted, moderated, and deleted flights are excluded at the database query boundary. The API never exposes email addresses, IGC object paths, file hashes, moderation notes, or account data.
 
 ## Endpoints
