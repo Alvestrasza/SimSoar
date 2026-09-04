@@ -40,8 +40,8 @@ async function verifyAccessToken(token: string) {
   const claims = decodeJsonPart<OAuthTokenClaims>(parts[1]);
   if (header.alg !== "RS256" || typeof header.kid !== "string" || !header.kid || header.kid.length > 255) throw new OAuthPolicyError("invalid_token");
   const issuer = process.env.AUTH_KEYCLOAK_ISSUER?.replace(/\/$/, "");
-  const audience = process.env.SIMSOAR_OAUTH_AUDIENCE;
-  if (!issuer || !audience) throw new OAuthPolicyError("oauth_not_configured");
+  const audience = process.env.SIMSOAR_OAUTH_AUDIENCE || "simsoar-api";
+  if (!issuer) throw new OAuthPolicyError("oauth_not_configured");
   const key = (await loadJwks(issuer)).find((candidate: JsonWebKeyWithKid) => candidate.kid === header.kid && (!candidate.alg || candidate.alg === "RS256") && (!candidate.use || candidate.use === "sig"));
   if (!key) throw new OAuthPolicyError("invalid_token");
   let publicKey: crypto.KeyObject;

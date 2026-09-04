@@ -25,7 +25,7 @@ An administrator must first configure the client in Keycloak and then register t
 - PKCE with `S256` required for public/native clients;
 - explicit consent enabled, with a plain-language description for every requested scope;
 - exact redirect URIs, with no wildcard; HTTPS except literal `127.0.0.1` or `[::1]` loopback redirects for native clients;
-- an audience mapper that adds the configured `SIMSOAR_OAUTH_AUDIENCE` to access tokens;
+- an audience mapper that adds the configured `SIMSOAR_OAUTH_AUDIENCE` (default `simsoar-api`) to access tokens;
 - short-lived signed RS256 access tokens containing `iss`, `sub`, `aud`, `azp`, `iat`, `exp`, and `scope`;
 - only the scopes reviewed in the SimSoar registry.
 
