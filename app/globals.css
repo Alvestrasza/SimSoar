@@ -173,7 +173,6 @@ html[data-theme="dark"] .btnSecondary:hover:not(:disabled) {
 .grid2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .twoCol { display: grid; grid-template-columns: 1fr 330px; gap: 22px; align-items: start; }
 .featureTile { padding: 28px; }
-.featureIcon { font-size: 32px; margin-bottom: 12px; }
 
 .tableWrap {
   overflow-x: auto;
@@ -353,6 +352,194 @@ textarea { min-height: 120px; resize: vertical; }
   }
 }
 
+/* SimSoar v0.4.38: wider content, compact flight search and sortable tables */
+.navInner,
+.wrap,
+.heroInner,
+.siteFooter {
+  max-width: 1360px;
+}
+
+.card,
+.flightsExplorer,
+.flightsExplorer > section,
+.tableWrap {
+  min-width: 0;
+}
+
+.tableWrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+}
+
+.tableWrap table {
+  min-width: 720px;
+}
+
+.tableWrap::-webkit-scrollbar {
+  height: 10px;
+}
+
+.tableWrap::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 48%, transparent);
+  background-clip: padding-box;
+}
+
+.sortableColumn {
+  position: relative;
+  padding-right: 30px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortableColumn::after {
+  content: "↕";
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  color: color-mix(in srgb, var(--muted) 68%, transparent);
+  font-size: 11px;
+  transform: translateY(-50%);
+}
+
+.sortableColumn[aria-sort="ascending"]::after {
+  content: "↑";
+  color: var(--accent);
+}
+
+.sortableColumn[aria-sort="descending"]::after {
+  content: "↓";
+  color: var(--accent);
+}
+
+.sortableColumn:hover,
+.sortableColumn:focus-visible {
+  background: var(--accent-lt);
+  color: var(--accent);
+  outline: none;
+}
+
+.flightFilterCard {
+  margin-bottom: 18px;
+}
+
+.flightFilterHead > div {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.flightFilterResult {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.flightFilterToggle {
+  flex: none;
+}
+
+.compactFilterBody {
+  padding: 16px 18px 18px;
+}
+
+.flightFilterGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 11px 12px;
+}
+
+.flightFilterGrid .formGroup.full {
+  grid-column: span 2;
+}
+
+.flightFilterGrid input,
+.flightFilterGrid select {
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 9px;
+}
+
+.filterRangeInputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.flightFilterActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.flightsExplorer {
+  display: grid;
+  gap: 22px;
+}
+
+.flightsSupportGrid {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: 16px;
+}
+
+.flightsSupportGrid .lineHeight {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.flightsSupportGrid .lineHeight p {
+  margin: 0;
+}
+
+@media (max-width: 1000px) {
+  .flightFilterGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flightsSupportGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .flightFilterHead {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .flightFilterHead > div {
+    display: grid;
+    gap: 3px;
+  }
+
+  .flightFilterToggle {
+    min-height: 34px;
+    padding: 6px 9px;
+    font-size: 12px;
+  }
+
+  .flightFilterGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .flightFilterGrid .formGroup.full {
+    grid-column: auto;
+  }
+
+  .flightsSupportGrid .lineHeight {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
 /* SimSoar restored interactive views from original index.html */
 .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); overflow-x: auto; width: 100%; }
 .tab { border: 0; background: transparent; color: var(--muted); padding: 12px 18px; border-bottom: 2px solid transparent; font-weight: 800; cursor: pointer; white-space: nowrap; }
@@ -397,11 +584,133 @@ textarea { min-height: 120px; resize: vertical; }
 .tabPane.hidden { display: none; }
 .tabPane.padded { padding: 22px 24px; }
 .leafletMap { width: 100%; height: 460px; background: #e8f0fe; }
+
+.flightsMapLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 16px;
+  padding: 16px;
+}
+
+.flightsOverviewMap {
+  width: 100%;
+  height: 560px;
+  min-height: 420px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #e8f0fe;
+}
+
+.flightsMapSelector {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  max-height: 560px;
+  overflow: auto;
+}
+
+.flightsMapSelectorItem {
+  display: grid;
+  gap: 3px;
+  padding: 11px 12px;
+  color: inherit;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.flightsMapSelectorItem:hover,
+.flightsMapSelectorItem:focus-visible,
+.flightsMapSelectorItem.active {
+  border-color: #ea580c;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, .15);
+}
+
+.flightsMapSelectorItem span,
+.flightsMapSelectorItem small {
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .flightsMapLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .flightsOverviewMap {
+    height: 440px;
+  }
+
+  .flightsMapSelector {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 320px;
+  }
+}
+
+@media (max-width: 560px) {
+  .flightsMapSelector {
+    grid-template-columns: 1fr;
+  }
+}
 .altitudeCanvas { width: 100%; display: block; border-radius: 12px; background: #f8fafc; }
+.replayControls { margin-bottom: 18px; padding: 16px 18px; display: grid; gap: 12px; }
+.replayControlRow, .replayButtons, .replayStatus { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.replayButtons { justify-content: flex-end; }
+.replayButtons .btn { min-height: 36px; }
+.replaySpeed { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13px; font-weight: 800; }
+.replaySpeed select { width: auto; min-width: 74px; padding: 7px 9px; }
+.replaySlider { width: 100%; accent-color: var(--accent); cursor: pointer; }
+.replayStatus { color: var(--muted); font-size: 13px; }
+.replayThermal { color: #b45309; }
+.flight3dShell { position: relative; overflow: hidden; border-radius: 14px; background: #09111f; }
+.flight3dCanvas { display: block; width: 100%; min-height: 300px; border-radius: 14px; background: #09111f; }
+.flight3dShell .flight3dCanvas { min-height: 360px; }
+.flight3dAltitude { position: absolute; inset: 16px auto 16px 16px; display: flex; flex-direction: column; justify-content: space-between; color: #cbd5e1; font-size: 12px; font-weight: 800; pointer-events: none; }
+.comparisonSelector { margin-bottom: 20px; padding-bottom: 18px; }
+.comparisonChoices { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 9px; max-height: 330px; overflow: auto; padding: 0 18px 16px; }
+.comparisonChoice { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); border-radius: 12px; padding: 11px 12px; cursor: pointer; }
+.comparisonChoice.selected { border-color: var(--accent); background: var(--accent-lt); }
+.comparisonChoice input { width: auto; }
+.comparisonChoice span { display: grid; gap: 3px; min-width: 0; }
+.comparisonChoice small { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.comparisonSelector > .btn { margin-left: 18px; }
+.comparisonHint, .comparisonSection { margin-top: 20px; }
+.comparisonHint { padding: 18px; }
+.comparisonHint p { margin: 0 0 5px; }
+.comparisonMap { height: 520px; }
+.comparisonLegend { display: flex; flex-wrap: wrap; gap: 9px 18px; padding: 14px 18px; border-top: 1px solid var(--border); }
+.comparisonLegend span, .comparisonFlightName { display: inline-flex; align-items: center; gap: 8px; }
+.comparisonLegend i, .comparisonFlightName i { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.comparisonAltitudeChart { display: block; width: 100%; min-height: 240px; border-radius: 12px; background: var(--bg); }
+.groupReplayControls { display: grid; gap: 12px; padding: 0 18px 18px; }
+.groupReplayPilots { display: flex; flex-wrap: wrap; gap: 9px; }
+.groupReplayPilots label { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 11px; padding: 8px 11px; cursor: pointer; opacity: .65; }
+.groupReplayPilots label.selected { border-color: var(--accent); background: var(--accent-lt); opacity: 1; }
+.groupReplayPilots input { width: auto; }
+.groupReplayPilots i { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.groupReplayPilots span { display: grid; gap: 2px; }
+.groupReplayPilots small { color: var(--muted); }
+.groupReplayMarker { --marker-color: #2563eb; display: grid; place-items: center; width: 30px; height: 30px; border: 3px solid white; border-radius: 50%; background: var(--marker-color); color: white; font-size: 12px; font-weight: 900; box-shadow: 0 2px 8px rgba(15, 23, 42, .4); }
+.flightSharePanel { margin: 24px auto; max-width: 1180px; }
+.flightShareGrid { display: grid; gap: 18px; }
+.flightShareGrid > div { display: grid; gap: 7px; }
+.flightShareGrid label { font-weight: 800; }
+.flightShareRow { display: flex; align-items: stretch; gap: 8px; }
+.flightShareRow input, .flightShareRow textarea { flex: 1; min-width: 0; }
+.flightShareRow textarea { min-height: 86px; }
+.flightEmbedPreview { width: 100%; height: 420px; border: 0; border-radius: 12px; background: #0f172a; }
+@media (max-width: 680px) { .flightShareRow { flex-wrap: wrap; } .flightShareRow input, .flightShareRow textarea { flex-basis: 100%; } .flightEmbedPreview { height: 460px; } }
 .smallStats { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 14px; color: var(--muted); font-size: 13px; }
 .thermalList { display: grid; gap: 10px; margin-top: 14px; }
 .thermalItem { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
 .thermalBubble { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: white; font-weight: 900; background: var(--green); flex-shrink: 0; }
+.glideBubble { background: var(--accent); }
+.phaseSectionTitle { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--border); }
+.phaseSummary { margin: 12px 0; }
+.windEstimate { margin: 14px 0; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
+.windEstimate p { margin: 6px 0 0; }
+.thermalWind { margin-top: 4px; }
 .emptyInline { text-align: center; padding: 28px; }
 .detailRows { display: grid; gap: 0; }
 .detailRows > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
@@ -418,6 +727,25 @@ textarea { min-height: 120px; resize: vertical; }
 .uploadPreview .dropZone { position: relative; }
 .uploadPreview .dropZone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .fileOk { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; padding: 12px 16px; border: 1px solid #86efac; border-radius: 12px; background: #f0fdf4; }
+.uploadFileList { display: grid; gap: 8px; margin-top: 14px; }
+.uploadFileList .fileOk { margin-top: 0; }
+.uploadFileInvalid { border-color: #fca5a5; background: #fef2f2; }
+.uploadResultGroups { display: grid; gap: 28px; }
+.uploadResultGroups h2 { margin: 0 0 12px; font-size: 18px; }
+.uploadResultList { display: grid; gap: 8px; }
+.uploadResultItem { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
+.uploadResultSuccess { border-color: #86efac; }
+.uploadResultFailure { border-color: #fca5a5; }
+.scoringFormula { font-size: 16px; line-height: 1.6; }
+.scoringPointList { display: grid; gap: 7px; margin: 14px 0 0; padding-left: 22px; }
+.scoringPointList li { display: flex; justify-content: space-between; gap: 10px; padding-left: 3px; }
+.scoringWindowSummary { display: grid; gap: 3px; margin-top: 14px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
+.scoringWindowForm { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 8px; }
+.scoringWindowForm label { display: grid; gap: 5px; color: var(--muted); font-size: 12px; }
+.scoringWindowForm input { width: 100%; }
+.scoringWindowForm .btn { grid-column: 1 / -1; justify-content: center; }
+.thermalSort { display: flex; align-items: center; gap: 10px; margin: 12px 0; color: var(--muted); font-size: 13px; }
+.thermalSort select { width: auto; min-width: 160px; }
 .parsedBox { margin-top: 14px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: #f8fafc; display: grid; gap: 7px; font-size: 13px; }
 .parsedBox > div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
 .parsedBox > div:last-of-type { border-bottom: none; }
@@ -578,6 +906,51 @@ body {
   font-size: 13px;
 }
 
+.visibilityActionForm {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.visibilitySelect {
+  width: auto;
+  min-width: 130px;
+  height: 38px;
+  padding: 7px 34px 7px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text2);
+  background: var(--surface);
+}
+
+.visibilitySelect:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-lt);
+}
+
+.visibilityActionForm .btn {
+  min-height: 38px;
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .visibilityActionForm {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .visibilitySelect {
+    flex: 1 1 160px;
+  }
+
+  .visibilityActionForm .btn {
+    flex: 1 1 auto;
+  }
+}
+
 .localeSelectWrap {
   display: inline-flex;
   align-items: center;
@@ -646,6 +1019,189 @@ body {
 .adminActionForm textarea {
   min-height: 72px;
   resize: vertical;
+}
+
+.adminFlightsWrap {
+  max-width: 1180px;
+}
+
+.adminFlightsHeader {
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.moderationCardGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.moderationCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg);
+}
+
+.moderationCard.softDeleted {
+  opacity: .82;
+  border-style: dashed;
+}
+
+.moderationCardMain {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.moderationCardTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.moderationFlightTitle {
+  display: block;
+  max-width: 100%;
+  font-size: 16px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.moderationSubLine {
+  margin: 5px 0 0;
+}
+
+.moderationMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.moderationMetaGrid div {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.moderationMetaGrid span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+.moderationMetaGrid strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.moderationStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.moderationStatusBadge.approved {
+  background: color-mix(in srgb, var(--green) 14%, var(--surface));
+  color: var(--green);
+}
+
+.moderationStatusBadge.hidden,
+.moderationStatusBadge.pending {
+  background: color-mix(in srgb, var(--orange) 14%, var(--surface));
+  color: var(--orange);
+}
+
+.moderationStatusBadge.rejected,
+.moderationStatusBadge.deleted {
+  background: color-mix(in srgb, #dc2626 12%, var(--surface));
+  color: #dc2626;
+}
+
+.moderationCardActions {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.moderationActionForm {
+  min-width: 0;
+  width: 100%;
+}
+
+.moderationActionForm select,
+.moderationActionForm textarea {
+  width: 100%;
+}
+
+.moderationActionForm textarea {
+  min-height: 78px;
+}
+
+.moderationCardActions form:not(.moderationActionForm) {
+  margin: 0;
+}
+
+.moderationCardActions .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 980px) {
+  .moderationCard {
+    grid-template-columns: 1fr;
+  }
+
+  .moderationCardActions {
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+}
+
+@media (max-width: 720px) {
+  .adminFlightsHeader {
+    flex-direction: column;
+  }
+
+  .moderationCard {
+    padding: 14px;
+  }
+
+  .moderationCardTop {
+    flex-direction: column;
+  }
+
+  .moderationMetaGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .moderationMetaGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hashText {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .ownerActions,
@@ -929,11 +1485,18 @@ body {
   position: relative;
 }
 
-.mapModeToggle {
+.mapControls {
   position: absolute;
   top: 12px;
   right: 12px;
   z-index: 900;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.mapModeToggle {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -964,10 +1527,1160 @@ body {
 }
 
 @media (max-width: 720px) {
-  .mapModeToggle {
+  .mapControls {
     top: 10px;
     right: 10px;
     max-width: calc(100% - 20px);
+  }
+  .mapModeToggle {
     font-size: 11px;
+  }
+}
+
+.airspaceWarnings { padding: 16px 18px; border-top: 1px solid var(--border); }
+.pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+.badgeGallery { margin-top: 20px; }
+.badgeGalleryHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.badgeGalleryHead h3 { margin: 0; }
+.badgeLevel { border: 1px solid var(--border); border-radius: 999px; padding: 6px 10px; color: var(--muted); }
+.badgeGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-top: 12px; }
+.achievementBadge { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); border-radius: 14px; padding: 12px; background: var(--panel); }
+.achievementBadgeIcon { font-size: 1.75rem; }
+.achievementBadge span:last-child { display: grid; gap: 3px; }
+.achievementBadge small { color: var(--muted); }
+.clubGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.clubCard { padding: 18px; }
+.clubCard h2 { margin-top: 0; }
+.clubStats { display: flex; flex-wrap: wrap; gap: 8px 14px; color: var(--muted); }
+.clubAdminCard { display: grid; gap: 18px; }
+.clubAdminForm { flex: 1; }
+.clubMemberAdmin { display: grid; gap: 10px; }
+.clubMemberRow, .clubAssignForm { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.clubAssignForm select { min-width: 180px; }
+.competitionMeta { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); border-top: 1px solid var(--border); }
+.leagueRoundLinks { display: flex; flex-wrap: wrap; gap: 10px; }
+.flightStoryCard { margin-top: 18px; }
+.flightStoryText { white-space: pre-wrap; line-height: 1.65; }
+.flightStoryGallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 18px; }
+.flightStoryGallery figure { margin: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg); }
+.flightStoryGallery img { display: block; width: 100%; height: 220px; object-fit: cover; }
+.flightStoryGallery figcaption { padding: 9px 12px; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.flightStoryGallery form { padding: 0 12px 12px; }
+.flightStoryForm { display: grid; gap: 14px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); }
+.flightStoryForm label { display: grid; gap: 7px; font-weight: 800; }
+
+.adminWrap {
+  width: 100%;
+  max-width: min(90vw, 1600px);
+}
+
+.adminSection {
+  display: grid;
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.adminHeroCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 520px);
+  gap: 28px;
+  align-items: center;
+  padding: 30px;
+}
+
+.adminEyebrow {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--accent-lt);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+
+.adminHeroTitle {
+  margin: 14px 0 10px;
+  font-size: clamp(30px, 4vw, 48px);
+  line-height: 1.05;
+}
+
+.adminHeroText {
+  max-width: 780px;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.adminHeroStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.adminHeroStats div,
+.adminMetricTile {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg);
+}
+
+.adminHeroStats span,
+.adminMetricTile span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.adminHeroStats strong,
+.adminMetricTile strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.adminDashboardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.adminDashboardTile {
+  display: flex;
+  min-height: 230px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px;
+}
+
+.adminDashboardTile h3,
+.adminMetricTile h3 {
+  margin: 0 0 10px;
+}
+
+.adminDashboardTile .statValue {
+  margin: 8px 0;
+}
+
+.adminTileIcon {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  background: var(--accent-lt);
+  color: var(--accent);
+  font-size: 22px;
+}
+
+.adminMetricTile {
+  display: grid;
+  align-content: center;
+  min-height: 150px;
+}
+
+.sectionHead.compact {
+  margin-bottom: 0;
+}
+
+@media (max-width: 960px) {
+  .adminWrap {
+    max-width: none;
+  }
+
+  .adminHeroCard {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .adminHeroCard {
+    padding: 22px;
+  }
+
+  .adminHeroStats {
+    grid-template-columns: 1fr;
+  }
+
+  .adminDashboardTile {
+    min-height: auto;
+  }
+}
+
+.pilotAdminCard {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+}
+
+.pilotAdminSidePanel {
+  min-width: 0;
+  width: 100%;
+}
+
+.pilotAdminSideGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.pilotAdminSideGrid div {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.pilotAdminSideGrid span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+.pilotAdminSideGrid strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.pilotAdminSidePanel .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.pilotProfileStats > div {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.pilotProfileStats strong {
+  font-size: 1.25rem;
+}
+
+.pilotProfileStats span {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.homeFeedScope {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.85rem;
+}
+
+.homeFeedLinks {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.flightCommunityWrap {
+  padding-top: 0;
+}
+
+.flightCommunityHead,
+.communityCommentMeta,
+.communityCommentActions,
+.communityReportForm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.flightCommunityBody,
+.communityComments,
+.communityCommentForm {
+  display: grid;
+  gap: 16px;
+}
+
+.communityCommentForm textarea {
+  min-height: 96px;
+}
+
+.communityCommentForm .btn {
+  justify-self: start;
+}
+
+.communityComment {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.communityCommentMeta {
+  justify-content: space-between;
+}
+
+.communityCommentText {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.communityReportForm input {
+  min-width: min(260px, 65vw);
+}
+
+.notificationNavLink {
+  position: relative;
+  min-width: 42px;
+  justify-content: center;
+}
+
+.notificationBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.notificationCount {
+  display: block;
+  margin-top: 4px;
+}
+
+.notificationList {
+  display: grid;
+  gap: 12px;
+}
+
+/* SimSoar v0.4.35: compact responsive application shell */
+:root {
+  --radius: 14px;
+  --shadow: 0 1px 3px rgba(15, 23, 42, .06), 0 8px 24px rgba(15, 23, 42, .035);
+}
+
+html[data-theme="dark"] {
+  --shadow: 0 1px 3px rgba(0, 0, 0, .28), 0 8px 24px rgba(0, 0, 0, .2);
+}
+
+body {
+  padding-top: 0;
+}
+
+body.hasDevBanner {
+  padding-top: 28px;
+}
+
+.devBanner {
+  min-height: 28px;
+  padding: 5px 12px;
+  font-size: 12px;
+  letter-spacing: .35px;
+}
+
+.skipLink {
+  position: fixed;
+  top: 6px;
+  left: 12px;
+  z-index: 1000000;
+  padding: 8px 12px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: white;
+  font-weight: 800;
+  transform: translateY(-150%);
+  transition: transform .15s ease;
+}
+
+.skipLink:focus {
+  transform: translateY(0);
+}
+
+.siteHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10000;
+}
+
+.hasDevBanner .siteHeader {
+  top: 28px;
+}
+
+.nav {
+  position: relative;
+  top: auto;
+  height: 58px;
+  min-height: 58px;
+  padding: 0 20px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.navInner {
+  position: relative;
+  width: 100%;
+  max-width: 1240px;
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.logo {
+  flex: none;
+  gap: 8px;
+  font-size: 20px;
+}
+
+.logoMark {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.navLinks > a,
+.navMore > summary {
+  padding: 7px 10px;
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  list-style: none;
+}
+
+.navLinks > a:hover,
+.navLinks > a:focus-visible,
+.navMore > summary:hover,
+.navMore > summary:focus-visible,
+.navMore[open] > summary {
+  background: var(--accent-lt);
+  color: var(--accent);
+  outline: none;
+}
+
+.navMore,
+.mobileMenu {
+  position: relative;
+}
+
+.navMore summary::-webkit-details-marker,
+.mobileMenu summary::-webkit-details-marker {
+  display: none;
+}
+
+.navMore > summary::after {
+  content: "⌄";
+  margin-left: 6px;
+  font-size: 11px;
+}
+
+.navMorePanel {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  min-width: 190px;
+  display: grid;
+  gap: 3px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 16px 38px rgba(15, 23, 42, .16);
+}
+
+.navMorePanel a {
+  padding: 9px 11px;
+  border-radius: 8px;
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.navMorePanel a:hover,
+.navMorePanel a:focus-visible {
+  background: var(--accent-lt);
+  color: var(--accent);
+  outline: none;
+}
+
+.navRight {
+  width: auto;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 7px;
+}
+
+.desktopNavUtilities {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-left: 7px;
+  border-left: 1px solid var(--border);
+}
+
+.navRight .btn,
+.navRight .navSelect {
+  min-height: 34px;
+  height: 34px;
+  border-radius: 10px;
+  padding: 6px 11px;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.navRight .navSelect {
+  min-width: 102px;
+  padding-right: 30px;
+}
+
+.navRight .themeQuickToggle,
+.navRight .notificationNavLink,
+.mobileMenu > summary {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+  border-radius: 10px;
+}
+
+.navRight .notificationNavLink {
+  gap: 3px;
+}
+
+.navRight .notificationBadge {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border: 2px solid var(--surface);
+  font-size: 9px;
+}
+
+.mobileMenu {
+  display: none;
+}
+
+.mobileMenu > summary {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  cursor: pointer;
+  list-style: none;
+}
+
+.menuIcon {
+  width: 16px;
+  display: grid;
+  gap: 3px;
+}
+
+.menuIcon i {
+  display: block;
+  height: 2px;
+  border-radius: 99px;
+  background: var(--text2);
+  transition: transform .15s ease, opacity .15s ease;
+}
+
+.mobileMenu[open] .menuIcon i:first-child {
+  transform: translateY(5px) rotate(45deg);
+}
+
+.mobileMenu[open] .menuIcon i:nth-child(2) {
+  opacity: 0;
+}
+
+.mobileMenu[open] .menuIcon i:last-child {
+  transform: translateY(-5px) rotate(-45deg);
+}
+
+.mobileMenu[open] > summary {
+  border-color: var(--accent);
+  background: var(--accent-lt);
+}
+
+.mobileMenuPanel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: min(360px, calc(100vw - 24px));
+  max-height: calc(100dvh - 86px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, .22);
+}
+
+.mobileMenuLinks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.mobileMenuLinks a {
+  padding: 11px 12px;
+  border-radius: 9px;
+  color: var(--text2);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.mobileMenuLinks a:hover,
+.mobileMenuLinks a:focus-visible {
+  background: var(--accent-lt);
+  color: var(--accent);
+  outline: none;
+}
+
+.mobileMenuUtilities {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-top: 9px;
+  padding: 10px 2px 2px;
+  border-top: 1px solid var(--border);
+}
+
+.mobileMenuUtilities .btn,
+.mobileMenuUtilities form {
+  flex: 1 1 auto;
+}
+
+.mobileMenuUtilities .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.pageShell:focus {
+  outline: none;
+}
+
+.wrap {
+  max-width: 1160px;
+  padding: 28px 20px;
+}
+
+.hero {
+  padding: 52px 20px 0;
+}
+
+.heroInner {
+  max-width: 1160px;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 410px);
+  gap: 34px;
+}
+
+h1 {
+  margin: 16px 0 12px;
+  font-size: clamp(36px, 5vw, 54px);
+}
+
+.heroSub {
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.heroStats {
+  margin-top: 24px;
+}
+
+.heroStats div {
+  padding: 14px 26px 20px 0;
+  margin-right: 26px;
+}
+
+.statValue {
+  font-size: 26px;
+}
+
+.btn {
+  border-radius: 10px;
+  padding: 8px 14px;
+}
+
+.cardHead {
+  padding: 15px 18px;
+}
+
+.cardBody {
+  padding: 18px;
+}
+
+.grid {
+  gap: 14px;
+}
+
+.twoCol {
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 16px;
+}
+
+.featureTile {
+  padding: 22px;
+}
+
+.formGrid {
+  gap: 13px;
+}
+
+.dropZone {
+  padding: 38px 18px;
+}
+
+.siteFooter {
+  max-width: 1160px;
+  margin-top: 10px;
+  padding: 18px 20px 24px;
+}
+
+@media (max-width: 1080px) {
+  .heroInner,
+  .twoCol,
+  .grid3,
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+
+  .navLinks,
+  .desktopNavUtilities {
+    display: none;
+  }
+
+  .mobileMenu {
+    display: block;
+  }
+}
+
+@media (max-width: 760px) {
+  .nav {
+    height: 54px;
+    min-height: 54px;
+    padding: 0 12px;
+  }
+
+  .navInner {
+    gap: 10px;
+  }
+
+  .logo {
+    font-size: 18px;
+  }
+
+  .logoMark {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+
+  .navRight {
+    width: auto;
+    margin-left: auto;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+
+  .wrap {
+    padding: 20px 12px;
+  }
+
+  .hero {
+    padding: 30px 12px 0;
+  }
+
+  .heroInner {
+    gap: 22px;
+  }
+
+  h1 {
+    margin-top: 12px;
+    font-size: clamp(32px, 10vw, 42px);
+  }
+
+  .heroStats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .heroStats div {
+    min-width: 0;
+    margin: 0;
+    padding: 12px 12px 16px 0;
+    border-right: 0;
+  }
+
+  .cardHead {
+    padding: 14px;
+  }
+
+  .cardBody,
+  .featureTile {
+    padding: 15px;
+  }
+
+  .siteFooter {
+    padding: 16px 12px 22px;
+  }
+
+  .flightDetailHeader {
+    padding: 14px;
+  }
+
+  .leafletMap,
+  .comparisonMap,
+  .flightsOverviewMap {
+    height: 380px;
+    min-height: 320px;
+  }
+
+  .flightEmbedPreview {
+    height: 390px;
+  }
+}
+
+@media (max-width: 430px) {
+  .mobileMenuLinks {
+    grid-template-columns: 1fr;
+  }
+
+  .mobileMenuUtilities,
+  .mobileMenuUtilities .localeSelectWrap,
+  .mobileMenuUtilities .navSelect {
+    width: 100%;
+  }
+
+  .heroStats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .flightStatsBar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .flightStatsBar > div {
+    padding: 12px;
+  }
+
+  .sectionHead {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skipLink,
+  .menuIcon i,
+  .btn,
+  .themeQuickToggle {
+    transition: none;
+  }
+}
+
+.notificationItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.notificationItem.isUnread {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-lt) 48%, var(--surface));
+}
+
+.notificationItem p {
+  margin: 0 0 6px;
+}
+
+.notificationActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .notificationItem {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 980px) {
+  .pilotAdminCard {
+    grid-template-columns: 1fr;
+  }
+}
+
+.checkboxLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-weight: 800;
+}
+
+.checkboxLine input {
+  width: auto;
+  accent-color: var(--accent);
+}
+
+.taskCardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.taskCard {
+  padding: 18px;
+}
+
+.taskCard h2,
+.taskDetailHead h1 {
+  margin: 0 0 8px;
+}
+
+.taskCardStats,
+.taskOwnerActions,
+.taskFlightSelector,
+.taskWaypointActions,
+.taskLibraryPicker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.taskLibraryPicker select {
+  flex: 1 1 220px;
+}
+
+.cupImportForm,
+.cupImportForm label,
+.cupImportHistory {
+  display: grid;
+  gap: 12px;
+}
+
+.cupImportForm .btn {
+  justify-self: start;
+}
+
+.cupImportHistory > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.cupImportHistory span,
+.cupImportHistory time {
+  color: var(--muted);
+}
+
+.taskCardStats {
+  margin: 14px 0;
+  font-weight: 800;
+}
+
+.taskPlannerLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(360px, .75fr);
+  min-height: 620px;
+}
+
+.taskPlannerMap,
+.taskComparisonMap {
+  min-height: 620px;
+  background: #e8f0fe;
+}
+
+.taskComparisonMap {
+  min-height: 500px;
+}
+
+.taskWaypointPanel {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 20px;
+  border-left: 1px solid var(--border);
+  max-height: 720px;
+  overflow: auto;
+}
+
+.taskWaypointPanel label,
+.taskMetadataGrid label {
+  display: grid;
+  gap: 6px;
+}
+
+.taskWaypointList {
+  display: grid;
+  gap: 10px;
+}
+
+.taskWaypointRow {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) minmax(80px, .55fr) 110px;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.taskWaypointRow legend {
+  padding: 0 5px;
+  font-weight: 800;
+}
+
+.taskWaypointCoordinates,
+.taskWaypointActions {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: .84rem;
+}
+
+.taskWaypointMarker {
+  display: grid;
+  place-items: center;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #1f6feb;
+  color: white;
+  font-weight: 900;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+
+.taskSummary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.taskSummary > span {
+  display: grid;
+  gap: 4px;
+}
+
+.taskSummary strong {
+  font-size: 1.2rem;
+}
+
+.taskSummary small {
+  color: var(--muted);
+}
+
+.taskComparisonWaypoints {
+  display: grid;
+  gap: 8px;
+  margin: 20px 0 0;
+  padding-left: 24px;
+}
+
+.taskComparisonWaypoints li {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.taskComparisonWaypoints li span {
+  display: block;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.taskComparisonWaypoints .reached {
+  border-color: #86efac;
+}
+
+.taskComparisonWaypoints .missed {
+  border-color: #fca5a5;
+}
+
+@media (max-width: 980px) {
+  .taskPlannerLayout {
+    grid-template-columns: 1fr;
+  }
+  .taskWaypointPanel {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    max-height: none;
+  }
+  .taskPlannerMap {
+    min-height: 460px;
+  }
+}
+
+@media (max-width: 640px) {
+  .taskWaypointRow,
+  .taskSummary {
+    grid-template-columns: 1fr;
+  }
+  .taskWaypointCoordinates,
+  .taskWaypointActions {
+    grid-column: auto;
+  }
+  .taskFlightSelector select {
+    width: 100%;
+  }
+}
+
+/* Keep the v0.4.38 shell overrides after all feature-specific styles. */
+.navInner,
+.wrap,
+.heroInner,
+.siteFooter {
+  max-width: 1360px;
+}
+
+@media (max-width: 640px) {
+  .flightFilterHead {
+    flex-direction: row;
+    align-items: center;
   }
 }

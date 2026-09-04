@@ -14,6 +14,12 @@ enum FlightVisibility {
   UNLISTED
 }
 
+enum TaskVisibility {
+  PUBLIC
+  PRIVATE
+  UNLISTED
+}
+
 enum SimSoarRole {
   USER
   PILOT
@@ -60,11 +66,109 @@ enum AuditAction {
   USER_DELETE
   PILOT_PROFILE_UPDATE
   FLIGHT_UPLOAD
+  FLIGHT_UPDATE
   FLIGHT_APPROVE
   FLIGHT_REJECT
   FLIGHT_HIDE
   FLIGHT_DELETE
+  FLIGHT_PURGE
+  FLIGHT_RESTORE
+  FLIGHT_IGC_REPLACE
+  IGC_UPLOAD_UNBLOCK
+  IGC_DOWNLOAD
   PREFERENCE_UPDATE
+  PILOT_FOLLOW
+  PILOT_UNFOLLOW
+  FLIGHT_LIKE
+  FLIGHT_UNLIKE
+  FLIGHT_COMMENT_CREATE
+  FLIGHT_COMMENT_DELETE
+  FLIGHT_COMMENT_REPORT
+  SCORING_WINDOW_UPDATE
+  AIRSPACE_IMPORT
+  AIRSPACE_DELETE
+  FLIGHT_STORY_UPDATE
+  FLIGHT_STORY_IMAGE_DELETE
+  BADGE_SETTINGS_UPDATE
+  CLUB_CREATE
+  CLUB_UPDATE
+  CLUB_DELETE
+  CLUB_MEMBER_ASSIGN
+  CLUB_MEMBER_REMOVE
+  COMPETITION_CREATE
+  COMPETITION_UPDATE
+  COMPETITION_CLOSE
+  COMPETITION_DELETE
+  LEAGUE_CREATE
+  LEAGUE_UPDATE
+  LEAGUE_DELETE
+  TASK_CREATE
+  TASK_UPDATE
+  TASK_DELETE
+  CUP_IMPORT
+  SEGMENT_CREATE
+  SEGMENT_UPDATE
+  SEGMENT_DELETE
+}
+
+enum ClubMemberRole {
+  MEMBER
+  MANAGER
+}
+
+enum CompetitionStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+enum CompetitionScoringRule {
+  OLC_POINTS
+  DISTANCE
+}
+
+enum LeagueMode {
+  WEEKLY
+  WEEKEND
+}
+
+enum LeagueScope {
+  GLOBAL
+  CLUB
+}
+
+enum LeagueRoundStatus {
+  ACTIVE
+  CLOSED
+}
+
+enum HomeFeedMode {
+  PUBLIC
+  OWN
+  FOLLOWING
+}
+
+enum NotificationType {
+  FLIGHT_LIKE
+  FLIGHT_COMMENT
+  FLIGHT_MODERATION
+  FOLLOWED_PILOT_FLIGHT
+}
+
+enum UploadBatchItemStatus {
+  IMPORTED
+  FAILED
+}
+
+enum ScoringWindowMode {
+  AUTO
+  MANUAL
+}
+
+enum WindEstimateConfidence {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 model User {
@@ -82,6 +186,129 @@ model User {
   profile        PilotProfile?
   preferences    UserPreference?
   flights        Flight[]
+  following      PilotFollow[]    @relation("PilotFollowFollower")
+  followers      PilotFollow[]    @relation("PilotFollowFollowing")
+  flightLikes    FlightLike[]
+  flightComments FlightComment[]
+  commentReports FlightCommentReport[]
+  notifications  Notification[]        @relation("NotificationRecipient")
+  notificationsSent Notification[]     @relation("NotificationActor")
+  uploadBatches     UploadBatch[]
+  badges            UserBadge[]
+  clubMemberships   ClubMembership[]
+  competitionEntries CompetitionEntry[]
+  leagueEntries      LeagueRoundEntry[]
+  segmentResults     FlightSegmentResult[]
+  tasks              FlightTask[]
+  cupImports         CupImport[]
+}
+
+model FlightSegment {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  startLat    Float
+  startLon    Float
+  finishLat   Float
+  finishLon   Float
+  gateRadiusM Int      @default(500)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  results FlightSegmentResult[]
+
+  @@index([active, name])
+}
+
+model FlightSegmentResult {
+  id              String   @id @default(cuid())
+  segmentId       String
+  flightId        String
+  userId          String
+  startSeq        Int
+  finishSeq       Int
+  durationSeconds Int
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+
+  segment FlightSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  flight  Flight        @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([segmentId, flightId])
+  @@index([segmentId, durationSeconds])
+  @@index([userId, createdAt])
+  @@index([flightId])
+}
+
+model FlightTask {
+  id              String         @id @default(cuid())
+  ownerId         String
+  name            String
+  description     String?
+  visibility      TaskVisibility @default(PRIVATE)
+  totalDistanceKm Float          @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  owner     User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  waypoints TaskWaypoint[]
+
+  @@index([ownerId, updatedAt])
+  @@index([visibility, updatedAt])
+}
+
+model TaskWaypoint {
+  id        String @id @default(cuid())
+  taskId    String
+  seq       Int
+  name      String?
+  code      String?
+  lat       Float
+  lon       Float
+  radiusM   Int    @default(500)
+
+  task FlightTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, seq])
+  @@index([taskId, seq])
+}
+
+model CupImport {
+  id         String   @id @default(cuid())
+  ownerId    String
+  sourceName String
+  sha256     String
+  createdAt  DateTime @default(now())
+
+  owner     User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  waypoints ImportedWaypoint[]
+
+  @@unique([ownerId, sha256])
+  @@index([ownerId, createdAt])
+}
+
+model ImportedWaypoint {
+  id         String  @id @default(cuid())
+  importId   String
+  seq        Int
+  name       String
+  code       String?
+  country    String?
+  lat        Float
+  lon        Float
+  elevationM Float?
+  style      Int?
+  description String?
+
+  cupImport CupImport @relation(fields: [importId], references: [id], onDelete: Cascade)
+
+  @@unique([importId, seq])
+  @@index([importId, seq])
+  @@index([name])
+  @@index([code])
 }
 
 model Account {
@@ -150,6 +377,160 @@ model PilotProfile {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model BadgeDefinition {
+  id          String   @id
+  code        String   @unique
+  name        String
+  description String
+  icon        String
+  enabled     Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       UserBadge[]
+
+  @@index([enabled, sortOrder])
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  awardedAt DateTime @default(now())
+
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge BadgeDefinition @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId, awardedAt])
+  @@index([badgeId])
+}
+
+model Club {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  memberships ClubMembership[]
+  leagues      League[]
+
+  @@index([name])
+}
+
+model ClubMembership {
+  id       String         @id @default(cuid())
+  clubId   String
+  userId   String
+  role     ClubMemberRole @default(MEMBER)
+  joinedAt DateTime       @default(now())
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([clubId, userId])
+  @@index([clubId, role])
+  @@index([userId])
+}
+
+model Competition {
+  id               String                 @id @default(cuid())
+  slug             String                 @unique
+  name             String
+  description      String?
+  rules            String?
+  startAt          DateTime
+  endAt            DateTime
+  status           CompetitionStatus      @default(DRAFT)
+  scoringRule      CompetitionScoringRule @default(OLC_POINTS)
+  simulator        String?
+  competitionClass String?
+  closedAt         DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  entries          CompetitionEntry[]
+
+  @@index([status, startAt, endAt])
+  @@index([endAt])
+}
+
+model CompetitionEntry {
+  id            String   @id @default(cuid())
+  competitionId String
+  flightId      String
+  userId        String
+  score         Float
+  assignedAt    DateTime @default(now())
+
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  flight      Flight      @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([competitionId, flightId])
+  @@index([competitionId, score])
+  @@index([competitionId, userId])
+  @@index([flightId])
+}
+
+model League {
+  id             String                 @id @default(cuid())
+  slug           String                 @unique
+  name           String
+  description    String?
+  mode           LeagueMode
+  scope          LeagueScope            @default(GLOBAL)
+  clubId         String?
+  startDayUtc    Int                    @default(1)
+  startHourUtc   Int                    @default(0)
+  durationHours  Int                    @default(168)
+  scoringRule    CompetitionScoringRule @default(OLC_POINTS)
+  active         Boolean                @default(true)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  club   Club?         @relation(fields: [clubId], references: [id], onDelete: SetNull)
+  rounds LeagueRound[]
+
+  @@index([active, mode])
+  @@index([clubId])
+}
+
+model LeagueRound {
+  id        String            @id @default(cuid())
+  leagueId  String
+  startsAt  DateTime
+  endsAt    DateTime
+  status    LeagueRoundStatus @default(ACTIVE)
+  createdAt DateTime          @default(now())
+  closedAt  DateTime?
+
+  league  League             @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  entries LeagueRoundEntry[]
+
+  @@unique([leagueId, startsAt])
+  @@index([leagueId, status, startsAt])
+  @@index([endsAt])
+}
+
+model LeagueRoundEntry {
+  id        String   @id @default(cuid())
+  roundId   String
+  flightId  String
+  userId    String
+  score     Float
+  createdAt DateTime @default(now())
+
+  round  LeagueRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  flight Flight      @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roundId, flightId])
+  @@index([roundId, score])
+  @@index([roundId, userId])
+  @@index([flightId])
+}
+
 model Flight {
   id                String                 @id @default(cuid())
   userId            String
@@ -159,8 +540,11 @@ model Flight {
   glider            String?
   registration      String?
   competitionClass  String?
+  weatherMode       String                 @default("UNKNOWN")
   comment           String?
+  storyText         String?
   visibility        FlightVisibility       @default(PUBLIC)
+  publicIgcDownloadEnabled Boolean         @default(false)
   moderationStatus  FlightModerationStatus @default(APPROVED)
   moderatedByUserId String?
   moderatedAt       DateTime?
@@ -168,11 +552,21 @@ model Flight {
   deletedAt         DateTime?
   deletedByUserId   String?
   igcObjectPath     String
-  igcSha256         String
+  igcSha256         String                 @unique
   startTime         DateTime?
   durationSeconds   Int
   distanceKm        Float
   olcPoints         Float
+  scoringRule       String                 @default("LEGACY_DISTANCE_1_8")
+  scoringDistanceKm Float                  @default(0)
+  scoringMultiplier Float                  @default(1.8)
+  scoringClosedCourse Boolean              @default(false)
+  suggestedScoringStartSeq Int?
+  suggestedScoringEndSeq   Int?
+  scoringStartSeq          Int?
+  scoringEndSeq            Int?
+  scoringWindowMode        ScoringWindowMode @default(AUTO)
+  scoringWindowReasons     String[]          @default([])
   avgSpeedKmh       Float
   maxAltitudeM      Int
   minAltitudeM      Int
@@ -187,6 +581,15 @@ model Flight {
   user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   track    TrackPoint[]
   thermals Thermal[]
+  glidePhases GlidePhase[]
+  likes    FlightLike[]
+  comments FlightComment[]
+  notifications Notification[]
+  scoringPoints FlightScoringPoint[]
+  storyImages FlightStoryImage[]
+  competitionEntries CompetitionEntry[]
+  leagueEntries      LeagueRoundEntry[]
+  segmentResults     FlightSegmentResult[]
 
   @@index([visibility, createdAt])
   @@index([visibility, moderationStatus, createdAt])
@@ -212,10 +615,27 @@ model TrackPoint {
   @@index([flightId, seq])
 }
 
+model FlightScoringPoint {
+  id            String @id @default(cuid())
+  flightId      String
+  order         Int
+  trackSeq      Int
+  lat           Float
+  lon           Float
+  legDistanceKm Float
+
+  flight Flight @relation(fields: [flightId], references: [id], onDelete: Cascade)
+
+  @@unique([flightId, order])
+  @@index([flightId, order])
+}
+
 model Thermal {
   id          String    @id @default(cuid())
   flightId    String
   seq         Int
+  startSeq    Int?
+  endSeq      Int?
   startTime   DateTime?
   endTime     DateTime?
   centerLat   Float?
@@ -224,11 +644,87 @@ model Thermal {
   maxClimbMs  Float
   gainM       Int
   durationSec Int
+  efficiencyPercent Float @default(0)
+  windDirectionDeg  Int?
+  windSpeedKmh      Float?
+  windConfidence    WindEstimateConfidence?
+  windDriftDistanceM Int?
 
   flight Flight @relation(fields: [flightId], references: [id], onDelete: Cascade)
 
   @@unique([flightId, seq])
   @@index([flightId, seq])
+}
+
+model GlidePhase {
+  id          String    @id @default(cuid())
+  flightId    String
+  seq         Int
+  startSeq    Int
+  endSeq      Int
+  startTime   DateTime?
+  endTime     DateTime?
+  durationSec Int
+  distanceKm  Float
+  avgSpeedKmh Float
+  avgSinkMs   Float
+  glideRatio  Float
+
+  flight Flight @relation(fields: [flightId], references: [id], onDelete: Cascade)
+
+  @@unique([flightId, seq])
+  @@index([flightId, seq])
+}
+
+model Airspace {
+  id           String   @id @default(cuid())
+  name         String
+  className    String
+  floorLabel   String
+  ceilingLabel String
+  sourceName   String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  importedByUserId String
+  minLat       Float
+  maxLat       Float
+  minLon       Float
+  maxLon       Float
+  points       AirspacePoint[]
+
+  @@index([active, createdAt])
+  @@index([active, minLat, maxLat])
+  @@index([active, minLon, maxLon])
+}
+
+model AirspacePoint {
+  id         String @id @default(cuid())
+  airspaceId String
+  seq        Int
+  lat        Float
+  lon        Float
+
+  airspace Airspace @relation(fields: [airspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([airspaceId, seq])
+  @@index([airspaceId, seq])
+}
+
+model FlightStoryImage {
+  id         String   @id @default(cuid())
+  flightId   String
+  objectPath String
+  fileName   String
+  mimeType   String
+  sizeBytes  Int
+  sha256     String
+  createdAt  DateTime @default(now())
+  uploadedByUserId String
+
+  flight Flight @relation(fields: [flightId], references: [id], onDelete: Cascade)
+
+  @@unique([flightId, sha256])
+  @@index([flightId, createdAt])
 }
 
 model UserPreference {
@@ -239,10 +735,117 @@ model UserPreference {
   unitSystem               UnitSystemPreference      @default(METRIC)
   preferredLeaderboardView LeaderboardViewPreference @default(ALL)
   preferredMapMode         MapModePreference         @default(STANDARD)
+  homeFeedMode             HomeFeedMode              @default(PUBLIC)
+  homeFeedSimulator        String?
+  homeFeedCompetitionClass String?
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PilotFollow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("PilotFollowFollower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("PilotFollowFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followingId, createdAt])
+  @@index([followerId, createdAt])
+}
+
+model FlightLike {
+  id        String   @id @default(cuid())
+  flightId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  flight Flight @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([flightId, userId])
+  @@index([userId, createdAt])
+}
+
+model FlightComment {
+  id              String   @id @default(cuid())
+  flightId        String
+  userId          String
+  content         String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+  deletedByUserId String?
+
+  flight  Flight                @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  user    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reports FlightCommentReport[]
+  notifications Notification[]
+
+  @@index([flightId, createdAt])
+  @@index([userId, createdAt])
+  @@index([deletedAt])
+}
+
+model FlightCommentReport {
+  id         String   @id @default(cuid())
+  commentId  String
+  reporterId String
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  comment  FlightComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  reporter User          @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, reporterId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id               String           @id @default(cuid())
+  userId           String
+  actorUserId      String?
+  type             NotificationType
+  flightId         String?
+  commentId        String?
+  moderationStatus String?
+  readAt           DateTime?
+  createdAt        DateTime         @default(now())
+
+  user    User           @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor   User?          @relation("NotificationActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  flight  Flight?        @relation(fields: [flightId], references: [id], onDelete: SetNull)
+  comment FlightComment? @relation(fields: [commentId], references: [id], onDelete: SetNull)
+
+  @@index([userId, readAt, createdAt])
+  @@index([flightId])
+}
+
+model UploadBatch {
+  id        String            @id @default(cuid())
+  userId    String
+  createdAt DateTime          @default(now())
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     UploadBatchItem[]
+
+  @@index([userId, createdAt])
+}
+
+model UploadBatchItem {
+  id               String                @id @default(cuid())
+  batchId          String
+  originalFileName String
+  status           UploadBatchItemStatus
+  errorCode        String?
+  flightId         String?
+  createdAt        DateTime              @default(now())
+  batch            UploadBatch           @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId, createdAt])
 }
 
 model AuditLog {
@@ -260,4 +863,18 @@ model AuditLog {
   @@index([actorUserId, createdAt])
   @@index([targetType, targetId])
   @@index([action, createdAt])
+}
+
+model IgcUploadBlock {
+  id                    String   @id @default(cuid())
+  igcSha256             String   @unique
+  originalFlightId      String?
+  originalTitle         String?
+  originalPilotCallsign String?
+  reason                String   @default("deleted-flight")
+  blockedAt             DateTime @default(now())
+  blockedByUserId       String?
+
+  @@index([blockedAt])
+  @@index([originalFlightId])
 }

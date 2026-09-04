@@ -1,3 +1,6 @@
+import {auth} from "@/auth";
+import FollowPilotButton from "@/app/components/FollowPilotButton";
+import {Link} from "@/i18n/navigation";
 import {prisma} from "@/lib/db";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
@@ -9,19 +12,13 @@ type PilotsPageProps = {
 };
 
 type PilotRow = {
+  userId: string;
   callsign: string;
   flightsCount: number;
   totalDistance: number;
   bestDistance: number;
   totalOlc: number;
   favoriteSim: string | null;
-};
-
-type PilotAggregate = {
-  callsign: string;
-  distances: number[];
-  olc: number[];
-  simulators: string[];
 };
 
 function favoriteSimulator(simulators: string[]) {
@@ -34,57 +31,51 @@ function favoriteSimulator(simulators: string[]) {
   return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 }
 
-async function getPilots(
-  unknownPilot: string,
-  loadError: string
-): Promise<{pilots: PilotRow[]; error: string | null}> {
+async function getPilots(loadError: string) {
   try {
-    const flights = await prisma.flight.findMany({
+    const users = await prisma.user.findMany({
       where: {
-        visibility: "PUBLIC",
-        moderationStatus: "APPROVED",
-        deletedAt: null
+        profile: {isNot: null},
+        flights: {
+          some: {
+            visibility: "PUBLIC",
+            moderationStatus: "APPROVED",
+            deletedAt: null
+          }
+        }
       },
       select: {
-        pilotCallsign: true,
-        distanceKm: true,
-        olcPoints: true,
-        simulator: true
+        id: true,
+        profile: {select: {callsign: true, favoriteSim: true}},
+        flights: {
+          where: {
+            visibility: "PUBLIC",
+            moderationStatus: "APPROVED",
+            deletedAt: null
+          },
+          select: {distanceKm: true, olcPoints: true, simulator: true}
+        }
       }
     });
 
-    const pilotMap = new Map<string, PilotAggregate>();
+    const pilots: PilotRow[] = users
+      .filter((user) => user.profile)
+      .map((user) => {
+        const distances = user.flights.map((flight) => flight.distanceKm ?? 0);
+        const olc = user.flights.map((flight) => flight.olcPoints ?? 0);
 
-    for (const flight of flights) {
-      const callsign = flight.pilotCallsign?.trim() || unknownPilot;
-
-      let entry = pilotMap.get(callsign);
-
-      if (!entry) {
-        entry = {
-          callsign,
-          distances: [],
-          olc: [],
-          simulators: []
+        return {
+          userId: user.id,
+          callsign: user.profile!.callsign,
+          flightsCount: user.flights.length,
+          totalDistance: distances.reduce((sum, value) => sum + value, 0),
+          bestDistance: Math.max(0, ...distances),
+          totalOlc: olc.reduce((sum, value) => sum + value, 0),
+          favoriteSim:
+            user.profile!.favoriteSim ??
+            favoriteSimulator(user.flights.map((flight) => flight.simulator))
         };
-
-        pilotMap.set(callsign, entry);
-      }
-
-      entry.distances.push(flight.distanceKm ?? 0);
-      entry.olc.push(flight.olcPoints ?? 0);
-      entry.simulators.push(flight.simulator || "–");
-    }
-
-    const pilots = [...pilotMap.values()]
-      .map((entry) => ({
-        callsign: entry.callsign,
-        flightsCount: entry.distances.length,
-        totalDistance: entry.distances.reduce((sum, value) => sum + value, 0),
-        bestDistance: Math.max(0, ...entry.distances),
-        totalOlc: entry.olc.reduce((sum, value) => sum + value, 0),
-        favoriteSim: favoriteSimulator(entry.simulators)
-      }))
+      })
       .sort(
         (a, b) =>
           b.totalOlc - a.totalOlc ||
@@ -92,34 +83,39 @@ async function getPilots(
           a.callsign.localeCompare(b.callsign)
       );
 
-    return {
-      pilots,
-      error: null
-    };
+    return {pilots, error: null};
   } catch (error) {
     console.error("SimSoar pilots page failed to load:", error);
-
-    return {
-      pilots: [],
-      error: loadError
-    };
+    return {pilots: [] as PilotRow[], error: loadError};
   }
 }
 
 export default async function PilotsPage({params}: PilotsPageProps) {
   const {locale} = await params;
+  const supportedLocale = locale === "en" ? "en" : "de";
 
   setRequestLocale(locale);
 
-  const t = await getTranslations({
-    locale,
-    namespace: "Pilots"
-  });
+  const t = await getTranslations({locale, namespace: "Pilots"});
 
-  const {pilots, error} = await getPilots(
-    t("unknownPilot"),
-    t("loadError")
-  );
+  let session = null;
+  try {
+    session = await auth();
+  } catch (error) {
+    console.error("SimSoar pilots session could not be loaded:", error);
+  }
+
+  const [{pilots, error}, followed] = await Promise.all([
+    getPilots(t("loadError")),
+    session?.user?.id
+      ? prisma.pilotFollow.findMany({
+          where: {followerId: session.user.id},
+          select: {followingId: true}
+        })
+      : Promise.resolve([])
+  ]);
+
+  const followedIds = new Set(followed.map((entry) => entry.followingId));
 
   return (
     <main className="wrap">
@@ -129,9 +125,7 @@ export default async function PilotsPage({params}: PilotsPageProps) {
         </div>
 
         {error ? (
-          <div className="cardBody">
-            <p className="muted">{error}</p>
-          </div>
+          <div className="cardBody"><p className="muted">{error}</p></div>
         ) : (
           <div className="tableWrap">
             <table>
@@ -144,28 +138,45 @@ export default async function PilotsPage({params}: PilotsPageProps) {
                   <th>{t("bestDistance")}</th>
                   <th>{t("totalOlc")}</th>
                   <th>{t("favoriteSim")}</th>
+                  {session?.user?.id ? <th>{t("followState")}</th> : null}
                 </tr>
               </thead>
 
               <tbody>
                 {pilots.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="emptyTable">
+                    <td colSpan={session?.user?.id ? 8 : 7} className="emptyTable">
                       {t("noPublicFlights")}
                     </td>
                   </tr>
                 ) : (
-                  pilots.map((p, i) => (
-                    <tr key={p.callsign}>
+                  pilots.map((pilot, index) => (
+                    <tr key={pilot.userId}>
+                      <td><strong>{index + 1}</strong></td>
                       <td>
-                        <strong>{i + 1}</strong>
+                        <Link href={`/pilots/${pilot.userId}`}>{pilot.callsign}</Link>
                       </td>
-                      <td>{p.callsign}</td>
-                      <td>{p.flightsCount}</td>
-                      <td>{Math.round(p.totalDistance)} km</td>
-                      <td>{Math.round(p.bestDistance)} km</td>
-                      <td>{Math.round(p.totalOlc)}</td>
-                      <td>{p.favoriteSim ?? "–"}</td>
+                      <td>{pilot.flightsCount}</td>
+                      <td>{Math.round(pilot.totalDistance)} km</td>
+                      <td>{Math.round(pilot.bestDistance)} km</td>
+                      <td>{Math.round(pilot.totalOlc)}</td>
+                      <td>{pilot.favoriteSim ?? "–"}</td>
+                      {session?.user?.id ? (
+                        <td>
+                          {session.user.id === pilot.userId ? (
+                            <span className="muted">{t("ownProfile")}</span>
+                          ) : (
+                            <FollowPilotButton
+                              pilotUserId={pilot.userId}
+                              locale={supportedLocale}
+                              isFollowing={followedIds.has(pilot.userId)}
+                              returnTo={`/${supportedLocale}/pilots`}
+                              followLabel={t("follow")}
+                              unfollowLabel={t("unfollow")}
+                            />
+                          )}
+                        </td>
+                      ) : null}
                     </tr>
                   ))
                 )}

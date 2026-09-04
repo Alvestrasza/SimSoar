@@ -3,6 +3,7 @@
 import {useEffect, useMemo, useRef, useState} from "react";
 import {useTranslations} from "next-intl";
 import {Link} from "@/i18n/navigation";
+import FlightsOverviewMap from "@/app/components/FlightsOverviewMap";
 
 type TrackPoint = {
   lat: number;
@@ -28,10 +29,10 @@ type FlightListItem = {
 
 type Props = {
   flights: FlightListItem[];
-  initialFilter?: FilterKey;
+  activeFilter: FilterKey;
+  filterLinks: Record<FilterKey, string>;
 };
 
-type SortKey = "olcPoints" | "distanceKm" | "maxVarioMs";
 type FilterKey = "all" | "msfs" | "condor" | "xplane";
 
 function simClass(sim: string) {
@@ -247,41 +248,18 @@ function SimDistributionChart({
 
 export default function FlightsExplorer({
   flights,
-  initialFilter = "all"
+  activeFilter,
+  filterLinks
 }: Props) {
   const t = useTranslations("Flights");
 
-  const [filter, setFilter] = useState<FilterKey>(initialFilter);
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [highlightedFlightId, setHighlightedFlightId] = useState<string | null>(null);
 
-  const [sort, setSort] = useState<{key: SortKey; dir: 1 | -1}>({
-    key: "olcPoints",
-    dir: -1
-  });
-
-  const filteredFlights = useMemo(() => {
-    return [...flights]
-      .filter((f) => {
-        if (filter === "all") return true;
-        if (filter === "msfs") return f.simulator.includes("MSFS");
-        if (filter === "condor") return f.simulator.includes("Condor");
-        return f.simulator.includes("X-Plane");
-      })
-      .sort(
-        (a, b) =>
-          sort.dir * ((a[sort.key] as number) - (b[sort.key] as number))
-      );
-  }, [flights, filter, sort]);
-
-  function setSortKey(key: SortKey) {
-    setSort((prev) =>
-      prev.key === key
-        ? {key, dir: prev.dir === 1 ? -1 : 1}
-        : {key, dir: -1}
-    );
-  }
+  const filteredFlights = flights;
 
   return (
-    <div className="twoCol">
+    <div className="flightsExplorer">
       <section>
         <div className="card" style={{marginBottom: 22}}>
           <div
@@ -289,36 +267,57 @@ export default function FlightsExplorer({
             style={{paddingBottom: 0, borderBottom: "none"}}
           >
             <div className="tabs" style={{marginBottom: 0}}>
-              <button
-                className={`tab ${filter === "all" ? "active" : ""}`}
-                onClick={() => setFilter("all")}
+              <Link
+                className={`tab ${activeFilter === "all" ? "active" : ""}`}
+                href={filterLinks.all}
               >
                 {t("tabAll")}
-              </button>
+              </Link>
 
-              <button
-                className={`tab ${filter === "msfs" ? "active" : ""}`}
-                onClick={() => setFilter("msfs")}
+              <Link
+                className={`tab ${activeFilter === "msfs" ? "active" : ""}`}
+                href={filterLinks.msfs}
               >
                 {t("tabMsfs")}
-              </button>
+              </Link>
 
-              <button
-                className={`tab ${filter === "condor" ? "active" : ""}`}
-                onClick={() => setFilter("condor")}
+              <Link
+                className={`tab ${activeFilter === "condor" ? "active" : ""}`}
+                href={filterLinks.condor}
               >
                 {t("tabCondor")}
-              </button>
+              </Link>
 
-              <button
-                className={`tab ${filter === "xplane" ? "active" : ""}`}
-                onClick={() => setFilter("xplane")}
+              <Link
+                className={`tab ${activeFilter === "xplane" ? "active" : ""}`}
+                href={filterLinks.xplane}
               >
                 {t("tabXplane")}
+              </Link>
+            </div>
+
+            <div className="tabs" style={{marginBottom: 0}}>
+              <button
+                type="button"
+                className={`tab ${viewMode === "list" ? "active" : ""}`}
+                aria-pressed={viewMode === "list"}
+                onClick={() => setViewMode("list")}
+              >
+                {t("viewList")}
+              </button>
+              <button
+                type="button"
+                className={`tab ${viewMode === "map" ? "active" : ""}`}
+                aria-pressed={viewMode === "map"}
+                onClick={() => setViewMode("map")}
+              >
+                {t("viewMap")}
               </button>
             </div>
           </div>
 
+          {viewMode === "list" ? (
+            <>
           <div className="tableWrap desktopTableOnly">
             <table>
               <thead>
@@ -326,34 +325,13 @@ export default function FlightsExplorer({
                   <th>{t("rank")}</th>
                   <th>{t("pilot")}</th>
 
-                  <th>
-                    <button
-                      className="sortButton"
-                      onClick={() => setSortKey("distanceKm")}
-                    >
-                      {t("distance")}
-                    </button>
-                  </th>
+                  <th>{t("distance")}</th>
 
-                  <th>
-                    <button
-                      className="sortButton"
-                      onClick={() => setSortKey("olcPoints")}
-                    >
-                      {t("olc")}
-                    </button>
-                  </th>
+                  <th>{t("olc")}</th>
 
                   <th>{t("avgSpeed")}</th>
 
-                  <th>
-                    <button
-                      className="sortButton"
-                      onClick={() => setSortKey("maxVarioMs")}
-                    >
-                      {t("maxVario")}
-                    </button>
-                  </th>
+                  <th>{t("maxVario")}</th>
 
                   <th>{t("simulator")}</th>
                   <th></th>
@@ -460,6 +438,41 @@ export default function FlightsExplorer({
               ))
             )}
           </div>
+            </>
+          ) : (
+            <div className="flightsMapLayout">
+              <FlightsOverviewMap
+                flights={filteredFlights}
+                highlightedFlightId={highlightedFlightId}
+                startLabel={t("mapStart")}
+                finishLabel={t("mapFinish")}
+              />
+
+              <div className="flightsMapSelector" aria-label={t("mapFlights")}>
+                {filteredFlights.length === 0 ? (
+                  <p className="muted emptyInline">{t("noFlights")}</p>
+                ) : (
+                  filteredFlights.map((flight) => (
+                    <Link
+                      key={flight.id}
+                      href={`/flights/${flight.id}`}
+                      className={`flightsMapSelectorItem ${
+                        highlightedFlightId === flight.id ? "active" : ""
+                      }`}
+                      onMouseEnter={() => setHighlightedFlightId(flight.id)}
+                      onMouseLeave={() => setHighlightedFlightId(null)}
+                      onFocus={() => setHighlightedFlightId(flight.id)}
+                      onBlur={() => setHighlightedFlightId(null)}
+                    >
+                      <strong>{flight.pilotCallsign}</strong>
+                      <span>{flight.glider ?? t("unknownGlider")}</span>
+                      <small>{Math.round(flight.distanceKm)} km · {Math.round(flight.olcPoints)} OLC</small>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="sectionHead">
@@ -478,7 +491,7 @@ export default function FlightsExplorer({
         </div>
       </section>
 
-      <aside className="grid">
+      <section className="flightsSupportGrid">
         <div className="card">
           <div className="cardHead">
             <span className="cardTitle">{t("simDistribution")}</span>
@@ -512,7 +525,7 @@ export default function FlightsExplorer({
             </p>
           </div>
         </div>
-      </aside>
+      </section>
     </div>
   );
 }

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "defaults": {
+    "simulator": "Legacy simulator",
+    "visibility": "PRIVATE"
+  },
+  "flights": []
+}

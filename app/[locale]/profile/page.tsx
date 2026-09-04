@@ -12,6 +12,7 @@ import {
   SIMSOAR_ROLE_ORDER,
   type SimSoarRole
 } from "@/lib/rbac";
+import BadgeGallery from "@/app/components/BadgeGallery";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -95,7 +96,7 @@ const noticeStatus =
 
   const highestVisibleRole = getHighestVisibleRole(session.user.roles);
 
-  const [profile, preferences, flights] = await Promise.all([
+  const [profile, preferences, flights, badges] = await Promise.all([
     prisma.pilotProfile.findUnique({
       where: {
         userId: session.user.id
@@ -114,11 +115,16 @@ const noticeStatus =
         createdAt: "desc"
       },
       take: 20
+    }),
+    prisma.userBadge.findMany({
+      where: {userId: session.user.id, badge: {enabled: true}},
+      orderBy: {badge: {sortOrder: "asc"}},
+      select: {awardedAt: true, badge: {select: {code: true, icon: true}}}
     })
   ]);
 
   return (
-    <main className="wrap" style={{maxWidth: 960}}>
+    <main className="wrap">
       <div className="card" style={{marginBottom: 20}}>
         <div className="cardHead profileHeader">
           <span className="cardTitle">{t("pageTitle")}</span>
@@ -172,20 +178,12 @@ const noticeStatus =
               <input
                 name="homeAirfield"
                 defaultValue={profile?.homeAirfield ?? ""}
+                maxLength={120}
+                placeholder={t("homeAirfieldPlaceholder")}
+                autoCapitalize="words"
+                spellCheck={false}
+                title={t("homeAirfieldHint")}
               />
-            </div>
-
-            <div className="formGroup">
-              <label>{t("favoriteSim")}</label>
-              <select
-                name="favoriteSim"
-                defaultValue={profile?.favoriteSim ?? "MSFS 2024"}
-              >
-                <option>MSFS 2024</option>
-                <option>MSFS 2020</option>
-                <option>Condor 2</option>
-                <option>X-Plane 12</option>
-              </select>
             </div>
 
             <div className="formGroup">
@@ -236,6 +234,9 @@ const noticeStatus =
 
           {noticeStatus ? <ProfileSaveNotice status={noticeStatus} /> : null}
         </form>
+      </div>
+      <div className="card" style={{marginBottom: 20}}>
+        <div className="cardBody"><BadgeGallery locale={locale} badges={badges} /></div>
       </div>
       <div className="card" style={{marginBottom: 20}}>
         <div className="cardHead">
@@ -304,6 +305,50 @@ const noticeStatus =
                 <option value="STANDARD">{t("mapStandard")}</option>
                 <option value="SATELLITE">{t("mapSatellite")}</option>
                 <option value="TERRAIN">{t("mapTerrain")}</option>
+              </select>
+            </div>
+
+            <div className="formGroup">
+              <label>{t("homeFeedMode")}</label>
+              <select
+                name="homeFeedMode"
+                defaultValue={preferences?.homeFeedMode ?? "PUBLIC"}
+              >
+                <option value="PUBLIC">{t("homeFeedPublic")}</option>
+                <option value="OWN">{t("homeFeedOwn")}</option>
+                <option value="FOLLOWING">{t("homeFeedFollowing")}</option>
+              </select>
+            </div>
+
+            <div className="formGroup">
+              <label>{t("homeFeedSimulator")}</label>
+              <select
+                name="homeFeedSimulator"
+                defaultValue={preferences?.homeFeedSimulator ?? ""}
+              >
+                <option value="">{t("homeFeedAnySimulator")}</option>
+                <option value="MSFS 2024">MSFS 2024</option>
+                <option value="MSFS 2020">MSFS 2020</option>
+                <option value="Condor 2">Condor 2</option>
+                <option value="X-Plane 12">X-Plane 12</option>
+                <option value="X-Plane 11">X-Plane 11</option>
+                <option value="DCS World">DCS World</option>
+                <option value="Other">{t("simOther")}</option>
+              </select>
+            </div>
+
+            <div className="formGroup">
+              <label>{t("homeFeedCompetitionClass")}</label>
+              <select
+                name="homeFeedCompetitionClass"
+                defaultValue={preferences?.homeFeedCompetitionClass ?? ""}
+              >
+                <option value="">{t("homeFeedAnyClass")}</option>
+                <option value="Club Klasse">{t("classClub")}</option>
+                <option value="15 m Klasse">{t("class15m")}</option>
+                <option value="18 m Klasse">{t("class18m")}</option>
+                <option value="Offene Klasse">{t("classOpen")}</option>
+                <option value="Doppelsitzer">{t("classTwoSeater")}</option>
               </select>
             </div>
           </div>

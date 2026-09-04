@@ -6,20 +6,36 @@ import UploadIgcPreview from "@/app/components/UploadIgcPreview";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {hasRole} from "@/lib/rbac";
 import {Link} from "@/i18n/navigation";
+import {getBulkUploadLimits} from "@/lib/bulk-upload-policy";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 type UploadPageProps = {
   params: Promise<{locale: string}>;
+  searchParams?:
+    | Promise<Record<string, string | string[] | undefined>>
+    | Record<string, string | string[] | undefined>;
 };
 
-export default async function UploadPage({params}: UploadPageProps) {
+export default async function UploadPage({
+  params,
+  searchParams
+}: UploadPageProps) {
   const {locale} = await params;
 
   setRequestLocale(locale);
 
   const t = await getTranslations({locale, namespace: "Upload"});
+
+  const queryParams = searchParams ? await searchParams : {};
+
+  const uploadErrorParam = Array.isArray(queryParams.uploadError)
+    ? queryParams.uploadError[0]
+    : queryParams.uploadError;
+
+  const uploadError =
+    typeof uploadErrorParam === "string" ? uploadErrorParam : null;
 
   let session = null;
 
@@ -77,14 +93,33 @@ export default async function UploadPage({params}: UploadPageProps) {
     })
   ]);
 
+  const uploadLimits = getBulkUploadLimits();
+
   return (
     <main className="wrap" style={{maxWidth: 860}}>
       <div className="card">
         <div className="cardHead">
           <span className="cardTitle">{t("pageTitle")}</span>
-          <span className="muted">{t("fileHint")}</span>
+          <span className="muted">{t("fileHint", {
+            count: uploadLimits.maxFiles,
+            perFile: Math.round(uploadLimits.maxFileBytes / 1024 / 1024),
+            total: Math.round(uploadLimits.maxTotalBytes / 1024 / 1024)
+          })}</span>
         </div>
-
+        {uploadError ? (
+          <div
+            className="cardBody"
+            style={{
+              borderBottom: "1px solid var(--border)",
+              background: "var(--orange-lt)"
+            }}
+          >
+            <strong>{t("uploadErrorTitle")}</strong>
+            <p style={{margin: "6px 0 0"}}>
+              {t(`uploadError_${uploadError}`)}
+            </p>
+          </div>
+        ) : null}
         <form className="cardBody" action={saveFlightAction}>
           <input type="hidden" name="locale" value={locale} />
 
@@ -96,6 +131,7 @@ export default async function UploadPage({params}: UploadPageProps) {
               <input
                 name="pilotCallsign"
                 defaultValue={profile?.callsign ?? ""}
+                readOnly
                 required
               />
             </div>

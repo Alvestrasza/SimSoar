@@ -2,8 +2,20 @@ import {notFound} from "next/navigation";
 import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
 import {hasRole} from "@/lib/rbac";
+import {resolveIgcDownloadMode} from "@/lib/igc-download";
 import FlightDetailClient from "@/app/components/FlightDetailClient";
+import FlightCommunitySection from "@/app/components/FlightCommunitySection";
+import FlightStorySection from "@/app/components/FlightStorySection";
+import {
+  canDeleteFlightComment,
+  canInteractWithFlight
+} from "@/lib/flight-community";
 import {setRequestLocale} from "next-intl/server";
+import {airspaceBounds, findAirspaceCrossings} from "@/lib/airspace";
+import type {Metadata} from "next";
+import FlightSharePanel from "@/app/components/FlightSharePanel";
+import {buildFlightShareUrls, configuredPublicOrigin, flightShareDescription} from "@/lib/flight-sharing";
+import {PUBLIC_FLIGHT_WHERE} from "@/lib/public-api";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +25,23 @@ type FlightDetailPageProps = {
     id: string;
   }>;
 };
+
+export async function generateMetadata({params}: FlightDetailPageProps): Promise<Metadata> {
+  const {locale: requestedLocale, id} = await params;
+  const locale = requestedLocale === "en" ? "en" : "de";
+  const flight = await prisma.flight.findFirst({where: {...PUBLIC_FLIGHT_WHERE, id}, select: {id: true, title: true, pilotCallsign: true, simulator: true, glider: true, distanceKm: true, olcPoints: true}});
+  if (!flight) return {title: "SimSoar", robots: {index: false, follow: false}};
+  const urls = buildFlightShareUrls(configuredPublicOrigin(), locale, flight.id);
+  const title = `${flight.title} · SimSoar`;
+  const description = flightShareDescription(flight, locale);
+  return {
+    title,
+    description,
+    alternates: {canonical: urls.shareUrl},
+    openGraph: {type: "article", title, description, url: urls.shareUrl, siteName: "SimSoar", images: [{url: urls.previewUrl, width: 1120, height: 630, alt: flight.title}]},
+    twitter: {card: "summary_large_image", title, description, images: [urls.previewUrl]}
+  };
+}
 
 export default async function FlightDetailPage({
   params
@@ -35,6 +64,19 @@ export default async function FlightDetailPage({
         orderBy: {
           seq: "asc"
         }
+      },
+      glidePhases: {
+        orderBy: {
+          seq: "asc"
+        }
+      },
+      scoringPoints: {
+        orderBy: {
+          order: "asc"
+        }
+      },
+      storyImages: {
+        orderBy: {createdAt: "asc"}
       }
     }
   });
@@ -69,14 +111,18 @@ export default async function FlightDetailPage({
 
   const isDeleted = flight.deletedAt !== null;
 
-  const isPublicApprovedFlight =
-    flight.visibility === "PUBLIC" &&
+  const isApprovedAndActive =
     flight.moderationStatus === "APPROVED" &&
     !isDeleted;
 
+  const isPublicOrUnlisted =
+    flight.visibility === "PUBLIC" ||
+    flight.visibility === "UNLISTED";
+
   const canViewFlight =
     canModerate ||
-    (!isDeleted && (isPublicApprovedFlight || isOwner));
+    isOwner ||
+    (isApprovedAndActive && isPublicOrUnlisted);
 
   if (!canViewFlight) {
     notFound();
@@ -85,14 +131,80 @@ export default async function FlightDetailPage({
   const isLockedByModeration =
     isDeleted || flight.moderationStatus !== "APPROVED";
 
-  if (flight.visibility === "PRIVATE" && !isOwner) {
-    notFound();
-  }
+  const igcDownloadMode = resolveIgcDownloadMode(flight, {
+    userId: session?.user?.id,
+    isAdmin: hasRole(session?.user?.roles, "ADMIN")
+  });
+
+  const communityEnabled = canInteractWithFlight(flight);
+  const isPublicShareable = flight.visibility === "PUBLIC" && isApprovedAndActive;
+  const shareUrls = isPublicShareable ? buildFlightShareUrls(configuredPublicOrigin(), locale === "en" ? "en" : "de", flight.id) : null;
+  const trackBounds = flight.track.length > 0 ? airspaceBounds(flight.track) : null;
+  const activeAirspaces = trackBounds ? await prisma.airspace.findMany({
+    where: {
+      active: true,
+      minLat: {lte: trackBounds.maxLat},
+      maxLat: {gte: trackBounds.minLat},
+      minLon: {lte: trackBounds.maxLon},
+      maxLon: {gte: trackBounds.minLon}
+    },
+    orderBy: {createdAt: "desc"},
+    include: {points: {orderBy: {seq: "asc"}}}
+  }) : [];
+  const airspaces = activeAirspaces.map((airspace) => ({
+    id: airspace.id,
+    name: airspace.name,
+    className: airspace.className,
+    floorLabel: airspace.floorLabel,
+    ceilingLabel: airspace.ceilingLabel,
+    points: airspace.points.map((point) => ({lat: point.lat, lon: point.lon}))
+  }));
+  const airspaceCrossings = findAirspaceCrossings(flight.track, airspaces);
+  const [likeCount, viewerLike, communityComments] = communityEnabled
+    ? await Promise.all([
+        prisma.flightLike.count({where: {flightId: flight.id}}),
+        session?.user?.id
+          ? prisma.flightLike.findUnique({
+              where: {
+                flightId_userId: {
+                  flightId: flight.id,
+                  userId: session.user.id
+                }
+              },
+              select: {id: true}
+            })
+          : Promise.resolve(null),
+        prisma.flightComment.findMany({
+          where: {flightId: flight.id},
+          orderBy: {createdAt: "asc"},
+          take: 200,
+          select: {
+            id: true,
+            userId: true,
+            content: true,
+            createdAt: true,
+            deletedAt: true,
+            user: {
+              select: {
+                name: true,
+                profile: {select: {callsign: true}}
+              }
+            },
+            reports: {
+              where: {reporterId: session?.user?.id ?? "__anonymous__"},
+              select: {id: true},
+              take: 1
+            }
+          }
+        })
+      ])
+    : [0, null, []];
 
   return (
-    <FlightDetailClient
-      preferredMapMode={preferredMapMode}
-      flight={{
+    <>
+      <FlightDetailClient
+        preferredMapMode={preferredMapMode}
+        flight={{
         id: flight.id,
         title: flight.title,
         pilotCallsign: flight.pilotCallsign,
@@ -100,35 +212,121 @@ export default async function FlightDetailPage({
         glider: flight.glider,
         registration: flight.registration,
         competitionClass: flight.competitionClass,
+        weatherMode: flight.weatherMode,
         comment: flight.comment,
         startTime: flight.startTime?.toISOString() ?? null,
         durationSeconds: flight.durationSeconds,
         distanceKm: flight.distanceKm,
         olcPoints: flight.olcPoints,
+        scoringRule: flight.scoringRule,
+        scoringDistanceKm: flight.scoringDistanceKm,
+        scoringMultiplier: flight.scoringMultiplier,
+        scoringClosedCourse: flight.scoringClosedCourse,
+        suggestedScoringStartSeq: flight.suggestedScoringStartSeq,
+        suggestedScoringEndSeq: flight.suggestedScoringEndSeq,
+        scoringStartSeq: flight.scoringStartSeq,
+        scoringEndSeq: flight.scoringEndSeq,
+        scoringWindowMode: flight.scoringWindowMode,
+        scoringWindowReasons: flight.scoringWindowReasons,
         avgSpeedKmh: flight.avgSpeedKmh,
         maxAltitudeM: flight.maxAltitudeM,
         minAltitudeM: flight.minAltitudeM,
         maxVarioMs: flight.maxVarioMs,
         visibility: flight.visibility,
+        publicIgcDownloadEnabled: flight.publicIgcDownloadEnabled,
+        canDownloadIgc: igcDownloadMode !== null,
         canManage: canModerate || (isOwner && !isLockedByModeration),
         track: flight.track.map((p: any) => ({
           seq: p.seq,
           lat: p.lat,
           lon: p.lon,
           altM: p.altM,
-          varioMs: p.varioMs
+          varioMs: p.varioMs,
+          time: p.time?.toISOString() ?? null
         })),
         thermals: flight.thermals.map((t: any) => ({
           id: t.id,
           seq: t.seq,
+          startSeq: t.startSeq,
+          endSeq: t.endSeq,
           centerLat: t.centerLat,
           centerLon: t.centerLon,
           avgClimbMs: t.avgClimbMs,
           maxClimbMs: t.maxClimbMs,
           gainM: t.gainM,
-          durationSec: t.durationSec
-        }))
-      }}
-    />
+          durationSec: t.durationSec,
+          efficiencyPercent: t.efficiencyPercent,
+          windDirectionDeg: t.windDirectionDeg,
+          windSpeedKmh: t.windSpeedKmh,
+          windConfidence: t.windConfidence,
+          windDriftDistanceM: t.windDriftDistanceM
+        })),
+        glidePhases: flight.glidePhases.map((phase: any) => ({
+          id: phase.id,
+          seq: phase.seq,
+          startSeq: phase.startSeq,
+          endSeq: phase.endSeq,
+          durationSec: phase.durationSec,
+          distanceKm: phase.distanceKm,
+          avgSpeedKmh: phase.avgSpeedKmh,
+          avgSinkMs: phase.avgSinkMs,
+          glideRatio: phase.glideRatio
+        })),
+        scoringPoints: flight.scoringPoints.map((point) => ({
+          id: point.id,
+          order: point.order,
+          trackSeq: point.trackSeq,
+          lat: point.lat,
+          lon: point.lon,
+          legDistanceKm: point.legDistanceKm
+        })),
+        airspaces,
+        airspaceCrossings
+        }}
+      />
+
+      {shareUrls ? <FlightSharePanel title={flight.title} shareUrl={shareUrls.shareUrl} embedUrl={shareUrls.embedUrl} /> : null}
+
+      <FlightStorySection
+        locale={locale}
+        flightId={flight.id}
+        storyText={flight.storyText}
+        images={flight.storyImages.map((image) => ({id: image.id, fileName: image.fileName}))}
+        canEdit={(isOwner && !isLockedByModeration) || hasRole(session?.user?.roles, "ADMIN")}
+        canRemove={isOwner || canModerate}
+      />
+
+      {communityEnabled ? (
+        <FlightCommunitySection
+          locale={locale}
+          flightId={flight.id}
+          likeCount={likeCount}
+          likedByViewer={Boolean(viewerLike)}
+          isAuthenticated={Boolean(session?.user?.id)}
+          comments={communityComments.map((comment) => ({
+            id: comment.id,
+            content: comment.content,
+            author:
+              comment.user.profile?.callsign ??
+              comment.user.name ??
+              "Pilot",
+            createdAt: comment.createdAt,
+            deletedAt: comment.deletedAt,
+            canDelete: session?.user?.id
+              ? canDeleteFlightComment(
+                  session.user.id,
+                  comment.userId,
+                  flight.userId,
+                  canModerate
+                )
+              : false,
+            canReport: Boolean(
+              session?.user?.id && session.user.id !== comment.userId
+            ),
+            reportedByViewer: comment.reports.length > 0
+          }))}
+        />
+      ) : null}
+    </>
   );
 }

@@ -8,6 +8,12 @@ import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
 import {hasRole} from "@/lib/rbac";
 import {writeAuditLog} from "@/lib/audit";
+import {createNotification} from "@/lib/notifications";
+import {recalculateUserBadges} from "@/lib/badges";
+import {recalculateFlightCompetitions} from "@/lib/competitions";
+import {recalculateFlightLeagueEntries} from "@/lib/leagues";
+import {recalculateFlightSegments} from "@/lib/segments";
+import fs from "node:fs/promises";
 
 const moderationSchema = z.object({
   flightId: z.string().min(1),
@@ -17,6 +23,11 @@ const moderationSchema = z.object({
 });
 
 const softDeleteFlightSchema = z.object({
+  flightId: z.string().min(1),
+  returnTo: z.string().min(1).optional()
+});
+
+const restoreFlightSchema = z.object({
   flightId: z.string().min(1),
   returnTo: z.string().min(1).optional()
 });
@@ -45,6 +56,25 @@ function revalidateFlightAdminViews(flightId: string) {
   revalidatePath("/en/admin/flights");
   revalidatePath(`/de/flights/${flightId}`);
   revalidatePath(`/en/flights/${flightId}`);
+}
+
+async function cleanupFlightFile(objectPath: string | null | undefined) {
+  if (!objectPath) {
+    return;
+  }
+
+  try {
+    await fs.unlink(objectPath);
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+
+    if (code !== "ENOENT") {
+      console.error("Could not purge IGC file:", {
+        objectPath,
+        error
+      });
+    }
+  }
 }
 
 const auditActionByStatus: Record<
@@ -88,6 +118,7 @@ export async function moderateFlightAction(formData: FormData) {
     },
     select: {
       id: true,
+      userId: true,
       title: true,
       pilotCallsign: true,
       visibility: true,
@@ -112,6 +143,19 @@ export async function moderateFlightAction(formData: FormData) {
     }
   });
 
+  await createNotification({
+    recipientUserId: flight.userId,
+    actorUserId: session.user.id,
+    type: "FLIGHT_MODERATION",
+    flightId: flight.id,
+    moderationStatus: flight.moderationStatus
+  });
+
+  await recalculateUserBadges(flight.userId);
+  await recalculateFlightCompetitions(flight.id);
+  await recalculateFlightLeagueEntries(flight.id);
+  await recalculateFlightSegments(flight.id);
+
   revalidateFlightAdminViews(flight.id);
 
   redirect(`${returnTo}?updated=1`);
@@ -135,23 +179,89 @@ export async function softDeleteFlightAction(formData: FormData) {
 
   const returnTo = safeReturnTo(fields.returnTo);
 
-  const flight = await prisma.flight.findFirst({
+  const flight = await prisma.flight.findUnique({
     where: {
-      id: fields.flightId,
-      deletedAt: null
+      id: fields.flightId
     },
     select: {
       id: true,
+      userId: true,
       title: true,
       pilotCallsign: true,
       visibility: true,
       moderationStatus: true,
-      igcSha256: true
+      igcSha256: true,
+      deletedAt: true,
+      deletedByUserId: true,
+      igcObjectPath: true,
+      storyImages: {select: {objectPath: true}}
     }
   });
 
   if (!flight) {
-    throw new Error("Flight not found or already deleted.");
+    throw new Error("Flight not found.");
+  }
+
+  if (flight.deletedAt) {
+    await prisma.$transaction(async (tx) => {
+      await tx.igcUploadBlock.upsert({
+        where: {
+          igcSha256: flight.igcSha256
+        },
+        create: {
+          igcSha256: flight.igcSha256,
+          originalFlightId: flight.id,
+          originalTitle: flight.title,
+          originalPilotCallsign: flight.pilotCallsign,
+          reason: "admin-purge",
+          blockedByUserId: session.user.id
+        },
+        update: {
+          originalFlightId: flight.id,
+          originalTitle: flight.title,
+          originalPilotCallsign: flight.pilotCallsign,
+          reason: "admin-purge",
+          blockedByUserId: session.user.id
+        }
+      });
+
+      await tx.flight.delete({
+        where: {
+          id: flight.id
+        }
+      });
+    });
+
+    await cleanupFlightFile(flight.igcObjectPath);
+    await Promise.all(flight.storyImages.map((image) => cleanupFlightFile(image.objectPath)));
+
+    await writeAuditLog({
+      actorUserId: session.user.id,
+      actorEmail: session.user.email,
+      action: "FLIGHT_PURGE",
+      targetType: "Flight",
+      targetId: flight.id,
+      summary: "Soft-deleted flight was permanently purged by an administrator.",
+      metadata: {
+        title: flight.title,
+        pilotCallsign: flight.pilotCallsign,
+        previousVisibility: flight.visibility,
+        previousModerationStatus: flight.moderationStatus,
+        deletedAt: flight.deletedAt.toISOString(),
+        deletedByUserId: flight.deletedByUserId,
+        igcSha256: flight.igcSha256,
+        uploadHashBlocked: true
+      }
+    });
+
+    await recalculateUserBadges(flight.userId);
+    await recalculateFlightCompetitions(flight.id);
+    await recalculateFlightLeagueEntries(flight.id);
+    await recalculateFlightSegments(flight.id);
+
+    revalidateFlightAdminViews(flight.id);
+
+    redirect(`${returnTo}?updated=1`);
   }
 
   const deletedAt = new Date();
@@ -198,7 +308,127 @@ export async function softDeleteFlightAction(formData: FormData) {
     }
   });
 
+  await createNotification({
+    recipientUserId: flight.userId,
+    actorUserId: session.user.id,
+    type: "FLIGHT_MODERATION",
+    flightId: updatedFlight.id,
+    moderationStatus: updatedFlight.moderationStatus
+  });
+
+  await recalculateUserBadges(flight.userId);
+  await recalculateFlightCompetitions(updatedFlight.id);
+  await recalculateFlightLeagueEntries(updatedFlight.id);
+  await recalculateFlightSegments(updatedFlight.id);
+
   revalidateFlightAdminViews(updatedFlight.id);
+
+  redirect(`${returnTo}?updated=1`);
+}
+
+export async function restoreFlightAction(formData: FormData) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("Not authenticated.");
+  }
+
+  if (!hasRole(session.user.roles, "ADMIN")) {
+    throw new Error("Not authorized.");
+  }
+
+  const fields = restoreFlightSchema.parse({
+    flightId: formData.get("flightId"),
+    returnTo: formData.get("returnTo") || undefined
+  });
+
+  const returnTo = safeReturnTo(fields.returnTo);
+
+  const flight = await prisma.flight.findUnique({
+    where: {
+      id: fields.flightId
+    },
+    select: {
+      id: true,
+      userId: true,
+      title: true,
+      pilotCallsign: true,
+      visibility: true,
+      moderationStatus: true,
+      deletedAt: true,
+      deletedByUserId: true,
+      igcSha256: true
+    }
+  });
+
+  if (!flight) {
+    throw new Error("Flight not found.");
+  }
+
+  if (!flight.deletedAt) {
+    throw new Error("Flight is not soft-deleted.");
+  }
+
+  const restoredAt = new Date();
+
+  const restoredFlight = await prisma.flight.update({
+    where: {
+      id: flight.id
+    },
+    data: {
+      deletedAt: null,
+      deletedByUserId: null,
+      moderationStatus: "APPROVED",
+      moderatedByUserId: session.user.id,
+      moderatedAt: restoredAt,
+      moderationNote: "Restored by administrator."
+    },
+    select: {
+      id: true,
+      title: true,
+      pilotCallsign: true,
+      visibility: true,
+      moderationStatus: true,
+      moderatedAt: true,
+      moderationNote: true
+    }
+  });
+
+  await writeAuditLog({
+    actorUserId: session.user.id,
+    actorEmail: session.user.email,
+    action: "FLIGHT_RESTORE",
+    targetType: "Flight",
+    targetId: restoredFlight.id,
+    summary: "Soft-deleted flight was restored by an administrator.",
+    metadata: {
+      title: restoredFlight.title,
+      pilotCallsign: restoredFlight.pilotCallsign,
+      visibility: restoredFlight.visibility,
+      previousModerationStatus: flight.moderationStatus,
+      restoredModerationStatus: restoredFlight.moderationStatus,
+      previousDeletedAt: flight.deletedAt.toISOString(),
+      previousDeletedByUserId: flight.deletedByUserId,
+      igcSha256: flight.igcSha256,
+      moderationNote: restoredFlight.moderationNote,
+      restoredAt: restoredFlight.moderatedAt?.toISOString() ?? null
+    }
+  });
+
+  await createNotification({
+    recipientUserId: flight.userId,
+    actorUserId: session.user.id,
+    type: "FLIGHT_MODERATION",
+    flightId: restoredFlight.id,
+    moderationStatus: restoredFlight.moderationStatus
+  });
+
+  await recalculateUserBadges(flight.userId);
+  await recalculateFlightCompetitions(restoredFlight.id);
+  await recalculateFlightLeagueEntries(restoredFlight.id);
+  await recalculateFlightSegments(restoredFlight.id);
+
+  revalidateFlightAdminViews(restoredFlight.id);
 
   redirect(`${returnTo}?updated=1`);
 }

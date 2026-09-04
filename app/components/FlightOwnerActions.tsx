@@ -6,6 +6,7 @@ import {
   deleteFlightAction,
   setFlightVisibilityAction
 } from "@/app/[locale]/profile/flight-actions";
+import {Link} from "@/i18n/navigation";
 
 type Visibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
 
@@ -29,10 +30,6 @@ export default function FlightOwnerActions({
   const locale = params.locale === "en" ? "en" : "de";
   const currentPath = pathname || `/${locale}/profile`;
 
-  const nextVisibility = visibility === "PUBLIC" ? "PRIVATE" : "PUBLIC";
-  const visibilityLabel =
-    visibility === "PUBLIC" ? t("hide") : t("show");
-
   if (!canChangeVisibility && !canDelete) {
     return null;
   }
@@ -40,16 +37,35 @@ export default function FlightOwnerActions({
   return (
     <div className="ownerActions">
       {canChangeVisibility ? (
-        <form action={setFlightVisibilityAction}>
+        <form className="visibilityActionForm" action={setFlightVisibilityAction}>
           <input type="hidden" name="flightId" value={flightId} />
-          <input type="hidden" name="visibility" value={nextVisibility} />
           <input type="hidden" name="returnTo" value={currentPath} />
 
+          <label className="srOnly" htmlFor={`visibility-${flightId}`}>
+            {t("visibilityLabel")}
+          </label>
+
+          <select
+            className="visibilitySelect"
+            id={`visibility-${flightId}`}
+            name="visibility"
+            defaultValue={visibility}
+            aria-label={t("visibilityLabel")}
+          >
+            <option value="PUBLIC">{t("visibilityPublic")}</option>
+            <option value="UNLISTED">{t("visibilityUnlisted")}</option>
+            <option value="PRIVATE">{t("visibilityPrivate")}</option>
+          </select>
+
           <button className="btn btnSecondary" type="submit">
-            {visibilityLabel}
+            {t("saveVisibility")}
           </button>
         </form>
       ) : null}
+
+      <Link className="btn btnSecondary" href={`/flights/${flightId}/edit`}>
+        {t("edit")}
+      </Link>
 
       {canDelete ? (
         <form

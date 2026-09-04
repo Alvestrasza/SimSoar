@@ -80,8 +80,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             process.env.SIMSOAR_ENV ??
             process.env.NEXT_PUBLIC_SIMSOAR_ENV ??
             null,
-          provider: account.provider,
-          rawRoleValues: roleValues
+          provider: account.provider
         });
 
         return false;
@@ -181,8 +180,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         summary: "User roles synchronized from Keycloak during sign-in.",
         metadata: {
           provider: account.provider,
-          roles: finalRoles,
-          rawRoleValues: roleValues
+          roles: finalRoles
         }
       });
 

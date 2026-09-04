@@ -44,7 +44,7 @@ export default async function AdminAuditPage({params}: AdminAuditPageProps) {
 
   if (!hasRole(session.user.roles, "ADMIN")) {
     return (
-      <main className="wrap" style={{maxWidth: 820}}>
+      <main className="wrap adminWrap">
         <section className="card">
           <div className="cardHead">
             <div>
@@ -77,7 +77,7 @@ export default async function AdminAuditPage({params}: AdminAuditPageProps) {
   });
 
   return (
-    <main className="wrap">
+    <main className="wrap adminWrap">
       <section className="card">
         <div className="cardHead">
           <div>

@@ -1,11 +1,16 @@
 "use client";
 
-import {useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {useLocale, useTranslations} from "next-intl";
 import {Link} from "@/i18n/navigation";
 import AltitudeChart from "./AltitudeChart";
 import FlightTrackMap from "./FlightTrackMap";
+import Flight3DView from "./Flight3DView";
 import FlightOwnerActions from "./FlightOwnerActions";
+import {updateScoringWindowAction} from "@/app/[locale]/flights/[id]/scoring-actions";
+import {sortThermals, type ThermalSortMode} from "@/lib/thermal-analysis";
+import {summarizeWindEstimates, type WindConfidence} from "@/lib/wind-estimation";
+import {activeThermalAtSequence, buildReplayTimeline, replayIndexAtElapsed} from "@/lib/flight-replay";
 
 type TrackPoint = {
   seq: number;
@@ -13,21 +18,69 @@ type TrackPoint = {
   lon: number;
   altM: number;
   varioMs?: number | null;
+  time?: string | null;
 };
 
 type Thermal = {
   id: string;
   seq: number;
+  startSeq?: number | null;
+  endSeq?: number | null;
   centerLat?: number | null;
   centerLon?: number | null;
   avgClimbMs: number;
   maxClimbMs: number;
   gainM: number;
   durationSec: number;
+  efficiencyPercent: number;
+  windDirectionDeg?: number | null;
+  windSpeedKmh?: number | null;
+  windConfidence?: WindConfidence | null;
+  windDriftDistanceM?: number | null;
+};
+
+type GlidePhase = {
+  id: string;
+  seq: number;
+  startSeq: number;
+  endSeq: number;
+  durationSec: number;
+  distanceKm: number;
+  avgSpeedKmh: number;
+  avgSinkMs: number;
+  glideRatio: number;
+};
+
+type Airspace = {
+  id: string;
+  name: string;
+  className: string;
+  floorLabel: string;
+  ceilingLabel: string;
+  points: Array<{lat: number; lon: number}>;
+};
+
+type AirspaceCrossing = {
+  airspaceId: string;
+  name: string;
+  className: string;
+  floorLabel: string;
+  ceilingLabel: string;
+  firstTrackSeq: number;
+  lastTrackSeq: number;
 };
 
 type Visibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
 type MapModePreference = "STANDARD" | "SATELLITE" | "TERRAIN";
+
+type ScoringPoint = {
+  id: string;
+  order: number;
+  trackSeq: number;
+  lat: number;
+  lon: number;
+  legDistanceKm: number;
+};
 
 type FlightDetail = {
   id: string;
@@ -37,19 +90,36 @@ type FlightDetail = {
   glider?: string | null;
   registration?: string | null;
   competitionClass?: string | null;
+  weatherMode?: string | null;
   comment?: string | null;
   startTime?: string | null;
   durationSeconds: number;
   distanceKm: number;
   olcPoints: number;
+  scoringRule: string;
+  scoringDistanceKm: number;
+  scoringMultiplier: number;
+  scoringClosedCourse: boolean;
+  suggestedScoringStartSeq?: number | null;
+  suggestedScoringEndSeq?: number | null;
+  scoringStartSeq?: number | null;
+  scoringEndSeq?: number | null;
+  scoringWindowMode: "AUTO" | "MANUAL";
+  scoringWindowReasons: string[];
   avgSpeedKmh: number;
   maxAltitudeM: number;
   minAltitudeM: number;
   maxVarioMs: number;
   visibility: Visibility;
+  publicIgcDownloadEnabled: boolean;
+  canDownloadIgc: boolean;
   canManage: boolean;
   track: TrackPoint[];
   thermals: Thermal[];
+  glidePhases: GlidePhase[];
+  scoringPoints: ScoringPoint[];
+  airspaces: Airspace[];
+  airspaceCrossings: AirspaceCrossing[];
 };
 
 type Props = {
@@ -57,7 +127,7 @@ type Props = {
   preferredMapMode?: MapModePreference;
 };
 
-type Tab = "map" | "altitude" | "thermals" | "info";
+type Tab = "map" | "3d" | "altitude" | "thermals" | "info";
 
 function durationLabel(seconds: number) {
   const safe = Math.max(0, seconds || 0);
@@ -65,6 +135,20 @@ function durationLabel(seconds: number) {
   const m = Math.floor((safe % 3600) / 60);
 
   return `${h}:${String(m).padStart(2, "0")} h`;
+}
+
+function phaseDurationLabel(seconds: number) {
+  const safe = Math.max(0, Math.round(seconds || 0));
+  const minutes = Math.floor(safe / 60);
+  return `${minutes}:${String(safe % 60).padStart(2, "0")} min`;
+}
+
+function replayTimeLabel(seconds: number) {
+  const safe = Math.max(0, Math.round(seconds || 0));
+  const hours = Math.floor(safe / 3600);
+  const minutes = Math.floor(safe % 3600 / 60);
+  const rest = safe % 60;
+  return hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}` : `${minutes}:${String(rest).padStart(2, "0")}`;
 }
 
 function isoDateLabel(value: string | null | undefined, locale: string) {
@@ -128,6 +212,16 @@ function competitionClassLabel(
   return value;
 }
 
+function weatherModeLabel(
+  value: string | null | undefined,
+  t: ReturnType<typeof useTranslations>
+) {
+  if (value === "LIVE") return t("weatherModeLive");
+  if (value === "PRESET") return t("weatherModePreset");
+  if (value === "CUSTOM") return t("weatherModeCustom");
+  return t("weatherModeUnknown");
+}
+
 function tabClass(tab: Tab, current: Tab) {
   return `tab ${tab === current ? "active" : ""}`;
 }
@@ -139,10 +233,54 @@ export default function FlightDetailClient({
   const t = useTranslations("FlightDetail");
   const locale = useLocale();
   const [tab, setTab] = useState<Tab>("map");
+  const [thermalSort, setThermalSort] = useState<ThermalSortMode>("strength");
+  const [replayElapsed, setReplayElapsed] = useState(0);
+  const [replaySpeed, setReplaySpeed] = useState(1);
+  const [replayPlaying, setReplayPlaying] = useState(false);
+  const replayTimeline = useMemo(() => buildReplayTimeline(flight.track), [flight.track]);
+  const replayIndex = replayIndexAtElapsed(replayTimeline.offsets, replayElapsed);
+  const replayPoint = replayIndex >= 0 ? flight.track[replayIndex] : null;
+  const activeReplayThermal = activeThermalAtSequence(flight.thermals, replayPoint?.seq);
+  const replayAvailable = flight.track.length > 1 && replayTimeline.durationSeconds > 0;
 
-  const altProfile = flight.track
-    .map((p) => p.altM)
-    .filter((alt) => Number.isFinite(alt));
+  useEffect(() => {
+    if (!replayPlaying) return;
+    let previous = performance.now();
+    const timer = window.setInterval(() => {
+      const now = performance.now();
+      const deltaSeconds = (now - previous) / 1000;
+      previous = now;
+      setReplayElapsed((current) => Math.min(replayTimeline.durationSeconds, current + deltaSeconds * replaySpeed));
+    }, 200);
+    return () => window.clearInterval(timer);
+  }, [replayPlaying, replaySpeed, replayTimeline.durationSeconds]);
+
+  useEffect(() => {
+    if (replayPlaying && replayElapsed >= replayTimeline.durationSeconds) setReplayPlaying(false);
+  }, [replayElapsed, replayPlaying, replayTimeline.durationSeconds]);
+
+  const {altProfile, altitudePointSequences} = useMemo(() => ({
+    altProfile: flight.track.filter((point) => Number.isFinite(point.altM)).map((point) => point.altM),
+    altitudePointSequences: flight.track.filter((point) => Number.isFinite(point.altM)).map((point) => point.seq)
+  }), [flight.track]);
+  const sortedThermals = useMemo(() => sortThermals(flight.thermals, thermalSort), [flight.thermals, thermalSort]);
+  const flightWind = useMemo(() => summarizeWindEstimates(flight.thermals.map((thermal) => ({
+    directionDeg: thermal.windDirectionDeg ?? null,
+    speedKmh: thermal.windSpeedKmh ?? null,
+    confidence: thermal.windConfidence ?? null
+  }))), [flight.thermals]);
+  const thermalDurationSec = flight.thermals.reduce(
+    (total, thermal) => total + thermal.durationSec,
+    0
+  );
+  const glideDurationSec = flight.glidePhases.reduce(
+    (total, phase) => total + phase.durationSec,
+    0
+  );
+  const glideDistanceKm = flight.glidePhases.reduce(
+    (total, phase) => total + phase.distanceKm,
+    0
+  );
 
   return (
     <main className="wrap">
@@ -219,6 +357,22 @@ export default function FlightDetailClient({
         </div>
       </div>
 
+      <section className="card replayControls" aria-label={t("replayTitle")}>
+        <div className="replayControlRow">
+          <strong>{t("replayTitle")}</strong>
+          <div className="replayButtons">
+            <button className="btn btnPrimary" type="button" disabled={!replayAvailable || replayPlaying} onClick={() => setReplayPlaying(true)}>{t("replayPlay")}</button>
+            <button className="btn btnSecondary" type="button" disabled={!replayPlaying} onClick={() => setReplayPlaying(false)}>{t("replayPause")}</button>
+            <button className="btn btnSecondary" type="button" disabled={!replayAvailable} onClick={() => {setReplayPlaying(false); setReplayElapsed(0);}}>{t("replayReset")}</button>
+            <label className="replaySpeed">{t("replaySpeed")}<select value={replaySpeed} onChange={(event) => setReplaySpeed(Number(event.target.value))}>{[0.5, 1, 2, 4, 8].map((speed) => <option key={speed} value={speed}>{speed}×</option>)}</select></label>
+          </div>
+        </div>
+        {replayAvailable ? <>
+          <input className="replaySlider" type="range" min={0} max={replayTimeline.durationSeconds} step={0.1} value={replayElapsed} aria-label={t("replayTimeline")} onChange={(event) => {setReplayPlaying(false); setReplayElapsed(Number(event.target.value));}} />
+          <div className="replayStatus"><span>{replayTimeLabel(replayElapsed)} / {replayTimeLabel(replayTimeline.durationSeconds)}</span><span>{t("replayPoint", {current: replayIndex + 1, total: flight.track.length})}</span>{activeReplayThermal ? <strong className="replayThermal">{t("replayThermal", {number: activeReplayThermal.seq})}</strong> : <span className="muted">{t("replayCruise")}</span>}</div>
+        </> : <p className="muted">{t("replayUnavailable")}</p>}
+      </section>
+
       <div className="twoCol">
         <section className="card detailMainCard">
           <div className="tabs detailTabs">
@@ -227,6 +381,13 @@ export default function FlightDetailClient({
               onClick={() => setTab("map")}
             >
               {t("tabMap")}
+            </button>
+
+            <button
+              className={tabClass("3d", tab)}
+              onClick={() => setTab("3d")}
+            >
+              {t("tab3d")}
             </button>
 
             <button
@@ -255,9 +416,35 @@ export default function FlightDetailClient({
             <FlightTrackMap
               points={flight.track}
               thermals={flight.thermals}
+              airspaces={flight.airspaces}
               active={tab === "map"}
               mapMode={preferredMapMode}
+              replayPoint={replayPoint}
+              replayThermal={activeReplayThermal !== null}
             />
+            <div className="airspaceWarnings">
+              <strong>{t("airspaceCrossingsTitle")}</strong>
+              <p className="muted">{t("airspaceDisclaimer")}</p>
+              {flight.airspaceCrossings.length === 0 ? (
+                <p className="muted">{t("noAirspaceCrossings")}</p>
+              ) : (
+                <div className="thermalList">
+                  {flight.airspaceCrossings.map((crossing) => (
+                    <div className="thermalItem" key={crossing.airspaceId}>
+                      <div><strong>{crossing.name}</strong><div className="muted">
+                        {crossing.className} · {crossing.floorLabel} – {crossing.ceilingLabel} · {t("airspaceTrackRange", {start: crossing.firstTrackSeq, end: crossing.lastTrackSeq})}
+                      </div></div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className={tab === "3d" ? "tabPane padded" : "tabPane padded hidden"}>
+            <h3>{t("flight3dTitle")}</h3>
+            <p className="muted">{t("flight3dDescription")}</p>
+            <Flight3DView points={flight.track} activeIndex={replayIndex} active={tab === "3d"} />
           </div>
 
           <div
@@ -273,8 +460,12 @@ export default function FlightDetailClient({
               <>
                 <AltitudeChart
                   profile={altProfile}
+                  pointSequences={altitudePointSequences}
+                  thermalRanges={flight.thermals}
                   minAlt={flight.minAltitudeM}
                   maxAlt={flight.maxAltitudeM}
+                  activeIndex={replayIndex}
+                  activeThermal={activeReplayThermal !== null}
                 />
 
                 <div className="smallStats">
@@ -313,11 +504,35 @@ export default function FlightDetailClient({
 
             <p className="muted">{t("thermalsDescription")}</p>
 
+            <div className="windEstimate cardBody">
+              <strong>{t("windEstimateTitle")}</strong>
+              {flightWind ? (
+                <p>
+                  {t("windEstimateValue", {
+                    direction: flightWind.directionDeg,
+                    speed: flightWind.speedKmh.toFixed(1),
+                    confidence: t(`windConfidence_${flightWind.confidence}`)
+                  })}
+                </p>
+              ) : (
+                <p className="muted">{t("windEstimateUnavailable")}</p>
+              )}
+              <p className="muted">{t("windEstimateDisclaimer")}</p>
+            </div>
+
+            <label className="thermalSort">
+              {t("thermalSort")}
+              <select value={thermalSort} onChange={(event) => setThermalSort(event.target.value as ThermalSortMode)}>
+                <option value="strength">{t("thermalSortStrength")}</option>
+                <option value="gain">{t("thermalSortGain")}</option>
+              </select>
+            </label>
+
             {flight.thermals.length === 0 ? (
               <p className="muted emptyInline">{t("noThermals")}</p>
             ) : (
               <div className="thermalList">
-                {flight.thermals.map((thermal) => (
+                {sortedThermals.map((thermal) => (
                   <div className="thermalItem" key={thermal.id}>
                     <div className="thermalBubble">
                       +{thermal.avgClimbMs.toFixed(1)}
@@ -332,7 +547,49 @@ export default function FlightDetailClient({
                         {t("thermalGain")}: +{thermal.gainM} m ·{" "}
                         {t("thermalDuration")}: {thermal.durationSec}s ·{" "}
                         {t("thermalMax")}{" "}
-                        {thermal.maxClimbMs.toFixed(1)} m/s
+                        {thermal.maxClimbMs.toFixed(1)} m/s · {t("thermalEfficiency")}: {thermal.efficiencyPercent.toFixed(0)}%
+                      </div>
+                      {thermal.windDirectionDeg != null && thermal.windSpeedKmh != null && thermal.windConfidence ? (
+                        <div className="muted thermalWind">
+                          {t("thermalWindEstimate", {
+                            direction: thermal.windDirectionDeg,
+                            speed: thermal.windSpeedKmh.toFixed(1),
+                            confidence: t(`windConfidence_${thermal.windConfidence}`)
+                          })}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <h3 className="phaseSectionTitle">{t("glidesTitle")}</h3>
+            <p className="muted">{t("glidesDescription")}</p>
+
+            <div className="smallStats phaseSummary">
+              <span>{t("thermalTime")}: <strong>{phaseDurationLabel(thermalDurationSec)}</strong></span>
+              <span>{t("glideTime")}: <strong>{phaseDurationLabel(glideDurationSec)}</strong></span>
+              <span>{t("glideDistance")}: <strong>{glideDistanceKm.toFixed(1)} km</strong></span>
+            </div>
+
+            {flight.glidePhases.length === 0 ? (
+              <p className="muted emptyInline">{t("noGlides")}</p>
+            ) : (
+              <div className="thermalList">
+                {flight.glidePhases.map((phase) => (
+                  <div className="thermalItem" key={phase.id}>
+                    <div className="thermalBubble glideBubble">
+                      {Math.round(phase.avgSpeedKmh)}
+                    </div>
+                    <div>
+                      <strong>{t("glide")} #{phase.seq}</strong>
+                      <div className="muted">
+                        {t("glideDuration")}: {phaseDurationLabel(phase.durationSec)} ·{" "}
+                        {t("glideDistance")}: {phase.distanceKm.toFixed(1)} km ·{" "}
+                        {t("glideSpeed")}: {phase.avgSpeedKmh.toFixed(0)} km/h ·{" "}
+                        {t("glideSink")}: {phase.avgSinkMs.toFixed(1)} m/s ·{" "}
+                        {t("glideRatio")}: {phase.glideRatio > 0 ? `${phase.glideRatio.toFixed(1)}:1` : "–"}
                       </div>
                     </div>
                   </div>
@@ -372,6 +629,11 @@ export default function FlightDetailClient({
               <div>
                 <span>{t("class")}</span>
                 <strong>{competitionClassLabel(flight.competitionClass, t)}</strong>
+              </div>
+
+              <div>
+                <span>{t("weatherMode")}</span>
+                <strong>{weatherModeLabel(flight.weatherMode, t)}</strong>
               </div>
 
               <div>
@@ -430,6 +692,100 @@ export default function FlightDetailClient({
               </div>
             </div>
           </div>
+
+          <div className="card">
+            <div className="cardHead">
+              <span className="cardTitle">{t("scoringTitle")}</span>
+            </div>
+
+            <div className="cardBody">
+              <p className="muted" style={{marginTop: 0}}>
+                {t("scoringRule")}: <strong>{flight.scoringRule}</strong>
+              </p>
+              <p className="scoringFormula">
+                {flight.scoringDistanceKm.toFixed(2)} km × {flight.scoringMultiplier.toFixed(2)} = <strong>{flight.olcPoints.toFixed(2)}</strong>
+              </p>
+              <p className="muted">
+                {flight.scoringClosedCourse ? t("closedCourseBonus") : t("openCourse")}
+              </p>
+              <div className="scoringWindowSummary">
+                <span>{t("activeScoringWindow")}</span>
+                <strong>
+                  #{flight.scoringStartSeq ?? flight.track[0]?.seq ?? 0} – #{flight.scoringEndSeq ?? flight.track.at(-1)?.seq ?? 0}
+                </strong>
+                <small className="muted">
+                  {flight.scoringWindowMode === "MANUAL" ? t("windowManual") : t("windowAutomatic")}
+                </small>
+              </div>
+              <p className="muted">
+                {t("suggestedScoringWindow")}: #{flight.suggestedScoringStartSeq ?? flight.track[0]?.seq ?? 0} – #{flight.suggestedScoringEndSeq ?? flight.track.at(-1)?.seq ?? 0}
+              </p>
+              {flight.scoringWindowReasons.length > 0 ? (
+                <p className="muted">
+                  {t("windowDetection")}: {flight.scoringWindowReasons.map((reason) => t(`windowReason_${reason}`)).join(", ")}
+                </p>
+              ) : null}
+              {flight.canManage && flight.track.length > 1 ? (
+                <>
+                  <form className="scoringWindowForm" action={updateScoringWindowAction}>
+                    <input type="hidden" name="flightId" value={flight.id} />
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="mode" value="manual" />
+                    <label>
+                      {t("windowStartSeq")}
+                      <input name="startSeq" type="number" min={flight.track[0].seq} max={flight.track.at(-1)!.seq - 1} defaultValue={flight.scoringStartSeq ?? flight.track[0].seq} required />
+                    </label>
+                    <label>
+                      {t("windowEndSeq")}
+                      <input name="endSeq" type="number" min={flight.track[0].seq + 1} max={flight.track.at(-1)!.seq} defaultValue={flight.scoringEndSeq ?? flight.track.at(-1)!.seq} required />
+                    </label>
+                    <button className="btn btnPrimary" type="submit">{t("recalculateWindow")}</button>
+                  </form>
+                  <form action={updateScoringWindowAction}>
+                    <input type="hidden" name="flightId" value={flight.id} />
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="mode" value="suggested" />
+                    <button className="btn btnSecondary" type="submit">{t("restoreSuggestedWindow")}</button>
+                  </form>
+                </>
+              ) : null}
+              {flight.scoringPoints.length > 0 ? (
+                <ol className="scoringPointList">
+                  {flight.scoringPoints.map((point) => (
+                    <li key={point.id}>
+                      <span>{t("scoringPoint", {number: point.order + 1, trackSeq: point.trackSeq})}</span>
+                      <strong>{point.order === 0 ? t("scoringStart") : `${point.legDistanceKm.toFixed(2)} km`}</strong>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p className="muted">{t("legacyScoringHint")}</p>
+              )}
+            </div>
+          </div>
+
+          {flight.canDownloadIgc ? (
+            <div className="card">
+              <div className="cardHead">
+                <span className="cardTitle">{t("igcDownloadTitle")}</span>
+              </div>
+
+              <div className="cardBody">
+                <p className="muted" style={{marginTop: 0}}>
+                  {flight.publicIgcDownloadEnabled
+                    ? t("igcDownloadPublicHint")
+                    : t("igcDownloadPrivateHint")}
+                </p>
+
+                <a
+                  className="btn btnPrimary"
+                  href={`/${locale}/flights/${flight.id}/igc`}
+                >
+                  {t("downloadIgc")}
+                </a>
+              </div>
+            </div>
+          ) : null}
 
           {flight.comment ? (
             <div className="card">

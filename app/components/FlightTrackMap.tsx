@@ -1,6 +1,7 @@
 "use client";
 
 import {useEffect, useRef, useState} from "react";
+import {useTranslations} from "next-intl";
 
 type LeafletApi = typeof import("leaflet");
 
@@ -20,6 +21,15 @@ type Thermal = {
   durationSec: number;
 };
 
+type Airspace = {
+  id: string;
+  name: string;
+  className: string;
+  floorLabel: string;
+  ceilingLabel: string;
+  points: Array<{lat: number; lon: number}>;
+};
+
 type MapModePreference = "STANDARD" | "SATELLITE" | "TERRAIN";
 
 type TileLayerConfig = {
@@ -31,8 +41,11 @@ type TileLayerConfig = {
 type Props = {
   points: TrackPoint[];
   thermals?: Thermal[];
+  airspaces?: Airspace[];
   active?: boolean;
   mapMode?: MapModePreference;
+  replayPoint?: TrackPoint | null;
+  replayThermal?: boolean;
 };
 
 function mkIcon(L: LeafletApi, label: string, color: string) {
@@ -91,13 +104,24 @@ function mapModeLabel(mapMode: MapModePreference) {
 export default function FlightTrackMap({
   points,
   thermals = [],
+  airspaces = [],
   active = true,
-  mapMode = "STANDARD"
+  mapMode = "STANDARD",
+  replayPoint = null,
+  replayThermal = false
 }: Props) {
+  const t = useTranslations("FlightDetail");
   const mapEl = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
+  const leafletRef = useRef<LeafletApi | null>(null);
+  const replayMarkerRef = useRef<import("leaflet").Marker | null>(null);
+  const replayPointRef = useRef(replayPoint);
+  const replayThermalRef = useRef(replayThermal);
+  replayPointRef.current = replayPoint;
+  replayThermalRef.current = replayThermal;
 
   const [currentMapMode, setCurrentMapMode] = useState<MapModePreference>(mapMode);
+  const [showAirspaces, setShowAirspaces] = useState(false);
 
   useEffect(() => {
     setCurrentMapMode(mapMode);
@@ -111,10 +135,12 @@ export default function FlightTrackMap({
       const leafletModule = await import("leaflet");
       if (cancelled || !mapEl.current) return;
       const L = leafletModule;
+      leafletRef.current = L;
 
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
+        replayMarkerRef.current = null;
       }
 
       const map = L.map(mapEl.current, { zoomControl: true, attributionControl: true });
@@ -126,6 +152,19 @@ export default function FlightTrackMap({
         maxZoom: tileLayer.maxZoom,
         attribution: tileLayer.attribution
       }).addTo(map);
+
+      if (showAirspaces) {
+        for (const airspace of airspaces) {
+          if (airspace.points.length < 3) continue;
+          const polygon = L.polygon(
+            airspace.points.map((point) => [point.lat, point.lon] as [number, number]),
+            {color: "#dc2626", weight: 2, opacity: 0.8, fillColor: "#ef4444", fillOpacity: 0.12}
+          ).addTo(map);
+          const tooltip = document.createElement("span");
+          tooltip.textContent = `${airspace.name} · ${airspace.className} · ${airspace.floorLabel} – ${airspace.ceilingLabel}`;
+          polygon.bindTooltip(tooltip);
+        }
+      }
 
       if (points.length > 1) {
         const latLngs = points.map((p) => L.latLng(p.lat, p.lon));
@@ -159,6 +198,14 @@ export default function FlightTrackMap({
             .bindPopup(`Thermik #${thermal.seq}: +${thermal.avgClimbMs.toFixed(1)} m/s, +${thermal.gainM} m, ${thermal.durationSec}s`);
         });
 
+        const currentReplayPoint = replayPointRef.current;
+        if (currentReplayPoint) {
+          replayMarkerRef.current = L.marker([currentReplayPoint.lat, currentReplayPoint.lon], {
+            icon: mkIcon(L, "✈", replayThermalRef.current ? "#f59e0b" : "#2563eb"),
+            zIndexOffset: 1000
+          }).addTo(map);
+        }
+
         map.fitBounds(L.latLngBounds(latLngs), { padding: [30, 30] });
       } else {
         map.setView([51.0, 10.0], 5);
@@ -174,25 +221,48 @@ export default function FlightTrackMap({
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
+        replayMarkerRef.current = null;
       }
     };
-  }, [points, thermals, currentMapMode]);
+  }, [points, thermals, airspaces, currentMapMode, showAirspaces]);
 
   useEffect(() => {
     if (active && mapRef.current) setTimeout(() => mapRef.current?.invalidateSize(), 80);
   }, [active]);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    const L = leafletRef.current;
+    if (!map || !L || !replayPoint) return;
+    if (!replayMarkerRef.current) {
+      replayMarkerRef.current = L.marker([replayPoint.lat, replayPoint.lon], {zIndexOffset: 1000}).addTo(map);
+    }
+    replayMarkerRef.current
+      .setLatLng([replayPoint.lat, replayPoint.lon])
+      .setIcon(mkIcon(L, "✈", replayThermal ? "#f59e0b" : "#2563eb"));
+  }, [replayPoint, replayThermal]);
+
   return (
     <div className="flightMapShell">
-      <button
-        className="mapModeToggle"
-        type="button"
-        onClick={() => setCurrentMapMode((value) => nextMapMode(value))}
-        title="Switch map mode"
-        aria-label="Switch map mode"
-      >
-        {mapModeLabel(currentMapMode)}
-      </button>
+      <div className="mapControls">
+        {airspaces.length > 0 ? <button
+          className="mapModeToggle"
+          type="button"
+          onClick={() => setShowAirspaces((value) => !value)}
+          aria-pressed={showAirspaces}
+        >
+          {showAirspaces ? t("hideAirspaces") : t("showAirspaces")}
+        </button> : null}
+        <button
+          className="mapModeToggle"
+          type="button"
+          onClick={() => setCurrentMapMode((value) => nextMapMode(value))}
+          title="Switch map mode"
+          aria-label="Switch map mode"
+        >
+          {mapModeLabel(currentMapMode)}
+        </button>
+      </div>
 
       <div ref={mapEl} className="leafletMap" />
     </div>

@@ -19,6 +19,10 @@ import LocaleSwitcher from "@/app/components/LocaleSwitcher";
 import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
 import QuickThemeToggle from "@/app/components/QuickThemeToggle";
+import {hasRole} from "@/lib/rbac";
+import type {Session} from "next-auth";
+import ClosableNavigationMenu from "@/app/components/ClosableNavigationMenu";
+import SortableTables from "@/app/components/SortableTables";
 
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -28,6 +32,8 @@ type LocaleLayoutProps = {
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({locale}));
 }
+
+export const dynamic = "force-dynamic";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -81,70 +87,129 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
 
-  const messages = await getMessages();
-  const nav = await getTranslations({locale, namespace: "Nav"});
-  const footer = await getTranslations({locale, namespace: "Footer"});
+  const [messages, nav, footer] = await Promise.all([
+    getMessages(),
+    getTranslations({locale, namespace: "Nav"}),
+    getTranslations({locale, namespace: "Footer"})
+  ]);
 
   let themePreference: "system" | "light" | "dark" = "system";
+  let session: Session | null = null;
+  let unreadNotifications = 0;
 
-try {
-  const session = await auth();
+  try {
+    session = await auth();
 
-  if (session?.user?.id) {
-    const preferences = await prisma.userPreference.findUnique({
-      where: {
-        userId: session.user.id
-      },
-      select: {
-        theme: true
-      }
-    });
+    if (session?.user?.id) {
+      const [preferences, unreadCount] = await Promise.all([
+        prisma.userPreference.findUnique({
+          where: {userId: session.user.id},
+          select: {theme: true}
+        }),
+        prisma.notification.count({
+          where: {userId: session.user.id, readAt: null}
+        })
+      ]);
+      unreadNotifications = unreadCount;
 
-    if (preferences?.theme === "LIGHT") {
-      themePreference = "light";
+      if (preferences?.theme === "LIGHT") themePreference = "light";
+      if (preferences?.theme === "DARK") themePreference = "dark";
     }
-
-    if (preferences?.theme === "DARK") {
-      themePreference = "dark";
-    }
+  } catch (error) {
+    console.error("SimSoar navigation preferences could not be loaded:", error);
   }
-} catch (error) {
-  console.error("SimSoar theme preference could not be loaded:", error);
-}
+
+  const isAuthenticated = Boolean(session?.user);
+  const canUseAdmin = hasRole(session?.user?.roles, "MODERATOR");
+  const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_SIMSOAR_ENV === "dev";
+  const primaryItems = [
+    {href: "/" as const, label: nav("home")},
+    {href: "/flights" as const, label: nav("flights")},
+    {href: "/upload" as const, label: nav("upload")},
+    {href: "/pilots" as const, label: nav("pilots")},
+    {href: "/clubs" as const, label: nav("clubs")},
+    {href: "/competitions" as const, label: nav("competitions")}
+  ];
+  const secondaryItems = [
+    {href: "/leagues" as const, label: nav("leagues")},
+    {href: "/tasks" as const, label: nav("tasks")},
+    {href: "/segments" as const, label: nav("segments")}
+  ];
+  const allItems = [...primaryItems, ...secondaryItems];
 
   return (
     <html lang={locale} data-theme={themePreference} suppressHydrationWarning>
-      <body>
+      <body className={isDevelopmentEnvironment ? "hasDevBanner" : undefined}>
         <NextIntlClientProvider messages={messages}>
-          {process.env.NEXT_PUBLIC_SIMSOAR_ENV === "dev" ? (
+          <SortableTables />
+          <a className="skipLink" href="#main-content">{nav("skipToContent")}</a>
+
+          {isDevelopmentEnvironment ? (
             <div className="devBanner">
               DEV ENVIRONMENT – SimSoar Development
             </div>
           ) : null}
 
-          <nav className="nav">
-            <Link className="logo" href="/">
-              <span className="logoMark">🛩</span>
-              <span>SimSoar</span>
-            </Link>
+          <header className="siteHeader">
+            <nav className="nav" aria-label={nav("primaryNavigation")}>
+              <div className="navInner">
+                <Link className="logo" href="/">
+                  <span className="logoMark" aria-hidden="true">🛩</span>
+                  <span>SimSoar</span>
+                </Link>
 
-            <div className="navLinks">
-              <Link href="/">{nav("home")}</Link>
-              <Link href="/flights">{nav("flights")}</Link>
-              <Link href="/upload">{nav("upload")}</Link>
-              <Link href="/pilots">{nav("pilots")}</Link>
-            </div>
+                <div className="navLinks">
+                  {primaryItems.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+                  <ClosableNavigationMenu
+                    className="navMore"
+                    panelClassName="navMorePanel"
+                    summary={nav("more")}
+                  >
+                    {secondaryItems.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+                  </ClosableNavigationMenu>
+                </div>
 
-            <div className="navRight">
-              <QuickThemeToggle />
-              <LocaleSwitcher />
-              <Suspense fallback={null}>
-                <AuthNav locale={locale} />
-              </Suspense>
-            </div>
-          </nav>
+                <div className="navRight">
+                  {session?.user?.id ? (
+                    <Link className="btn btnSecondary notificationNavLink" href="/notifications" aria-label={nav("notifications", {count: unreadNotifications})}>
+                      <span aria-hidden="true">🔔</span>
+                      {unreadNotifications > 0 ? <span className="notificationBadge">{unreadNotifications > 99 ? "99+" : unreadNotifications}</span> : null}
+                    </Link>
+                  ) : null}
+                  <QuickThemeToggle />
 
-          {children}
+                  <div className="desktopNavUtilities">
+                    <LocaleSwitcher />
+                    <Suspense fallback={null}>
+                      <AuthNav locale={locale} isAuthenticated={isAuthenticated} canUseAdmin={canUseAdmin} />
+                    </Suspense>
+                  </div>
+
+                  <ClosableNavigationMenu
+                    className="mobileMenu"
+                    panelClassName="mobileMenuPanel"
+                    summary={<span aria-hidden="true" className="menuIcon"><i /><i /><i /></span>}
+                    summaryAriaLabel={nav("menu")}
+                    summaryTitle={nav("menu")}
+                  >
+                    <div className="mobileMenuLinks">
+                      {allItems.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+                    </div>
+                    <div className="mobileMenuUtilities">
+                      <LocaleSwitcher />
+                      <Suspense fallback={null}>
+                        <AuthNav locale={locale} isAuthenticated={isAuthenticated} canUseAdmin={canUseAdmin} />
+                      </Suspense>
+                    </div>
+                  </ClosableNavigationMenu>
+                </div>
+              </div>
+            </nav>
+          </header>
+
+          <div id="main-content" className="pageShell" tabIndex={-1}>
+            {children}
+          </div>
 
           <footer className="siteFooter">
             <span>
