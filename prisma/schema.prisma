@@ -106,6 +106,9 @@ enum AuditAction {
   TASK_UPDATE
   TASK_DELETE
   CUP_IMPORT
+  SEGMENT_CREATE
+  SEGMENT_UPDATE
+  SEGMENT_DELETE
 }
 
 enum ClubMemberRole {
@@ -195,8 +198,49 @@ model User {
   clubMemberships   ClubMembership[]
   competitionEntries CompetitionEntry[]
   leagueEntries      LeagueRoundEntry[]
+  segmentResults     FlightSegmentResult[]
   tasks              FlightTask[]
   cupImports         CupImport[]
+}
+
+model FlightSegment {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  startLat    Float
+  startLon    Float
+  finishLat   Float
+  finishLon   Float
+  gateRadiusM Int      @default(500)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  results FlightSegmentResult[]
+
+  @@index([active, name])
+}
+
+model FlightSegmentResult {
+  id              String   @id @default(cuid())
+  segmentId       String
+  flightId        String
+  userId          String
+  startSeq        Int
+  finishSeq       Int
+  durationSeconds Int
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+
+  segment FlightSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  flight  Flight        @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([segmentId, flightId])
+  @@index([segmentId, durationSeconds])
+  @@index([userId, createdAt])
+  @@index([flightId])
 }
 
 model FlightTask {
@@ -545,6 +589,7 @@ model Flight {
   storyImages FlightStoryImage[]
   competitionEntries CompetitionEntry[]
   leagueEntries      LeagueRoundEntry[]
+  segmentResults     FlightSegmentResult[]
 
   @@index([visibility, createdAt])
   @@index([visibility, moderationStatus, createdAt])

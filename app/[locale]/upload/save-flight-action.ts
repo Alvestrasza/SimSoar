@@ -12,6 +12,7 @@ import { notifyFollowersAboutFlight } from "@/lib/notifications";
 import { recalculateUserBadges } from "@/lib/badges";
 import { recalculateFlightCompetitions } from "@/lib/competitions";
 import { recalculateFlightLeagueEntries } from "@/lib/leagues";
+import { recalculateFlightSegments } from "@/lib/segments";
 import { hasRole } from "@/lib/rbac";
 import { Prisma } from "@prisma/client";
 import {
@@ -328,7 +329,8 @@ async function importFlightFile({
     }),
     recalculateUserBadges(userId),
     recalculateFlightCompetitions(flight.id),
-    recalculateFlightLeagueEntries(flight.id)
+    recalculateFlightLeagueEntries(flight.id),
+    recalculateFlightSegments(flight.id)
   ]);
 
   if (followUpResults.some((result) => result.status === "rejected")) {

@@ -12,6 +12,7 @@ import {createNotification} from "@/lib/notifications";
 import {recalculateUserBadges} from "@/lib/badges";
 import {recalculateFlightCompetitions} from "@/lib/competitions";
 import {recalculateFlightLeagueEntries} from "@/lib/leagues";
+import {recalculateFlightSegments} from "@/lib/segments";
 import fs from "node:fs/promises";
 
 const moderationSchema = z.object({
@@ -153,6 +154,7 @@ export async function moderateFlightAction(formData: FormData) {
   await recalculateUserBadges(flight.userId);
   await recalculateFlightCompetitions(flight.id);
   await recalculateFlightLeagueEntries(flight.id);
+  await recalculateFlightSegments(flight.id);
 
   revalidateFlightAdminViews(flight.id);
 
@@ -255,6 +257,7 @@ export async function softDeleteFlightAction(formData: FormData) {
     await recalculateUserBadges(flight.userId);
     await recalculateFlightCompetitions(flight.id);
     await recalculateFlightLeagueEntries(flight.id);
+    await recalculateFlightSegments(flight.id);
 
     revalidateFlightAdminViews(flight.id);
 
@@ -316,6 +319,7 @@ export async function softDeleteFlightAction(formData: FormData) {
   await recalculateUserBadges(flight.userId);
   await recalculateFlightCompetitions(updatedFlight.id);
   await recalculateFlightLeagueEntries(updatedFlight.id);
+  await recalculateFlightSegments(updatedFlight.id);
 
   revalidateFlightAdminViews(updatedFlight.id);
 
@@ -422,6 +426,7 @@ export async function restoreFlightAction(formData: FormData) {
   await recalculateUserBadges(flight.userId);
   await recalculateFlightCompetitions(restoredFlight.id);
   await recalculateFlightLeagueEntries(restoredFlight.id);
+  await recalculateFlightSegments(restoredFlight.id);
 
   revalidateFlightAdminViews(restoredFlight.id);
 
