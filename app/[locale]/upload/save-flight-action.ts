@@ -20,10 +20,10 @@ import {
   getBulkUploadLimits,
   validateBatchLimits
 } from "@/lib/bulk-upload-policy";
+import { bindUploadPilotIdentity } from "@/lib/upload-identity";
 
 const formSchema = z.object({
   locale: z.enum(["de", "en"]).default("de"),
-  pilotCallsign: z.string().min(2).max(40),
   simulator: z.string().min(2).max(40),
   registration: z.string().max(40).optional(),
   glider: z.string().max(80).optional(),
@@ -111,7 +111,7 @@ async function cleanupUploadedFile(objectPath: string) {
   }
 }
 
-type UploadFields = z.infer<typeof formSchema>;
+type UploadFields = z.infer<typeof formSchema> & { pilotCallsign: string };
 
 async function importFlightFile({
   file,
@@ -356,9 +356,8 @@ export async function saveFlightAction(formData: FormData) {
     throw new Error("Pilot role required to upload flights.");
   }
 
-  const fields = formSchema.parse({
+  const submittedFields = formSchema.parse({
     locale,
-    pilotCallsign: formData.get("pilotCallsign"),
     simulator: formData.get("simulator"),
     registration: formData.get("registration") || undefined,
     glider: formData.get("glider") || undefined,
@@ -366,6 +365,12 @@ export async function saveFlightAction(formData: FormData) {
     visibility: formData.get("visibility"),
     comment: formData.get("comment") || undefined
   });
+
+  const profile = await prisma.pilotProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { callsign: true }
+  });
+  const fields = bindUploadPilotIdentity(submittedFields, profile?.callsign);
 
   const files = formData.getAll("igc").filter((entry): entry is File => entry instanceof File);
   const limits = getBulkUploadLimits();

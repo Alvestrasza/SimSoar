@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {canViewFlightStory, detectStoryImageType, getStoryImageLimits} from "../lib/flight-story.ts";
+import {canViewFlightStory, detectStoryImageType, getFlightStoryImageCacheControl, getStoryImageLimits} from "../lib/flight-story.ts";
 
 test("detects supported image formats from signatures rather than declared MIME types", () => {
   assert.deepEqual(detectStoryImageType(Buffer.from([0xff, 0xd8, 0xff, 0x00])), {mimeType: "image/jpeg", extension: "jpg"});
@@ -22,4 +22,15 @@ test("allows public stories while keeping private or moderated flights protected
   assert.equal(canViewFlightStory({...publicFlight, visibility: "PRIVATE"}, {}), false);
   assert.equal(canViewFlightStory({...publicFlight, moderationStatus: "HIDDEN"}, {userId: "owner"}), true);
   assert.equal(canViewFlightStory({...publicFlight, visibility: "PRIVATE"}, {canModerate: true}), true);
+});
+
+test("publicly caches only active approved public story images", () => {
+  const publicFlight = {userId: "owner", visibility: "PUBLIC", moderationStatus: "APPROVED", deletedAt: null};
+  assert.equal(getFlightStoryImageCacheControl(publicFlight), "public, max-age=3600");
+  assert.equal(getFlightStoryImageCacheControl({...publicFlight, visibility: "UNLISTED"}), "private, no-store");
+  assert.equal(getFlightStoryImageCacheControl({...publicFlight, visibility: "PRIVATE"}), "private, no-store");
+  assert.equal(getFlightStoryImageCacheControl({...publicFlight, moderationStatus: "PENDING"}), "private, no-store");
+  assert.equal(getFlightStoryImageCacheControl({...publicFlight, moderationStatus: "REJECTED"}), "private, no-store");
+  assert.equal(getFlightStoryImageCacheControl({...publicFlight, moderationStatus: "HIDDEN"}), "private, no-store");
+  assert.equal(getFlightStoryImageCacheControl({...publicFlight, deletedAt: new Date()}), "private, no-store");
 });

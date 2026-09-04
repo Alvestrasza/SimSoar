@@ -69,44 +69,36 @@ function normalizeGroupRoleName(value: string): string {
     .replace(/[\s-]+/g, "_");
 }
 
+const SIMSOAR_GROUP_SUFFIX_BY_ROLE: Record<SimSoarRole, readonly string[]> = {
+  USER: ["users", "user"],
+  PILOT: ["pilots", "pilot"],
+  MODERATOR: ["moderators", "moderator"],
+  ADMIN: ["admins", "admin"],
+  OWNER: ["owners", "owner"]
+};
+
+function getExpectedEnvironmentGroups(): Map<string, SimSoarRole> {
+  const environment = getSimSoarRuntimeEnvironment();
+  if (!environment) return new Map();
+
+  const prefix = process.env.KEYCLOAK_SIMSOAR_GROUP_PREFIX ?? "00005-2-LS-SimSoar";
+  const groups = new Map<string, SimSoarRole>();
+
+  for (const role of SIMSOAR_ROLE_ORDER) {
+    for (const suffix of SIMSOAR_GROUP_SUFFIX_BY_ROLE[role]) {
+      groups.set(
+        normalizeGroupRoleName(`${prefix}_${environment}_${suffix}`),
+        role
+      );
+    }
+  }
+
+  return groups;
+}
+
 function inferRoleFromEnvironmentGroup(value: string): SimSoarRole | null {
   const normalized = normalizeGroupRoleName(value);
-
-  if (!normalized.includes("simsoar_")) {
-    return null;
-  }
-
-  const environment = getSimSoarRuntimeEnvironment();
-
-  if (
-    environment &&
-    (normalized.includes("simsoar_dev_") || normalized.includes("simsoar_prod_")) &&
-    !normalized.includes(`simsoar_${environment}_`)
-  ) {
-    return null;
-  }
-
-  if (normalized.endsWith("_owners") || normalized.endsWith("_owner")) {
-    return "OWNER";
-  }
-
-  if (normalized.endsWith("_admins") || normalized.endsWith("_admin")) {
-    return "ADMIN";
-  }
-
-  if (normalized.endsWith("_moderators") || normalized.endsWith("_moderator")) {
-    return "MODERATOR";
-  }
-
-  if (normalized.endsWith("_pilots") || normalized.endsWith("_pilot")) {
-    return "PILOT";
-  }
-
-  if (normalized.endsWith("_users") || normalized.endsWith("_user")) {
-    return "USER";
-  }
-
-  return null;
+  return getExpectedEnvironmentGroups().get(normalized) ?? null;
 }
 
 function toStringArray(value: unknown): string[] {
@@ -148,18 +140,13 @@ export function getSimSoarRuntimeEnvironment(): "dev" | "prod" | null {
 }
 
 export function hasSimSoarEnvironmentAccess(values: unknown[]): boolean {
-  const environment = getSimSoarRuntimeEnvironment();
-
-  if (!environment) {
-    return true;
-  }
-
-  const requiredMarker = `simsoar_${environment}_`;
+  const expectedGroups = getExpectedEnvironmentGroups();
+  if (expectedGroups.size === 0) return false;
 
   return values
     .filter((value): value is string => typeof value === "string")
     .map(normalizeAccessValue)
-    .some((value) => value.includes(requiredMarker));
+    .some((value) => expectedGroups.has(value));
 }
 
 export function normalizeSimSoarRoles(values: unknown[]): SimSoarRole[] {
@@ -199,12 +186,14 @@ export function extractKeycloakRoleValues(
   const keycloakProfile = profile as KeycloakProfileWithRoles | null;
   const values: string[] = [];
 
-  values.push(...toStringArray(keycloakProfile?.simsoar_roles));
-  values.push(...toStringArray(keycloakProfile?.realm_access?.roles));
   values.push(...toStringArray(keycloakProfile?.groups));
 
   if (clientId && keycloakProfile?.resource_access?.[clientId]?.roles) {
-    values.push(...toStringArray(keycloakProfile.resource_access[clientId].roles));
+    values.push(
+      ...toStringArray(keycloakProfile.resource_access[clientId].roles).filter(
+        (value) => KEYCLOAK_ROLE_MAP[normalizeRoleName(value)] !== undefined
+      )
+    );
   }
 
   return values;

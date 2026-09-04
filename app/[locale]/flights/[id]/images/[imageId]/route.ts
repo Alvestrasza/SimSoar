@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
 import {hasRole} from "@/lib/rbac";
-import {canViewFlightStory} from "@/lib/flight-story";
+import {canViewFlightStory, getFlightStoryImageCacheControl} from "@/lib/flight-story";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -27,7 +27,7 @@ export async function GET(_request: Request, {params}: {params: Promise<{id: str
       headers: {
         "Content-Type": image.mimeType,
         "Content-Length": String(buffer.length),
-        "Cache-Control": image.flight.visibility === "PUBLIC" ? "public, max-age=3600" : "private, no-store",
+        "Cache-Control": getFlightStoryImageCacheControl(image.flight),
         "X-Content-Type-Options": "nosniff",
         "Content-Security-Policy": "default-src 'none'; sandbox"
       }

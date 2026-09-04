@@ -31,15 +31,25 @@ export function detectStoryImageType(buffer: Buffer): {mimeType: string; extensi
   return null;
 }
 
-export function canViewFlightStory(flight: {
+type FlightStoryVisibility = {
   userId: string;
   visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
   moderationStatus: "PENDING" | "APPROVED" | "REJECTED" | "HIDDEN";
   deletedAt: Date | null;
-}, viewer: {userId?: string; canModerate?: boolean}) {
+};
+
+export function canViewFlightStory(flight: FlightStoryVisibility, viewer: {userId?: string; canModerate?: boolean}) {
   return viewer.canModerate === true || viewer.userId === flight.userId || (
     flight.deletedAt === null &&
     flight.moderationStatus === "APPROVED" &&
     (flight.visibility === "PUBLIC" || flight.visibility === "UNLISTED")
   );
+}
+
+export function getFlightStoryImageCacheControl(flight: FlightStoryVisibility): string {
+  return flight.deletedAt === null &&
+    flight.moderationStatus === "APPROVED" &&
+    flight.visibility === "PUBLIC"
+    ? "public, max-age=3600"
+    : "private, no-store";
 }

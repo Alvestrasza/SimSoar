@@ -131,6 +131,7 @@ export default async function UploadPage({
               <input
                 name="pilotCallsign"
                 defaultValue={profile?.callsign ?? ""}
+                readOnly
                 required
               />
             </div>
