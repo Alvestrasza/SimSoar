@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
-    if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) throw new OAuthPolicyError("invalid_content_type");
     const {context, rateLimit} = await authenticateOAuthRequest(request, "flights.upload");
+    if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) throw new OAuthPolicyError("invalid_content_type");
     const idempotencyKey = validateIdempotencyKey(request.headers.get("idempotency-key"));
     const text = await request.text();
     if (Buffer.byteLength(text, "utf8") > 10_000) throw new OAuthPolicyError("request_too_large");
