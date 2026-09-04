@@ -9,6 +9,7 @@ import {
   parseFlightFilters,
   type FlightFilterInput
 } from "@/lib/flight-filters";
+import CollapsibleFilterCard from "@/app/components/CollapsibleFilterCard";
 
 export const dynamic = "force-dynamic";
 
@@ -86,6 +87,7 @@ export default async function FlightsPage({
 
   const t = await getTranslations({locale, namespace: "Flights"});
   const queryParams = searchParams ? await searchParams : {};
+  const hasExplicitFilters = filterKeys.some((key) => firstValue(queryParams[key]));
   const explicitAllSimulators = firstValue(queryParams.simulator) === "all";
   const filterInput = explicitAllSimulators
     ? {...queryParams, simulator: ""}
@@ -140,14 +142,15 @@ export default async function FlightsPage({
         <Link className="btn btnPrimary" href="/flights/compare">{t("compareFlights")}</Link>
       </div>
 
-      <section className="card" style={{marginBottom: 22}}>
-        <div className="cardHead">
-          <span className="cardTitle">{t("advancedFilters")}</span>
-          <span className="muted">{t("resultCount", {count: flights.length})}</span>
-        </div>
-
-        <form className="cardBody" method="get">
-          <div className="formGrid">
+      <CollapsibleFilterCard
+        collapseLabel={t("hideFilters")}
+        expandLabel={t("showFilters")}
+        initiallyOpen={hasExplicitFilters}
+        resultLabel={t("resultCount", {count: flights.length})}
+        title={t("advancedFilters")}
+      >
+        <form className="cardBody compactFilterBody" method="get">
+          <div className="formGrid flightFilterGrid">
             <div className="formGroup full">
               <label htmlFor="flight-search">{t("searchPilot")}</label>
               <input
@@ -160,7 +163,19 @@ export default async function FlightsPage({
 
             <div className="formGroup">
               <label htmlFor="flight-simulator">{t("filterSimulator")}</label>
-              <input id="flight-simulator" name="simulator" defaultValue={filters.simulator} />
+              <select id="flight-simulator" name="simulator" defaultValue={filters.simulator}>
+                <option value="">{t("filterAnySimulator")}</option>
+                <option value="MSFS">{t("filterAllMsfs")}</option>
+                <option value="MSFS 2024">MSFS 2024</option>
+                <option value="MSFS 2020">MSFS 2020</option>
+                <option value="Condor">{t("filterAllCondor")}</option>
+                <option value="Condor 2">Condor 2</option>
+                <option value="X-Plane">{t("filterAllXplane")}</option>
+                <option value="X-Plane 12">X-Plane 12</option>
+                <option value="X-Plane 11">X-Plane 11</option>
+                <option value="DCS World">DCS World</option>
+                <option value="Other">{t("filterOtherSimulator")}</option>
+              </select>
             </div>
 
             <div className="formGroup">
@@ -170,12 +185,19 @@ export default async function FlightsPage({
 
             <div className="formGroup">
               <label htmlFor="flight-class">{t("filterCompetitionClass")}</label>
-              <input id="flight-class" name="competitionClass" defaultValue={filters.competitionClass} />
+              <select id="flight-class" name="competitionClass" defaultValue={filters.competitionClass}>
+                <option value="">{t("filterAnyClass")}</option>
+                <option value="Club Klasse">{t("classClub")}</option>
+                <option value="15 m Klasse">{t("class15m")}</option>
+                <option value="18 m Klasse">{t("class18m")}</option>
+                <option value="Offene Klasse">{t("classOpen")}</option>
+                <option value="Doppelsitzer">{t("classTwoSeater")}</option>
+              </select>
             </div>
 
             <div className="formGroup">
               <label>{t("filterDateRange")}</label>
-              <div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8}}>
+              <div className="filterRangeInputs">
                 <input type="date" name="dateFrom" aria-label={t("from")} defaultValue={firstValue(queryParams.dateFrom)} />
                 <input type="date" name="dateTo" aria-label={t("to")} defaultValue={firstValue(queryParams.dateTo)} />
               </div>
@@ -189,7 +211,7 @@ export default async function FlightsPage({
             ].map(([label, minName, maxName]) => (
               <div className="formGroup" key={label}>
                 <label>{t(`filter_${label}`)}</label>
-                <div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8}}>
+                <div className="filterRangeInputs">
                   <input type="number" min="0" step="any" name={minName} aria-label={t("from")} placeholder={t("from")} defaultValue={firstValue(queryParams[minName])} />
                   <input type="number" min="0" step="any" name={maxName} aria-label={t("to")} placeholder={t("to")} defaultValue={firstValue(queryParams[maxName])} />
                 </div>
@@ -197,12 +219,12 @@ export default async function FlightsPage({
             ))}
           </div>
 
-          <div style={{display: "flex", gap: 10, flexWrap: "wrap", marginTop: 20}}>
+          <div className="flightFilterActions">
             <button className="btn btnSuccess" type="submit">{t("applyFilters")}</button>
             <Link className="btn btnSecondary" href="/flights">{t("clearFilters")}</Link>
           </div>
         </form>
-      </section>
+      </CollapsibleFilterCard>
 
       <FlightsExplorer
         activeFilter={

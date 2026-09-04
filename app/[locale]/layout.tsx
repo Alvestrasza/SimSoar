@@ -22,6 +22,7 @@ import QuickThemeToggle from "@/app/components/QuickThemeToggle";
 import {hasRole} from "@/lib/rbac";
 import type {Session} from "next-auth";
 import ClosableNavigationMenu from "@/app/components/ClosableNavigationMenu";
+import SortableTables from "@/app/components/SortableTables";
 
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -140,6 +141,7 @@ export default async function LocaleLayout({
     <html lang={locale} data-theme={themePreference} suppressHydrationWarning>
       <body className={isDevelopmentEnvironment ? "hasDevBanner" : undefined}>
         <NextIntlClientProvider messages={messages}>
+          <SortableTables />
           <a className="skipLink" href="#main-content">{nav("skipToContent")}</a>
 
           {isDevelopmentEnvironment ? (
