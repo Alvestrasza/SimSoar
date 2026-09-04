@@ -11,7 +11,7 @@ import {
   canInteractWithFlight
 } from "@/lib/flight-community";
 import {setRequestLocale} from "next-intl/server";
-import {findAirspaceCrossings} from "@/lib/airspace";
+import {airspaceBounds, findAirspaceCrossings} from "@/lib/airspace";
 
 export const dynamic = "force-dynamic";
 
@@ -116,12 +116,18 @@ export default async function FlightDetailPage({
   });
 
   const communityEnabled = canInteractWithFlight(flight);
-  const activeAirspaces = await prisma.airspace.findMany({
-    where: {active: true},
+  const trackBounds = flight.track.length > 0 ? airspaceBounds(flight.track) : null;
+  const activeAirspaces = trackBounds ? await prisma.airspace.findMany({
+    where: {
+      active: true,
+      minLat: {lte: trackBounds.maxLat},
+      maxLat: {gte: trackBounds.minLat},
+      minLon: {lte: trackBounds.maxLon},
+      maxLon: {gte: trackBounds.minLon}
+    },
     orderBy: {createdAt: "desc"},
-    take: 200,
     include: {points: {orderBy: {seq: "asc"}}}
-  });
+  }) : [];
   const airspaces = activeAirspaces.map((airspace) => ({
     id: airspace.id,
     name: airspace.name,

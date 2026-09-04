@@ -529,7 +529,7 @@
     "subtitle": "OpenAir-Polygone importieren und für technische Kartenprüfungen bereitstellen.",
     "backToAdmin": "Zurück zum Admin-Dashboard",
     "file": "OpenAir-Datei",
-    "formatHint": "Unterstützt werden .txt, .air und .openair mit AC, AN, AL, AH und DP-Polygonpunkten.",
+    "formatHint": "Unterstützt werden .txt, .air und .openair mit Polygonen, Kreisen und Bögen. Auch große regionale Datensätze werden paketweise importiert.",
     "import": "Importieren",
     "imported": "{count} Lufträume wurden importiert.",
     "available": "Importierte Lufträume",
@@ -538,7 +538,14 @@
     "delete": "Entfernen",
     "error_size": "Die Datei ist leer oder überschreitet die konfigurierte Größenbegrenzung.",
     "error_type": "Der Dateityp wird nicht unterstützt.",
-    "error_content": "Die Datei enthält keine gültigen oder zu viele OpenAir-Polygone."
+    "error_content": "Die Datei enthält keine gültigen OpenAir-Lufträume.",
+    "error_airspaces": "Die Datei enthält mehr Lufträume als die konfigurierte Sicherheitsgrenze erlaubt.",
+    "error_points-per-airspace": "Mindestens ein Luftraum überschreitet die konfigurierte Punktgrenze.",
+    "error_total-points": "Die Datei überschreitet die konfigurierte Gesamtzahl von Geometriepunkten.",
+    "paginationLabel": "Seiten der importierten Lufträume",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "page": "Seite {page} von {totalPages} · {totalAirspaces} Lufträume"
   },
   "AdminFlights": {
     "pageTitle": "Flugmoderation",

@@ -1,6 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {findAirspaceCrossings, parseOpenAir, parseOpenAirCoordinate, pointInPolygon} from "../lib/airspace.ts";
+import {
+  airspaceBounds,
+  findAirspaceCrossings,
+  parseOpenAir,
+  parseOpenAirCoordinate,
+  pointInPolygon,
+  validateAirspaceImport
+} from "../lib/airspace.ts";
 
 const polygon = [
   {lat: 50, lon: 8},
@@ -39,4 +46,52 @@ test("detects points and track segments crossing a polygon", () => {
   assert.equal(crossings.length, 1);
   assert.equal(crossings[0].firstTrackSeq, 10);
   assert.equal(crossings[0].lastTrackSeq, 20);
+});
+
+test("converts OpenAir circles and clockwise arcs into bounded polygons", () => {
+  const airspaces = parseOpenAir(`
+AC R
+AN Example circle
+AL GND
+AH 2500 FT
+V X=50:30:00 N 008:15:00 E
+DC 1.00
+AC C
+AN Example arc
+AL 1000 FT
+AH FL 75
+DP 50:30:00 N 008:15:00 E
+V X=50:30:00 N 008:15:00 E
+V D=+
+DB 50:31:00 N 008:15:00 E, 50:30:00 N 008:16:33 E
+DP 50:30:00 N 008:15:00 E
+`);
+  assert.equal(airspaces.length, 2);
+  assert.ok(airspaces[0].points.length >= 70);
+  assert.ok(airspaces[1].points.length >= 4);
+  assert.ok(airspaces[0].points.every((point) => Math.abs(point.lat) <= 90 && Math.abs(point.lon) <= 180));
+});
+
+test("validates large regional imports by total and per-airspace limits", () => {
+  const airspaces = Array.from({length: 700}, (_, index) => ({
+    name: `Region ${index}`,
+    className: "C",
+    floorLabel: "GND",
+    ceilingLabel: "FL 100",
+    points: polygon
+  }));
+  assert.deepEqual(validateAirspaceImport(airspaces, {
+    maxAirspaces: 50_000,
+    maxPointsPerAirspace: 50_000,
+    maxTotalPoints: 2_000_000
+  }), {ok: true, reason: null, totalPoints: 2800});
+  assert.equal(validateAirspaceImport(airspaces, {
+    maxAirspaces: 600,
+    maxPointsPerAirspace: 50_000,
+    maxTotalPoints: 2_000_000
+  }).reason, "airspaces");
+});
+
+test("calculates airspace bounds for spatial prefiltering", () => {
+  assert.deepEqual(airspaceBounds(polygon), {minLat: 50, maxLat: 51, minLon: 8, maxLon: 9});
 });

@@ -529,7 +529,7 @@
     "subtitle": "Import OpenAir polygons for technical map checks.",
     "backToAdmin": "Back to Admin Dashboard",
     "file": "OpenAir file",
-    "formatHint": "Supports .txt, .air, and .openair files with AC, AN, AL, AH, and DP polygon points.",
+    "formatHint": "Supports .txt, .air, and .openair files with polygons, circles, and arcs. Large regional datasets are imported in batches.",
     "import": "Import",
     "imported": "{count} airspaces were imported.",
     "available": "Imported airspaces",
@@ -538,7 +538,14 @@
     "delete": "Remove",
     "error_size": "The file is empty or exceeds the configured size limit.",
     "error_type": "The file type is not supported.",
-    "error_content": "The file contains no valid or too many OpenAir polygons."
+    "error_content": "The file contains no valid OpenAir airspaces.",
+    "error_airspaces": "The file contains more airspaces than the configured safety limit allows.",
+    "error_points-per-airspace": "At least one airspace exceeds the configured point limit.",
+    "error_total-points": "The file exceeds the configured total geometry point limit.",
+    "paginationLabel": "Imported airspace pages",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {totalPages} · {totalAirspaces} airspaces"
   },
   "AdminFlights": {
     "pageTitle": "Flight Moderation",

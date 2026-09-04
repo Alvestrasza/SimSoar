@@ -23,11 +23,19 @@ export default async function AdminAirspacesPage({params, searchParams}: {
   const query = await searchParams;
   const error = Array.isArray(query.error) ? query.error[0] : query.error;
   const imported = Array.isArray(query.imported) ? query.imported[0] : query.imported;
-  const airspaces = await prisma.airspace.findMany({
-    orderBy: {createdAt: "desc"},
-    take: 500,
-    include: {_count: {select: {points: true}}}
-  });
+  const requestedPage = Number(Array.isArray(query.page) ? query.page[0] : query.page);
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const pageSize = 100;
+  const [airspaces, totalAirspaces] = await Promise.all([
+    prisma.airspace.findMany({
+      orderBy: {createdAt: "desc"},
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: {_count: {select: {points: true}}}
+    }),
+    prisma.airspace.count()
+  ]);
+  const totalPages = Math.max(1, Math.ceil(totalAirspaces / pageSize));
 
   return <main className="wrap adminWrap">
     <section className="card">
@@ -56,6 +64,11 @@ export default async function AdminAirspacesPage({params, searchParams}: {
             </form>
           </article>)}
         </div>}
+        {totalPages > 1 ? <nav className="pagination" aria-label={t("paginationLabel")}>
+          {page > 1 ? <Link className="btn btnSecondary" href={`/admin/airspaces?page=${page - 1}`}>{t("previous")}</Link> : null}
+          <span className="muted">{t("page", {page, totalPages, totalAirspaces})}</span>
+          {page < totalPages ? <Link className="btn btnSecondary" href={`/admin/airspaces?page=${page + 1}`}>{t("next")}</Link> : null}
+        </nav> : null}
       </div>
     </section>
   </main>;

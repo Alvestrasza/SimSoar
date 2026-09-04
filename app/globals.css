@@ -1303,6 +1303,7 @@ body {
 }
 
 .airspaceWarnings { padding: 16px 18px; border-top: 1px solid var(--border); }
+.pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
 .flightStoryCard { margin-top: 18px; }
 .flightStoryText { white-space: pre-wrap; line-height: 1.65; }
 .flightStoryGallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 18px; }
