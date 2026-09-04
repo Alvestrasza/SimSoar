@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://simsoar.example/schemas/task-package-1.0.0.json",
+  "title": "SimSoar task package 1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "manifest", "files"],
+  "properties": {
+    "format": {"const": "simsoar-task-package"},
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "packageId", "createdAt", "task", "compatibility", "dependencies", "files", "provenance"],
+      "properties": {
+        "schemaVersion": {"const": "1.0.0"},
+        "packageId": {"type": "string", "minLength": 1, "maxLength": 300},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "task": {
+          "type": "object", "additionalProperties": false,
+          "required": ["id", "lineageId", "revision", "name", "description", "visibility", "distanceKm", "waypointCount", "updatedAt"],
+          "properties": {
+            "id": {"type": "string", "minLength": 1},
+            "lineageId": {"type": "string", "minLength": 1},
+            "revision": {"type": "integer", "minimum": 1},
+            "name": {"type": "string", "minLength": 1, "maxLength": 120},
+            "description": {"type": ["string", "null"], "maxLength": 2000},
+            "visibility": {"enum": ["PUBLIC", "UNLISTED", "PRIVATE"]},
+            "distanceKm": {"type": "number", "minimum": 0},
+            "waypointCount": {"type": "integer", "minimum": 2, "maximum": 100},
+            "updatedAt": {"type": "string", "format": "date-time"}
+          }
+        },
+        "compatibility": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["simulator", "minVersion", "maxVersion", "format"],
+            "properties": {
+              "simulator": {"type": "string", "minLength": 1},
+              "minVersion": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+(?:\\.[0-9]+)?$"},
+              "maxVersion": {"type": ["string", "null"]},
+              "format": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["id", "required", "version", "sha256", "license", "sourceUrl"],
+            "properties": {
+              "id": {"type": "string", "pattern": "^[A-Za-z0-9._-]{1,120}$"},
+              "required": {"type": "boolean"},
+              "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+(?:\\.[0-9]+)?$"},
+              "sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+              "license": {"type": "string", "minLength": 1, "maxLength": 200},
+              "sourceUrl": {"type": "string", "format": "uri", "pattern": "^https://"}
+            }
+          }
+        },
+        "files": {
+          "type": "array", "minItems": 1, "maxItems": 16,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["path", "kind", "mediaType", "role", "size", "sha256", "license", "sourceUrl"],
+            "properties": {
+              "path": {"type": "string", "minLength": 1, "maxLength": 180},
+              "kind": {"const": "file"},
+              "mediaType": {"type": "string", "pattern": "^text/"},
+              "role": {"enum": ["task", "metadata"]},
+              "size": {"type": "integer", "minimum": 0, "maximum": 1048576},
+              "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+              "license": {"type": "string", "minLength": 1, "maxLength": 200},
+              "sourceUrl": {"type": ["string", "null"], "format": "uri"}
+            }
+          }
+        },
+        "provenance": {
+          "type": "object", "additionalProperties": false,
+          "required": ["producer", "taskLineageId", "taskRevision"],
+          "properties": {
+            "producer": {"const": "SimSoar"},
+            "taskLineageId": {"type": "string", "minLength": 1},
+            "taskRevision": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    },
+    "files": {
+      "type": "array", "minItems": 1, "maxItems": 16,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["path", "encoding", "data"],
+        "properties": {
+          "path": {"type": "string"},
+          "encoding": {"const": "base64"},
+          "data": {"type": "string", "contentEncoding": "base64"}
+        }
+      }
+    }
+  }
+}

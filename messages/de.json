@@ -71,7 +71,9 @@
     "library": "Importierte Wegpunktbibliothek",
     "chooseLibraryWaypoint": "Importierten Wegpunkt auswählen",
     "addLibraryWaypoint": "Wegpunkt hinzufügen",
-    "downloadCup": "CUP herunterladen"
+    "downloadCup": "CUP herunterladen",
+    "downloadPackage": "Aufgabenpaket herunterladen",
+    "revision": "Revision {revision}"
   },
   "CupImport": {
     "title": "CUP-Wegpunkte und -Aufgaben importieren",

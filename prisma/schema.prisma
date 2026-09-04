@@ -245,6 +245,9 @@ model FlightSegmentResult {
 
 model FlightTask {
   id              String         @id @default(cuid())
+  lineageId       String         @default(cuid())
+  revision        Int            @default(1)
+  packageDownloads Int           @default(0)
   ownerId         String
   name            String
   description     String?
@@ -258,6 +261,7 @@ model FlightTask {
 
   @@index([ownerId, updatedAt])
   @@index([visibility, updatedAt])
+  @@index([lineageId, revision])
 }
 
 model TaskWaypoint {
