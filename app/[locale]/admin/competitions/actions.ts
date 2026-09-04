@@ -9,6 +9,7 @@ import {hasRole} from "@/lib/rbac";
 import {writeAuditLog} from "@/lib/audit";
 import {normalizePublicSlug} from "@/lib/club-policy";
 import {recalculateCompetitionFlights} from "@/lib/competitions";
+import {EVIDENCE_FIELDS} from "@/lib/authenticity";
 
 const competitionSchema = z.object({
   competitionId: z.string().optional(),
@@ -21,7 +22,10 @@ const competitionSchema = z.object({
   status: z.enum(["DRAFT", "ACTIVE"]),
   scoringRule: z.enum(["OLC_POINTS", "DISTANCE"]),
   simulator: z.string().trim().max(80).optional(),
-  competitionClass: z.string().trim().max(80).optional()
+  competitionClass: z.string().trim().max(80).optional(),
+  evidenceRequired: z.boolean(),
+  requireSignedEvidence: z.boolean(),
+  requiredTaskPackageId: z.string().trim().max(300).optional()
 });
 
 function safeLocale(value: FormDataEntryValue | null) { return value === "en" ? "en" : "de"; }
@@ -47,8 +51,14 @@ export async function saveCompetitionAction(formData: FormData) {
     rules: String(formData.get("rules") ?? "") || undefined,
     startAt: formData.get("startAt"), endAt: formData.get("endAt"), status: formData.get("status"),
     scoringRule: formData.get("scoringRule"), simulator: String(formData.get("simulator") ?? "") || undefined,
-    competitionClass: String(formData.get("competitionClass") ?? "") || undefined
+    competitionClass: String(formData.get("competitionClass") ?? "") || undefined,
+    evidenceRequired: formData.get("evidenceRequired") === "true",
+    requireSignedEvidence: formData.get("requireSignedEvidence") === "true",
+    requiredTaskPackageId: String(formData.get("requiredTaskPackageId") ?? "") || undefined
   });
+  const requiredEvidenceFields = [...new Set(formData.getAll("requiredEvidenceFields").map(String))];
+  if (requiredEvidenceFields.some((field) => !(EVIDENCE_FIELDS as readonly string[]).includes(field))) redirect(`/${locale}/admin/competitions?error=evidence`);
+  const evidenceSimulators = [...new Set(String(formData.get("evidenceSimulators") ?? "").split(/[,\r\n]+/).map((value) => value.trim()).filter(Boolean))].slice(0, 20);
   const startAt = new Date(values.startAt);
   const endAt = new Date(values.endAt);
   if (!Number.isFinite(startAt.getTime()) || !Number.isFinite(endAt.getTime()) || endAt <= startAt) {
@@ -60,6 +70,8 @@ export async function saveCompetitionAction(formData: FormData) {
     name: values.name, slug, description: values.description || null, rules: values.rules || null,
     startAt, endAt, status: values.status, scoringRule: values.scoringRule,
     simulator: values.simulator || null, competitionClass: values.competitionClass || null,
+    evidenceRequired: values.evidenceRequired, evidenceSimulators, requiredEvidenceFields,
+    requireSignedEvidence: values.requireSignedEvidence, requiredTaskPackageId: values.requiredTaskPackageId || null,
     closedAt: null
   } as const;
   const competition = values.competitionId

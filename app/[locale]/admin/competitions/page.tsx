@@ -6,6 +6,7 @@ import {archivePastCompetitions} from "@/lib/competitions";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound, redirect} from "next/navigation";
 import {closeCompetitionAction, deleteCompetitionAction, saveCompetitionAction} from "./actions";
+import {EVIDENCE_FIELDS} from "@/lib/authenticity";
 
 export const dynamic = "force-dynamic";
 function localDateTime(date: Date) { return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16); }
@@ -39,6 +40,11 @@ export default async function AdminCompetitionsPage({params, searchParams}: {
     <label><span>{t("class")}</span><input name="competitionClass" defaultValue={competition?.competitionClass ?? ""} placeholder={t("optional")} /></label>
     <label className="full"><span>{t("description")}</span><textarea name="description" rows={2} defaultValue={competition?.description ?? ""} /></label>
     <label className="full"><span>{t("rules")}</span><textarea name="rules" rows={3} defaultValue={competition?.rules ?? ""} /></label>
+    <label><input type="checkbox" name="evidenceRequired" value="true" defaultChecked={competition?.evidenceRequired ?? false} /> {t("evidenceRequired")}</label>
+    <label><input type="checkbox" name="requireSignedEvidence" value="true" defaultChecked={competition?.requireSignedEvidence ?? false} /> {t("requireSignedEvidence")}</label>
+    <label className="full"><span>{t("evidenceSimulators")}</span><input name="evidenceSimulators" defaultValue={competition?.evidenceSimulators.join(", ") ?? ""} placeholder={t("evidenceSimulatorsHint")} /></label>
+    <label className="full"><span>{t("requiredTaskPackageId")}</span><input name="requiredTaskPackageId" defaultValue={competition?.requiredTaskPackageId ?? ""} placeholder={t("optional")} /></label>
+    <fieldset className="full"><legend>{t("requiredEvidenceFields")}</legend><div className="formGrid">{EVIDENCE_FIELDS.map((field) => <label key={field}><input type="checkbox" name="requiredEvidenceFields" value={field} defaultChecked={competition?.requiredEvidenceFields.includes(field)} /> {field}</label>)}</div></fieldset>
   </>;
 
   return <main className="wrap adminWrap">

@@ -115,6 +115,11 @@ enum AuditAction {
   OAUTH_GRANT_USE
   OAUTH_GRANT_REVOKE
   OAUTH_API_WRITE
+  AUTHENTICITY_KEY_REGISTER
+  AUTHENTICITY_KEY_REVOKE
+  AUTHENTICITY_EVIDENCE_SUBMIT
+  AUTHENTICITY_APPEAL_CREATE
+  AUTHENTICITY_APPEAL_REVIEW
 }
 
 enum ClubMemberRole {
@@ -178,6 +183,19 @@ enum OAuthClientStatus {
   REVOKED
 }
 
+enum AuthenticityStatus {
+  VERIFIED
+  INCOMPLETE
+  FLAGGED
+  UNSUPPORTED
+}
+
+enum AuthenticityAppealStatus {
+  OPEN
+  ACCEPTED
+  REJECTED
+}
+
 enum WindEstimateConfidence {
   LOW
   MEDIUM
@@ -218,6 +236,9 @@ model User {
   oauthClientsReviewed   OAuthClient[] @relation("OAuthClientReviewedBy")
   oauthGrants            OAuthGrant[]
   oauthIdempotencyRecords OAuthIdempotencyRecord[]
+  authenticityKeys        AuthenticityKey[]
+  authenticitySubmissions FlightAuthenticitySubmission[] @relation("AuthenticitySubmittedBy")
+  authenticityReviews     FlightAuthenticitySubmission[] @relation("AuthenticityReviewedBy")
 }
 
 model FlightSegment {
@@ -370,6 +391,8 @@ model OAuthClient {
   reviewedBy        User?                    @relation("OAuthClientReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
   grants            OAuthGrant[]
   idempotencyRecords OAuthIdempotencyRecord[]
+  authenticityKeys  AuthenticityKey[]
+  authenticitySubmissions FlightAuthenticitySubmission[]
 
   @@index([status, name])
 }
@@ -407,6 +430,24 @@ model OAuthIdempotencyRecord {
 
   @@unique([oauthClientId, userId, key])
   @@index([expiresAt])
+}
+
+model AuthenticityKey {
+  id            String   @id @default(cuid())
+  userId        String
+  oauthClientId String
+  keyId         String
+  publicKeyJwk  Json
+  fingerprint   String
+  createdAt     DateTime @default(now())
+  revokedAt     DateTime?
+
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client OAuthClient @relation(fields: [oauthClientId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, oauthClientId, keyId])
+  @@index([oauthClientId, revokedAt])
+  @@index([fingerprint])
 }
 
 model Session {
@@ -525,6 +566,11 @@ model Competition {
   scoringRule      CompetitionScoringRule @default(OLC_POINTS)
   simulator        String?
   competitionClass String?
+  evidenceRequired Boolean                @default(false)
+  evidenceSimulators String[]             @default([])
+  requiredEvidenceFields String[]         @default([])
+  requireSignedEvidence Boolean           @default(false)
+  requiredTaskPackageId String?
   closedAt         DateTime?
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
@@ -669,6 +715,7 @@ model Flight {
   competitionEntries CompetitionEntry[]
   leagueEntries      LeagueRoundEntry[]
   segmentResults     FlightSegmentResult[]
+  authenticitySubmissions FlightAuthenticitySubmission[]
 
   @@index([visibility, createdAt])
   @@index([visibility, moderationStatus, createdAt])
@@ -676,6 +723,43 @@ model Flight {
   @@index([moderationStatus, createdAt])
   @@index([deletedAt])
   @@index([userId, createdAt])
+}
+
+model FlightAuthenticitySubmission {
+  id                  String             @id @default(cuid())
+  flightId            String
+  userId              String
+  oauthClientId       String
+  revision            Int
+  status              AuthenticityStatus
+  evidenceVersion     String
+  evidenceSha256      String
+  simulatorVersion    String?
+  taskPackageId       String?
+  taskPackageSha256   String?
+  attemptId           String?
+  signed              Boolean            @default(false)
+  signatureValid      Boolean?
+  signingKeyId        String?
+  evidenceSummary     Json
+  findings            Json
+  appealStatus        AuthenticityAppealStatus?
+  appealText          String?
+  appealedAt          DateTime?
+  appealResolution    String?
+  appealReviewedAt    DateTime?
+  appealReviewedByUserId String?
+  createdAt           DateTime           @default(now())
+
+  flight           Flight      @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  user             User        @relation("AuthenticitySubmittedBy", fields: [userId], references: [id], onDelete: Cascade)
+  client           OAuthClient @relation(fields: [oauthClientId], references: [id], onDelete: Restrict)
+  appealReviewedBy User?       @relation("AuthenticityReviewedBy", fields: [appealReviewedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([flightId, revision])
+  @@index([flightId, createdAt])
+  @@index([userId, attemptId])
+  @@index([status, createdAt])
 }
 
 model TrackPoint {

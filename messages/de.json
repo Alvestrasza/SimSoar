@@ -170,7 +170,14 @@
     "flightsTitle": "Gewertete Flüge",
     "date": "Datum",
     "flight": "Flug",
-    "unnamedPilot": "Pilot ohne öffentliches Profil"
+    "unnamedPilot": "Pilot ohne öffentliches Profil",
+    "evidenceTitle": "Echtheitsnachweise",
+    "evidencePolicy": "Signierter Nachweis erforderlich: {signed}",
+    "evidenceNoFields": "Keine zusätzlichen Pflichtfelder",
+    "evidence": "Nachweis",
+    "evidenceMissing": "Nicht eingereicht",
+    "yes": "Ja",
+    "no": "Nein"
   },
   "Leagues": {
     "title": "Wochen- und Vereinsligen",
@@ -927,7 +934,14 @@
     "close": "Abschließen",
     "delete": "Löschen",
     "error_date": "Der Endzeitpunkt muss nach dem gültigen Beginn liegen.",
-    "error_slug": "Die URL-Kennung ist ungültig."
+    "error_slug": "Die URL-Kennung ist ungültig.",
+    "error_evidence": "Die Nachweisregel enthält ein ungültiges Feld.",
+    "evidenceRequired": "Echtheitsnachweis für diesen Wettbewerb verlangen",
+    "requireSignedEvidence": "Signierten Begleitnachweis verlangen",
+    "evidenceSimulators": "Nachweisregel für Simulatoren",
+    "evidenceSimulatorsHint": "Kommagetrennt; leer gilt für alle Simulatoren",
+    "requiredTaskPackageId": "Erforderliche Aufgabenpaket-ID",
+    "requiredEvidenceFields": "Erforderliche Nachweisfelder"
   },
   "AdminClubs": {
     "title": "Vereine verwalten",
@@ -993,6 +1007,8 @@
     "flight": "Flug",
     "pilot": "Pilot",
     "stats": "Werte",
+    "authenticity": "Echtheitsnachweis",
+    "authenticityMissing": "Nicht eingereicht",
     "visibility": "Sichtbarkeit",
     "status": "Status",
     "createdAt": "Erstellt",
@@ -1015,6 +1031,28 @@
     "purgeConfirm": "Den soft-deleted Flug „{title}“ endgültig entfernen? Der Flug, Trackdaten, Thermiken und die IGC-Datei werden gelöscht. Der IGC-Hash bleibt gesperrt, damit dieselbe Datei nicht erneut hochgeladen werden kann.",
     "restore": "Wiederherstellen",
     "restoreConfirm": "Den soft-deleted Flug „{title}“ wiederherstellen? Der Flug wird erneut freigegeben und ist gemäß seiner Sichtbarkeit wieder erreichbar."  
+  },
+  "Authenticity": {
+    "title": "Echtheitsnachweise",
+    "subtitle": "Revisionsfeste Begleitnachweise; Befunde ändern Flug und Wertung nicht automatisch.",
+    "revision": "Revision {revision}",
+    "status_VERIFIED": "Verifiziert",
+    "status_INCOMPLETE": "Unvollständig",
+    "status_FLAGGED": "Auffällig",
+    "status_UNSUPPORTED": "Nicht unterstützt",
+    "signatureValid": "Signatur gültig",
+    "signatureInvalid": "Signatur ungültig",
+    "signatureMissing": "Keine Signatur",
+    "noFindings": "Keine Befunde",
+    "appeal": "Einspruch",
+    "resolution": "Entscheidungsbegründung",
+    "appealReason": "Begründung des Einspruchs",
+    "submitAppeal": "Einspruch einreichen",
+    "decision": "Entscheidung",
+    "accept": "Annehmen",
+    "reject": "Ablehnen",
+    "reviewAppeal": "Einspruch entscheiden",
+    "empty": "Für diesen Flug wurde noch kein Begleitnachweis eingereicht."
   },
   "AdminAudit": {
     "pageTitle": "Audit Log",
