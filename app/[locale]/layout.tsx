@@ -20,6 +20,7 @@ import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
 import QuickThemeToggle from "@/app/components/QuickThemeToggle";
 import {hasRole} from "@/lib/rbac";
+import type {Session} from "next-auth";
 
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -91,7 +92,7 @@ export default async function LocaleLayout({
   ]);
 
   let themePreference: "system" | "light" | "dark" = "system";
-  let session: Awaited<ReturnType<typeof auth>> = null;
+  let session: Session | null = null;
   let unreadNotifications = 0;
 
   try {
