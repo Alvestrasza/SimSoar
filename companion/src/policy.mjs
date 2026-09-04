@@ -59,8 +59,10 @@ export function validateTaskPackage(buffer, simulator) {
 export function sanitizeDiagnostic(value, userDirectory = "") {
   let text = String(value).replace(/Bearer\s+[A-Za-z0-9._~+\/-]+/gi, "Bearer [REDACTED]").replace(/([?&](?:token|code|secret|key)=)[^&\s]+/gi, "$1[REDACTED]");
   if (userDirectory) {
-    const resolved = path.resolve(userDirectory);
-    for (const variant of [resolved, resolved.replace(/\\/g, "/"), resolved.replace(/\//g, "\\")]) text = text.replace(new RegExp(regexEscape(variant), "gi"), "[USER_DIR]");
+    const directories = new Set([String(userDirectory), path.resolve(userDirectory)]);
+    for (const directory of directories) {
+      for (const variant of [directory, directory.replace(/\\/g, "/"), directory.replace(/\//g, "\\")]) text = text.replace(new RegExp(regexEscape(variant), "gi"), "[USER_DIR]");
+    }
   }
   return text.slice(0, 2000);
 }
