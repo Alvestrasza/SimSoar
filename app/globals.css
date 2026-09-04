@@ -479,6 +479,22 @@ textarea { min-height: 120px; resize: vertical; }
 .flight3dCanvas { display: block; width: 100%; min-height: 300px; border-radius: 14px; background: #09111f; }
 .flight3dShell .flight3dCanvas { min-height: 360px; }
 .flight3dAltitude { position: absolute; inset: 16px auto 16px 16px; display: flex; flex-direction: column; justify-content: space-between; color: #cbd5e1; font-size: 12px; font-weight: 800; pointer-events: none; }
+.comparisonSelector { margin-bottom: 20px; padding-bottom: 18px; }
+.comparisonChoices { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 9px; max-height: 330px; overflow: auto; padding: 0 18px 16px; }
+.comparisonChoice { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); border-radius: 12px; padding: 11px 12px; cursor: pointer; }
+.comparisonChoice.selected { border-color: var(--accent); background: var(--accent-lt); }
+.comparisonChoice input { width: auto; }
+.comparisonChoice span { display: grid; gap: 3px; min-width: 0; }
+.comparisonChoice small { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.comparisonSelector > .btn { margin-left: 18px; }
+.comparisonHint, .comparisonSection { margin-top: 20px; }
+.comparisonHint { padding: 18px; }
+.comparisonHint p { margin: 0 0 5px; }
+.comparisonMap { height: 520px; }
+.comparisonLegend { display: flex; flex-wrap: wrap; gap: 9px 18px; padding: 14px 18px; border-top: 1px solid var(--border); }
+.comparisonLegend span, .comparisonFlightName { display: inline-flex; align-items: center; gap: 8px; }
+.comparisonLegend i, .comparisonFlightName i { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.comparisonAltitudeChart { display: block; width: 100%; min-height: 240px; border-radius: 12px; background: var(--bg); }
 .smallStats { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 14px; color: var(--muted); font-size: 13px; }
 .thermalList { display: grid; gap: 10px; margin-top: 14px; }
 .thermalItem { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
