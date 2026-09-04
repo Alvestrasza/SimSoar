@@ -724,7 +724,7 @@
   },
   "Login": {
     "title": "🔐 Sign in",
-    "description": "SimSoar uses an user management system, MFA and password policies remain centralized.",
+    "description": "Please sign in to use this feature.",
     "button": "Sign in"
   },
   "FlightStory": {
