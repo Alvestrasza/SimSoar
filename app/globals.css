@@ -466,6 +466,15 @@ textarea { min-height: 120px; resize: vertical; }
   }
 }
 .altitudeCanvas { width: 100%; display: block; border-radius: 12px; background: #f8fafc; }
+.replayControls { margin-bottom: 18px; padding: 16px 18px; display: grid; gap: 12px; }
+.replayControlRow, .replayButtons, .replayStatus { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.replayButtons { justify-content: flex-end; }
+.replayButtons .btn { min-height: 36px; }
+.replaySpeed { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13px; font-weight: 800; }
+.replaySpeed select { width: auto; min-width: 74px; padding: 7px 9px; }
+.replaySlider { width: 100%; accent-color: var(--accent); cursor: pointer; }
+.replayStatus { color: var(--muted); font-size: 13px; }
+.replayThermal { color: #b45309; }
 .smallStats { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 14px; color: var(--muted); font-size: 13px; }
 .thermalList { display: grid; gap: 10px; margin-top: 14px; }
 .thermalItem { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }

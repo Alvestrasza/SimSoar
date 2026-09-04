@@ -1,6 +1,6 @@
 "use client";
 
-import {useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {useLocale, useTranslations} from "next-intl";
 import {Link} from "@/i18n/navigation";
 import AltitudeChart from "./AltitudeChart";
@@ -9,6 +9,7 @@ import FlightOwnerActions from "./FlightOwnerActions";
 import {updateScoringWindowAction} from "@/app/[locale]/flights/[id]/scoring-actions";
 import {sortThermals, type ThermalSortMode} from "@/lib/thermal-analysis";
 import {summarizeWindEstimates, type WindConfidence} from "@/lib/wind-estimation";
+import {activeThermalAtSequence, buildReplayTimeline, replayIndexAtElapsed} from "@/lib/flight-replay";
 
 type TrackPoint = {
   seq: number;
@@ -16,6 +17,7 @@ type TrackPoint = {
   lon: number;
   altM: number;
   varioMs?: number | null;
+  time?: string | null;
 };
 
 type Thermal = {
@@ -140,6 +142,14 @@ function phaseDurationLabel(seconds: number) {
   return `${minutes}:${String(safe % 60).padStart(2, "0")} min`;
 }
 
+function replayTimeLabel(seconds: number) {
+  const safe = Math.max(0, Math.round(seconds || 0));
+  const hours = Math.floor(safe / 3600);
+  const minutes = Math.floor(safe % 3600 / 60);
+  const rest = safe % 60;
+  return hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}` : `${minutes}:${String(rest).padStart(2, "0")}`;
+}
+
 function isoDateLabel(value: string | null | undefined, locale: string) {
   if (!value) {
     return "–";
@@ -223,19 +233,41 @@ export default function FlightDetailClient({
   const locale = useLocale();
   const [tab, setTab] = useState<Tab>("map");
   const [thermalSort, setThermalSort] = useState<ThermalSortMode>("strength");
+  const [replayElapsed, setReplayElapsed] = useState(0);
+  const [replaySpeed, setReplaySpeed] = useState(1);
+  const [replayPlaying, setReplayPlaying] = useState(false);
+  const replayTimeline = useMemo(() => buildReplayTimeline(flight.track), [flight.track]);
+  const replayIndex = replayIndexAtElapsed(replayTimeline.offsets, replayElapsed);
+  const replayPoint = replayIndex >= 0 ? flight.track[replayIndex] : null;
+  const activeReplayThermal = activeThermalAtSequence(flight.thermals, replayPoint?.seq);
+  const replayAvailable = flight.track.length > 1 && replayTimeline.durationSeconds > 0;
 
-  const altProfile = flight.track
-    .map((p) => p.altM)
-    .filter((alt) => Number.isFinite(alt));
-  const altitudePointSequences = flight.track
-    .filter((point) => Number.isFinite(point.altM))
-    .map((point) => point.seq);
-  const sortedThermals = sortThermals(flight.thermals, thermalSort);
-  const flightWind = summarizeWindEstimates(flight.thermals.map((thermal) => ({
+  useEffect(() => {
+    if (!replayPlaying) return;
+    let previous = performance.now();
+    const timer = window.setInterval(() => {
+      const now = performance.now();
+      const deltaSeconds = (now - previous) / 1000;
+      previous = now;
+      setReplayElapsed((current) => Math.min(replayTimeline.durationSeconds, current + deltaSeconds * replaySpeed));
+    }, 200);
+    return () => window.clearInterval(timer);
+  }, [replayPlaying, replaySpeed, replayTimeline.durationSeconds]);
+
+  useEffect(() => {
+    if (replayPlaying && replayElapsed >= replayTimeline.durationSeconds) setReplayPlaying(false);
+  }, [replayElapsed, replayPlaying, replayTimeline.durationSeconds]);
+
+  const {altProfile, altitudePointSequences} = useMemo(() => ({
+    altProfile: flight.track.filter((point) => Number.isFinite(point.altM)).map((point) => point.altM),
+    altitudePointSequences: flight.track.filter((point) => Number.isFinite(point.altM)).map((point) => point.seq)
+  }), [flight.track]);
+  const sortedThermals = useMemo(() => sortThermals(flight.thermals, thermalSort), [flight.thermals, thermalSort]);
+  const flightWind = useMemo(() => summarizeWindEstimates(flight.thermals.map((thermal) => ({
     directionDeg: thermal.windDirectionDeg ?? null,
     speedKmh: thermal.windSpeedKmh ?? null,
     confidence: thermal.windConfidence ?? null
-  })));
+  }))), [flight.thermals]);
   const thermalDurationSec = flight.thermals.reduce(
     (total, thermal) => total + thermal.durationSec,
     0
@@ -324,6 +356,22 @@ export default function FlightDetailClient({
         </div>
       </div>
 
+      <section className="card replayControls" aria-label={t("replayTitle")}>
+        <div className="replayControlRow">
+          <strong>{t("replayTitle")}</strong>
+          <div className="replayButtons">
+            <button className="btn btnPrimary" type="button" disabled={!replayAvailable || replayPlaying} onClick={() => setReplayPlaying(true)}>{t("replayPlay")}</button>
+            <button className="btn btnSecondary" type="button" disabled={!replayPlaying} onClick={() => setReplayPlaying(false)}>{t("replayPause")}</button>
+            <button className="btn btnSecondary" type="button" disabled={!replayAvailable} onClick={() => {setReplayPlaying(false); setReplayElapsed(0);}}>{t("replayReset")}</button>
+            <label className="replaySpeed">{t("replaySpeed")}<select value={replaySpeed} onChange={(event) => setReplaySpeed(Number(event.target.value))}>{[0.5, 1, 2, 4, 8].map((speed) => <option key={speed} value={speed}>{speed}×</option>)}</select></label>
+          </div>
+        </div>
+        {replayAvailable ? <>
+          <input className="replaySlider" type="range" min={0} max={replayTimeline.durationSeconds} step={0.1} value={replayElapsed} aria-label={t("replayTimeline")} onChange={(event) => {setReplayPlaying(false); setReplayElapsed(Number(event.target.value));}} />
+          <div className="replayStatus"><span>{replayTimeLabel(replayElapsed)} / {replayTimeLabel(replayTimeline.durationSeconds)}</span><span>{t("replayPoint", {current: replayIndex + 1, total: flight.track.length})}</span>{activeReplayThermal ? <strong className="replayThermal">{t("replayThermal", {number: activeReplayThermal.seq})}</strong> : <span className="muted">{t("replayCruise")}</span>}</div>
+        </> : <p className="muted">{t("replayUnavailable")}</p>}
+      </section>
+
       <div className="twoCol">
         <section className="card detailMainCard">
           <div className="tabs detailTabs">
@@ -363,6 +411,8 @@ export default function FlightDetailClient({
               airspaces={flight.airspaces}
               active={tab === "map"}
               mapMode={preferredMapMode}
+              replayPoint={replayPoint}
+              replayThermal={activeReplayThermal !== null}
             />
             <div className="airspaceWarnings">
               <strong>{t("airspaceCrossingsTitle")}</strong>
@@ -400,6 +450,8 @@ export default function FlightDetailClient({
                   thermalRanges={flight.thermals}
                   minAlt={flight.minAltitudeM}
                   maxAlt={flight.maxAltitudeM}
+                  activeIndex={replayIndex}
+                  activeThermal={activeReplayThermal !== null}
                 />
 
                 <div className="smallStats">
