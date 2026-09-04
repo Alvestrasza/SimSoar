@@ -63,7 +63,7 @@ export async function saveTaskAction(formData: FormData) {
       await tx.taskWaypoint.deleteMany({where: {taskId: values.taskId}});
       return tx.flightTask.update({
         where: {id: values.taskId},
-        data: {...data, waypoints: {createMany: {data: waypoints}}}
+        data: {...data, revision: {increment: 1}, waypoints: {createMany: {data: waypoints}}}
       });
     });
   } else {

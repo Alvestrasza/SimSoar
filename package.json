@@ -1,6 +1,6 @@
 {
   "name": "simsoar-nextjs",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "private": true,
   "description": "SimSoar multi-user virtual gliding community portal",
   "scripts": {
@@ -30,6 +30,7 @@
     "test:competitions": "node --experimental-strip-types --test tests/competitions.test.mjs",
     "test:leagues": "node --experimental-strip-types --test tests/leagues.test.mjs",
     "test:tasks": "node --experimental-strip-types --test tests/task-planner.test.mjs",
+    "test:task-package": "node --experimental-strip-types --test tests/task-package.test.mjs",
     "test:cup": "node --experimental-strip-types --test tests/cup.test.mjs",
     "test:segments": "node --experimental-strip-types --test tests/segments.test.mjs",
     "test:flight-replay": "node --experimental-strip-types --test tests/flight-replay.test.mjs",

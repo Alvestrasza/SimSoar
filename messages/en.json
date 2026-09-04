@@ -71,7 +71,9 @@
     "library": "Imported waypoint library",
     "chooseLibraryWaypoint": "Choose an imported waypoint",
     "addLibraryWaypoint": "Add waypoint",
-    "downloadCup": "Download CUP"
+    "downloadCup": "Download CUP",
+    "downloadPackage": "Download task package",
+    "revision": "Revision {revision}"
   },
   "CupImport": {
     "title": "Import CUP waypoints and tasks",
