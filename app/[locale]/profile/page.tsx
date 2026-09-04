@@ -124,7 +124,7 @@ const noticeStatus =
   ]);
 
   return (
-    <main className="wrap" style={{maxWidth: 960}}>
+    <main className="wrap">
       <div className="card" style={{marginBottom: 20}}>
         <div className="cardHead profileHeader">
           <span className="cardTitle">{t("pageTitle")}</span>
