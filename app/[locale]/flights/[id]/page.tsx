@@ -12,6 +12,10 @@ import {
 } from "@/lib/flight-community";
 import {setRequestLocale} from "next-intl/server";
 import {airspaceBounds, findAirspaceCrossings} from "@/lib/airspace";
+import type {Metadata} from "next";
+import FlightSharePanel from "@/app/components/FlightSharePanel";
+import {buildFlightShareUrls, configuredPublicOrigin, flightShareDescription} from "@/lib/flight-sharing";
+import {PUBLIC_FLIGHT_WHERE} from "@/lib/public-api";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +25,23 @@ type FlightDetailPageProps = {
     id: string;
   }>;
 };
+
+export async function generateMetadata({params}: FlightDetailPageProps): Promise<Metadata> {
+  const {locale: requestedLocale, id} = await params;
+  const locale = requestedLocale === "en" ? "en" : "de";
+  const flight = await prisma.flight.findFirst({where: {...PUBLIC_FLIGHT_WHERE, id}, select: {id: true, title: true, pilotCallsign: true, simulator: true, glider: true, distanceKm: true, olcPoints: true}});
+  if (!flight) return {title: "SimSoar", robots: {index: false, follow: false}};
+  const urls = buildFlightShareUrls(configuredPublicOrigin(), locale, flight.id);
+  const title = `${flight.title} · SimSoar`;
+  const description = flightShareDescription(flight, locale);
+  return {
+    title,
+    description,
+    alternates: {canonical: urls.shareUrl},
+    openGraph: {type: "article", title, description, url: urls.shareUrl, siteName: "SimSoar", images: [{url: urls.previewUrl, width: 1120, height: 630, alt: flight.title}]},
+    twitter: {card: "summary_large_image", title, description, images: [urls.previewUrl]}
+  };
+}
 
 export default async function FlightDetailPage({
   params
@@ -116,6 +137,8 @@ export default async function FlightDetailPage({
   });
 
   const communityEnabled = canInteractWithFlight(flight);
+  const isPublicShareable = flight.visibility === "PUBLIC" && isApprovedAndActive;
+  const shareUrls = isPublicShareable ? buildFlightShareUrls(configuredPublicOrigin(), locale === "en" ? "en" : "de", flight.id) : null;
   const trackBounds = flight.track.length > 0 ? airspaceBounds(flight.track) : null;
   const activeAirspaces = trackBounds ? await prisma.airspace.findMany({
     where: {
@@ -261,6 +284,8 @@ export default async function FlightDetailPage({
         airspaceCrossings
         }}
       />
+
+      {shareUrls ? <FlightSharePanel title={flight.title} shareUrl={shareUrls.shareUrl} embedUrl={shareUrls.embedUrl} /> : null}
 
       <FlightStorySection
         locale={locale}
