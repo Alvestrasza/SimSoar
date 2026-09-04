@@ -65,7 +65,8 @@
     "importSuccess": "{waypoints} Wegpunkte importiert und {tasks} Aufgaben angelegt.",
     "library": "Importierte Wegpunktbibliothek",
     "chooseLibraryWaypoint": "Importierten Wegpunkt auswählen",
-    "addLibraryWaypoint": "Wegpunkt hinzufügen"
+    "addLibraryWaypoint": "Wegpunkt hinzufügen",
+    "downloadCup": "CUP herunterladen"
   },
   "CupImport": {
     "title": "CUP-Wegpunkte und -Aufgaben importieren",
