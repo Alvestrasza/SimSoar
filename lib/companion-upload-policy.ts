@@ -28,7 +28,7 @@ export function validateCompanionFormShape(keys: string[], fileCount: number) {
 
 export function validateCompanionUploadFields(input: Record<string, unknown>) {
   const simulator = typeof input.simulator === "string" ? input.simulator.trim() : "";
-  const visibility = input.visibility === "PUBLIC" || input.visibility === "UNLISTED" || input.visibility === "PRIVATE" ? input.visibility : "PRIVATE";
+  const visibility: "PUBLIC" | "UNLISTED" | "PRIVATE" = input.visibility === "PUBLIC" || input.visibility === "UNLISTED" || input.visibility === "PRIVATE" ? input.visibility : "PRIVATE";
   if (simulator.length < 2 || simulator.length > 40) throw new CompanionUploadPolicyError("invalid_simulator");
   const bounded = (value: unknown, maximum: number) => typeof value === "string" ? value.trim().slice(0, maximum) || null : null;
   return {simulator, visibility, registration: bounded(input.registration, 40), glider: bounded(input.glider, 80), competitionClass: bounded(input.competitionClass, 80), comment: bounded(input.comment, 2000)};
