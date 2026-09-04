@@ -357,9 +357,15 @@ model Airspace {
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())
   importedByUserId String
+  minLat       Float
+  maxLat       Float
+  minLon       Float
+  maxLon       Float
   points       AirspacePoint[]
 
   @@index([active, createdAt])
+  @@index([active, minLat, maxLat])
+  @@index([active, minLon, maxLon])
 }
 
 model AirspacePoint {
