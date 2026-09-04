@@ -352,6 +352,194 @@ textarea { min-height: 120px; resize: vertical; }
   }
 }
 
+/* SimSoar v0.4.38: wider content, compact flight search and sortable tables */
+.navInner,
+.wrap,
+.heroInner,
+.siteFooter {
+  max-width: 1360px;
+}
+
+.card,
+.flightsExplorer,
+.flightsExplorer > section,
+.tableWrap {
+  min-width: 0;
+}
+
+.tableWrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+}
+
+.tableWrap table {
+  min-width: 720px;
+}
+
+.tableWrap::-webkit-scrollbar {
+  height: 10px;
+}
+
+.tableWrap::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 48%, transparent);
+  background-clip: padding-box;
+}
+
+.sortableColumn {
+  position: relative;
+  padding-right: 30px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortableColumn::after {
+  content: "↕";
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  color: color-mix(in srgb, var(--muted) 68%, transparent);
+  font-size: 11px;
+  transform: translateY(-50%);
+}
+
+.sortableColumn[aria-sort="ascending"]::after {
+  content: "↑";
+  color: var(--accent);
+}
+
+.sortableColumn[aria-sort="descending"]::after {
+  content: "↓";
+  color: var(--accent);
+}
+
+.sortableColumn:hover,
+.sortableColumn:focus-visible {
+  background: var(--accent-lt);
+  color: var(--accent);
+  outline: none;
+}
+
+.flightFilterCard {
+  margin-bottom: 18px;
+}
+
+.flightFilterHead > div {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.flightFilterResult {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.flightFilterToggle {
+  flex: none;
+}
+
+.compactFilterBody {
+  padding: 16px 18px 18px;
+}
+
+.flightFilterGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 11px 12px;
+}
+
+.flightFilterGrid .formGroup.full {
+  grid-column: span 2;
+}
+
+.flightFilterGrid input,
+.flightFilterGrid select {
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 9px;
+}
+
+.filterRangeInputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.flightFilterActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.flightsExplorer {
+  display: grid;
+  gap: 22px;
+}
+
+.flightsSupportGrid {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: 16px;
+}
+
+.flightsSupportGrid .lineHeight {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.flightsSupportGrid .lineHeight p {
+  margin: 0;
+}
+
+@media (max-width: 1000px) {
+  .flightFilterGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flightsSupportGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .flightFilterHead {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .flightFilterHead > div {
+    display: grid;
+    gap: 3px;
+  }
+
+  .flightFilterToggle {
+    min-height: 34px;
+    padding: 6px 9px;
+    font-size: 12px;
+  }
+
+  .flightFilterGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .flightFilterGrid .formGroup.full {
+    grid-column: auto;
+  }
+
+  .flightsSupportGrid .lineHeight {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
 /* SimSoar restored interactive views from original index.html */
 .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); overflow-x: auto; width: 100%; }
 .tab { border: 0; background: transparent; color: var(--muted); padding: 12px 18px; border-bottom: 2px solid transparent; font-weight: 800; cursor: pointer; white-space: nowrap; }
@@ -2479,5 +2667,20 @@ h1 {
   }
   .taskFlightSelector select {
     width: 100%;
+  }
+}
+
+/* Keep the v0.4.38 shell overrides after all feature-specific styles. */
+.navInner,
+.wrap,
+.heroInner,
+.siteFooter {
+  max-width: 1360px;
+}
+
+@media (max-width: 640px) {
+  .flightFilterHead {
+    flex-direction: row;
+    align-items: center;
   }
 }

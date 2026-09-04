@@ -33,7 +33,6 @@ type Props = {
   filterLinks: Record<FilterKey, string>;
 };
 
-type SortKey = "olcPoints" | "distanceKm" | "maxVarioMs";
 type FilterKey = "all" | "msfs" | "condor" | "xplane";
 
 function simClass(sim: string) {
@@ -257,29 +256,10 @@ export default function FlightsExplorer({
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const [highlightedFlightId, setHighlightedFlightId] = useState<string | null>(null);
 
-  const [sort, setSort] = useState<{key: SortKey; dir: 1 | -1}>({
-    key: "olcPoints",
-    dir: -1
-  });
-
-  const filteredFlights = useMemo(() => {
-    return [...flights]
-      .sort(
-        (a, b) =>
-          sort.dir * ((a[sort.key] as number) - (b[sort.key] as number))
-      );
-  }, [flights, sort]);
-
-  function setSortKey(key: SortKey) {
-    setSort((prev) =>
-      prev.key === key
-        ? {key, dir: prev.dir === 1 ? -1 : 1}
-        : {key, dir: -1}
-    );
-  }
+  const filteredFlights = flights;
 
   return (
-    <div className="twoCol">
+    <div className="flightsExplorer">
       <section>
         <div className="card" style={{marginBottom: 22}}>
           <div
@@ -345,34 +325,13 @@ export default function FlightsExplorer({
                   <th>{t("rank")}</th>
                   <th>{t("pilot")}</th>
 
-                  <th>
-                    <button
-                      className="sortButton"
-                      onClick={() => setSortKey("distanceKm")}
-                    >
-                      {t("distance")}
-                    </button>
-                  </th>
+                  <th>{t("distance")}</th>
 
-                  <th>
-                    <button
-                      className="sortButton"
-                      onClick={() => setSortKey("olcPoints")}
-                    >
-                      {t("olc")}
-                    </button>
-                  </th>
+                  <th>{t("olc")}</th>
 
                   <th>{t("avgSpeed")}</th>
 
-                  <th>
-                    <button
-                      className="sortButton"
-                      onClick={() => setSortKey("maxVarioMs")}
-                    >
-                      {t("maxVario")}
-                    </button>
-                  </th>
+                  <th>{t("maxVario")}</th>
 
                   <th>{t("simulator")}</th>
                   <th></th>
@@ -532,7 +491,7 @@ export default function FlightsExplorer({
         </div>
       </section>
 
-      <aside className="grid">
+      <section className="flightsSupportGrid">
         <div className="card">
           <div className="cardHead">
             <span className="cardTitle">{t("simDistribution")}</span>
@@ -566,7 +525,7 @@ export default function FlightsExplorer({
             </p>
           </div>
         </div>
-      </aside>
+      </section>
     </div>
   );
 }
