@@ -14,6 +14,7 @@ type Props = {
   initialDescription?: string;
   initialVisibility?: "PUBLIC" | "UNLISTED" | "PRIVATE";
   initialPoints?: TaskPoint[];
+  libraryPoints?: Array<TaskPoint & {id: string}>;
 };
 
 function markerIcon(L: typeof import("leaflet"), number: number) {
@@ -25,10 +26,11 @@ function markerIcon(L: typeof import("leaflet"), number: number) {
   });
 }
 
-export default function TaskPlanner({action, locale, taskId, initialName = "", initialDescription = "", initialVisibility = "PRIVATE", initialPoints = []}: Props) {
+export default function TaskPlanner({action, locale, taskId, initialName = "", initialDescription = "", initialVisibility = "PRIVATE", initialPoints = [], libraryPoints = []}: Props) {
   const t = useTranslations("Tasks");
   const mapEl = useRef<HTMLDivElement | null>(null);
   const [points, setPoints] = useState<PlannerPoint[]>(() => initialPoints.map((point, index) => ({...point, clientId: `initial-${index}`})));
+  const [libraryPointId, setLibraryPointId] = useState("");
   const distanceKm = useMemo(() => taskDistanceKm(points), [points]);
 
   useEffect(() => {
@@ -83,6 +85,7 @@ export default function TaskPlanner({action, locale, taskId, initialName = "", i
             <label><span>{t("visibility")}</span><select name="visibility" defaultValue={initialVisibility}><option value="PUBLIC">{t("visibility_PUBLIC")}</option><option value="UNLISTED">{t("visibility_UNLISTED")}</option><option value="PRIVATE">{t("visibility_PRIVATE")}</option></select></label>
           </div>
           <label><span>{t("description")}</span><textarea name="description" maxLength={2000} defaultValue={initialDescription} /></label>
+          {libraryPoints.length > 0 ? <div className="taskLibraryPicker"><select aria-label={t("library")} value={libraryPointId} onChange={(event) => setLibraryPointId(event.target.value)}><option value="">{t("chooseLibraryWaypoint")}</option>{libraryPoints.map((point) => <option key={point.id} value={point.id}>{point.code ? `${point.code} · ` : ""}{point.name}</option>)}</select><button className="btn btnSecondary" type="button" disabled={!libraryPointId} onClick={() => { const selected = libraryPoints.find((point) => point.id === libraryPointId); if (selected) setPoints((current) => [...current, {...selected, clientId: crypto.randomUUID()}]); }}>{t("addLibraryWaypoint")}</button></div> : null}
           <div className="taskWaypointList">
             {points.length === 0 ? <p className="muted">{t("emptyPlanner")}</p> : points.map((point, index) => <fieldset className="taskWaypointRow" key={point.clientId}>
               <legend>{t("waypoint", {number: index + 1})}</legend>

@@ -1707,11 +1707,41 @@ body {
 .taskCardStats,
 .taskOwnerActions,
 .taskFlightSelector,
-.taskWaypointActions {
+.taskWaypointActions,
+.taskLibraryPicker {
   display: flex;
   gap: 8px;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.taskLibraryPicker select {
+  flex: 1 1 220px;
+}
+
+.cupImportForm,
+.cupImportForm label,
+.cupImportHistory {
+  display: grid;
+  gap: 12px;
+}
+
+.cupImportForm .btn {
+  justify-self: start;
+}
+
+.cupImportHistory > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.cupImportHistory span,
+.cupImportHistory time {
+  color: var(--muted);
 }
 
 .taskCardStats {
