@@ -1,18 +1,17 @@
 import {Link} from "@/i18n/navigation";
-import {auth} from "@/auth";
-import {hasRole} from "@/lib/rbac";
 import {signInWithKeycloak, signOutWithKeycloak} from "@/app/auth-actions";
 import {getTranslations} from "next-intl/server";
 
 type AuthNavProps = {
   locale: string;
+  isAuthenticated: boolean;
+  canUseAdmin: boolean;
 };
 
-export async function AuthNav({locale}: AuthNavProps) {
-  const session = await auth();
+export async function AuthNav({locale, isAuthenticated, canUseAdmin}: AuthNavProps) {
   const nav = await getTranslations({locale, namespace: "Nav"});
 
-  if (!session?.user) {
+  if (!isAuthenticated) {
     return (
       <form action={signInWithKeycloak}>
         <input type="hidden" name="locale" value={locale} />
@@ -23,7 +22,6 @@ export async function AuthNav({locale}: AuthNavProps) {
     );
   }
 
-  const canUseAdmin = hasRole(session.user.roles, "MODERATOR");
   return (
     <>
       {canUseAdmin ? (
