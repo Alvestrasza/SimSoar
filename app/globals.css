@@ -1313,6 +1313,15 @@ body {
 .achievementBadgeIcon { font-size: 1.75rem; }
 .achievementBadge span:last-child { display: grid; gap: 3px; }
 .achievementBadge small { color: var(--muted); }
+.clubGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.clubCard { padding: 18px; }
+.clubCard h2 { margin-top: 0; }
+.clubStats { display: flex; flex-wrap: wrap; gap: 8px 14px; color: var(--muted); }
+.clubAdminCard { display: grid; gap: 18px; }
+.clubAdminForm { flex: 1; }
+.clubMemberAdmin { display: grid; gap: 10px; }
+.clubMemberRow, .clubAssignForm { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.clubAssignForm select { min-width: 180px; }
 .flightStoryCard { margin-top: 18px; }
 .flightStoryText { white-space: pre-wrap; line-height: 1.65; }
 .flightStoryGallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 18px; }
