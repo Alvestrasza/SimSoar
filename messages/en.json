@@ -572,6 +572,18 @@
     "replayReset": "Reset",
     "replaySpeed": "Speed"
   },
+  "FlightShare": {
+    "title": "Share flight",
+    "description": "This public flight has a stable sharing URL and a data-minimal embed view.",
+    "shareLink": "Public link",
+    "embedCode": "Iframe code",
+    "embedHint": "The embed only displays approved public flight data and disappears when the flight is no longer public.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copiedStatus": "Copied to the clipboard.",
+    "share": "Share",
+    "previewTitle": "Flight embed preview"
+  },
   "FlightDetail": {
     "back": "← Back",
     "unknownGlider": "Unknown aircraft",

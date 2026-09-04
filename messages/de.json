@@ -572,6 +572,18 @@
     "replayReset": "Zurücksetzen",
     "replaySpeed": "Geschwindigkeit"
   },
+  "FlightShare": {
+    "title": "Flug teilen",
+    "description": "Dieser öffentliche Flug besitzt eine stabile Teilen-URL und eine datensparsame Einbettungsansicht.",
+    "shareLink": "Öffentlicher Link",
+    "embedCode": "Iframe-Code",
+    "embedHint": "Die Einbettung zeigt ausschließlich freigegebene öffentliche Flugdaten und verschwindet, sobald der Flug nicht mehr öffentlich ist.",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "copiedStatus": "In die Zwischenablage kopiert.",
+    "share": "Teilen",
+    "previewTitle": "Vorschau der Flugeinbettung"
+  },
   "FlightDetail": {
     "back": "← Zurück",
     "unknownGlider": "Unbekanntes Muster",
