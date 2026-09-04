@@ -184,6 +184,7 @@ Possible next development stages include:
 - detailed altitude and climb charts
 - improved thermal detection
 - public and private flight visibility options
+- map-based task planning with public, unlisted, and private routes
 - moderation workflow for public uploads
 - event and competition support
 - role-based administration

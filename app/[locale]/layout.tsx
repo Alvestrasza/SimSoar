@@ -139,6 +139,7 @@ try {
               <Link href="/clubs">{nav("clubs")}</Link>
               <Link href="/competitions">{nav("competitions")}</Link>
               <Link href="/leagues">{nav("leagues")}</Link>
+              <Link href="/tasks">{nav("tasks")}</Link>
             </div>
 
             <div className="navRight">
