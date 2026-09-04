@@ -12,7 +12,7 @@ The implementation follows the [OAuth 2.0 Security Best Current Practice (RFC 97
 | `public.read` | Identify clients that consume public catalog data | Existing public GET endpoints remain anonymous |
 | `tasks.private.read` | Read the user's own tasks | `GET /api/v1/tasks`, `GET /api/v1/tasks/{id}` |
 | `tasks.write` | Create tasks for the user | `POST /api/v1/tasks` |
-| `flights.upload` | Submit authenticity evidence for owned flights | `POST /api/v1/evidence/keys`, key revocation, and `POST /api/v1/flights/{id}/evidence` |
+| `flights.upload` | Submit a confirmed IGC file or authenticity evidence for owned flights | `POST /api/v1/flights/upload`, evidence key management, and `POST /api/v1/flights/{id}/evidence` |
 | `events.manage` | Reserved for steward-approved event operations | No endpoint is enabled yet |
 
 Reserved scopes grant no access until a dedicated endpoint and policy are shipped. Administrative website roles do not bypass OAuth endpoint scopes. The flight evidence contract is documented in [Flight authenticity and anti-cheat evidence](flight-authenticity.md).
@@ -46,6 +46,8 @@ SimSoar's protected API never receives or stores refresh tokens. Keycloak owns r
 All protected endpoints are versioned below `/api/v1`, return `X-API-Version: 1`, and use `Cache-Control: no-store`. Bearer tokens are accepted only in the `Authorization` header; cookies do not authenticate these endpoints. Responses use fixed error messages and never echo credentials.
 
 Mutating endpoints require `Content-Type: application/json` and an `Idempotency-Key` of 8–128 safe characters. Keys are scoped to client and user, retained for 24 hours, and bound to a hash of method, path, user, and exact body. Repeating the same request returns the stored response; reusing the key with different content returns a conflict. A maintenance job may delete expired records.
+
+The companion IGC endpoint is the only multipart exception. It requires a bounded `Content-Length`, one IGC file, an idempotency key, and `X-SimSoar-Upload-Confirmation` containing the exact SHA-256 selected by the user. It defaults to private visibility and binds the pilot identity to the authenticated profile rather than submitted metadata.
 
 Evidence signing-key revocation uses an empty request body and still requires an idempotency key. Private signing keys and raw simulator logs never enter the protected API.
 
