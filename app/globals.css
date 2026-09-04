@@ -1688,3 +1688,176 @@ body {
   width: auto;
   accent-color: var(--accent);
 }
+
+.taskCardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.taskCard {
+  padding: 18px;
+}
+
+.taskCard h2,
+.taskDetailHead h1 {
+  margin: 0 0 8px;
+}
+
+.taskCardStats,
+.taskOwnerActions,
+.taskFlightSelector,
+.taskWaypointActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.taskCardStats {
+  margin: 14px 0;
+  font-weight: 800;
+}
+
+.taskPlannerLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(360px, .75fr);
+  min-height: 620px;
+}
+
+.taskPlannerMap,
+.taskComparisonMap {
+  min-height: 620px;
+  background: #e8f0fe;
+}
+
+.taskComparisonMap {
+  min-height: 500px;
+}
+
+.taskWaypointPanel {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 20px;
+  border-left: 1px solid var(--border);
+  max-height: 720px;
+  overflow: auto;
+}
+
+.taskWaypointPanel label,
+.taskMetadataGrid label {
+  display: grid;
+  gap: 6px;
+}
+
+.taskWaypointList {
+  display: grid;
+  gap: 10px;
+}
+
+.taskWaypointRow {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) minmax(80px, .55fr) 110px;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.taskWaypointRow legend {
+  padding: 0 5px;
+  font-weight: 800;
+}
+
+.taskWaypointCoordinates,
+.taskWaypointActions {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: .84rem;
+}
+
+.taskWaypointMarker {
+  display: grid;
+  place-items: center;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #1f6feb;
+  color: white;
+  font-weight: 900;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+
+.taskSummary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.taskSummary > span {
+  display: grid;
+  gap: 4px;
+}
+
+.taskSummary strong {
+  font-size: 1.2rem;
+}
+
+.taskSummary small {
+  color: var(--muted);
+}
+
+.taskComparisonWaypoints {
+  display: grid;
+  gap: 8px;
+  margin: 20px 0 0;
+  padding-left: 24px;
+}
+
+.taskComparisonWaypoints li {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.taskComparisonWaypoints li span {
+  display: block;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.taskComparisonWaypoints .reached {
+  border-color: #86efac;
+}
+
+.taskComparisonWaypoints .missed {
+  border-color: #fca5a5;
+}
+
+@media (max-width: 980px) {
+  .taskPlannerLayout {
+    grid-template-columns: 1fr;
+  }
+  .taskWaypointPanel {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    max-height: none;
+  }
+  .taskPlannerMap {
+    min-height: 460px;
+  }
+}
+
+@media (max-width: 640px) {
+  .taskWaypointRow,
+  .taskSummary {
+    grid-template-columns: 1fr;
+  }
+  .taskWaypointCoordinates,
+  .taskWaypointActions {
+    grid-column: auto;
+  }
+  .taskFlightSelector select {
+    width: 100%;
+  }
+}

@@ -14,6 +14,12 @@ enum FlightVisibility {
   UNLISTED
 }
 
+enum TaskVisibility {
+  PUBLIC
+  PRIVATE
+  UNLISTED
+}
+
 enum SimSoarRole {
   USER
   PILOT
@@ -96,6 +102,9 @@ enum AuditAction {
   LEAGUE_CREATE
   LEAGUE_UPDATE
   LEAGUE_DELETE
+  TASK_CREATE
+  TASK_UPDATE
+  TASK_DELETE
 }
 
 enum ClubMemberRole {
@@ -185,6 +194,40 @@ model User {
   clubMemberships   ClubMembership[]
   competitionEntries CompetitionEntry[]
   leagueEntries      LeagueRoundEntry[]
+  tasks              FlightTask[]
+}
+
+model FlightTask {
+  id              String         @id @default(cuid())
+  ownerId         String
+  name            String
+  description     String?
+  visibility      TaskVisibility @default(PRIVATE)
+  totalDistanceKm Float          @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  owner     User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  waypoints TaskWaypoint[]
+
+  @@index([ownerId, updatedAt])
+  @@index([visibility, updatedAt])
+}
+
+model TaskWaypoint {
+  id        String @id @default(cuid())
+  taskId    String
+  seq       Int
+  name      String?
+  code      String?
+  lat       Float
+  lon       Float
+  radiusM   Int    @default(500)
+
+  task FlightTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, seq])
+  @@index([taskId, seq])
 }
 
 model Account {
