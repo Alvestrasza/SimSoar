@@ -560,7 +560,17 @@
     "altitude": "Maximum altitude",
     "climb": "Maximum climb",
     "altitudeTitle": "Altitude profiles",
-    "altitudeHint": "Profiles are aligned by relative flight progress so flights with different durations remain comparable."
+    "altitudeHint": "Profiles are aligned by relative flight progress so flights with different durations remain comparable.",
+    "groupReplayTitle": "Group flight replay",
+    "groupReplayDescription": "Replay every selected flight on one shared timeline and hide individual pilots when needed.",
+    "groupReplayTimeline": "Group flight replay timeline",
+    "groupReplayRecordedTime": "Aligned by recorded time",
+    "groupReplayRelativeTime": "Relative progress due to incomplete timestamps",
+    "groupReplayPilots": "Visible pilots",
+    "replayPlay": "Play",
+    "replayPause": "Pause",
+    "replayReset": "Reset",
+    "replaySpeed": "Speed"
   },
   "FlightDetail": {
     "back": "← Back",

@@ -495,6 +495,15 @@ textarea { min-height: 120px; resize: vertical; }
 .comparisonLegend span, .comparisonFlightName { display: inline-flex; align-items: center; gap: 8px; }
 .comparisonLegend i, .comparisonFlightName i { width: 11px; height: 11px; border-radius: 50%; flex: none; }
 .comparisonAltitudeChart { display: block; width: 100%; min-height: 240px; border-radius: 12px; background: var(--bg); }
+.groupReplayControls { display: grid; gap: 12px; padding: 0 18px 18px; }
+.groupReplayPilots { display: flex; flex-wrap: wrap; gap: 9px; }
+.groupReplayPilots label { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 11px; padding: 8px 11px; cursor: pointer; opacity: .65; }
+.groupReplayPilots label.selected { border-color: var(--accent); background: var(--accent-lt); opacity: 1; }
+.groupReplayPilots input { width: auto; }
+.groupReplayPilots i { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.groupReplayPilots span { display: grid; gap: 2px; }
+.groupReplayPilots small { color: var(--muted); }
+.groupReplayMarker { --marker-color: #2563eb; display: grid; place-items: center; width: 30px; height: 30px; border: 3px solid white; border-radius: 50%; background: var(--marker-color); color: white; font-size: 12px; font-weight: 900; box-shadow: 0 2px 8px rgba(15, 23, 42, .4); }
 .smallStats { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 14px; color: var(--muted); font-size: 13px; }
 .thermalList { display: grid; gap: 10px; margin-top: 14px; }
 .thermalItem { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
