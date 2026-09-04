@@ -123,6 +123,12 @@ async function main() {
     sourceIds.add(entry.sourceId);
   }
 
+  if (manifest.flights.length === 0) {
+    const items = [];
+    await writeReport({format: "simsoar-legacy-import-report", version: LEGACY_IMPORT_VERSION, mode: options.apply ? "apply" : "dry-run", overwrite: options.overwrite, generatedAt: new Date().toISOString(), summary: summarizeLegacyImport(items), items}, options.report);
+    return;
+  }
+
   const prisma = new PrismaClient();
   const items = [];
   const uploadRoot = (process.env.UPLOAD_DIR ?? "uploads").replace(/[\\/]+$/, "");
