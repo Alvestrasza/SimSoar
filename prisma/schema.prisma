@@ -109,6 +109,12 @@ enum AuditAction {
   SEGMENT_CREATE
   SEGMENT_UPDATE
   SEGMENT_DELETE
+  OAUTH_CLIENT_CREATE
+  OAUTH_CLIENT_UPDATE
+  OAUTH_CLIENT_REVOKE
+  OAUTH_GRANT_USE
+  OAUTH_GRANT_REVOKE
+  OAUTH_API_WRITE
 }
 
 enum ClubMemberRole {
@@ -165,6 +171,13 @@ enum ScoringWindowMode {
   MANUAL
 }
 
+enum OAuthClientStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+  REVOKED
+}
+
 enum WindEstimateConfidence {
   LOW
   MEDIUM
@@ -201,6 +214,10 @@ model User {
   segmentResults     FlightSegmentResult[]
   tasks              FlightTask[]
   cupImports         CupImport[]
+  oauthClientsRegistered OAuthClient[] @relation("OAuthClientRegisteredBy")
+  oauthClientsReviewed   OAuthClient[] @relation("OAuthClientReviewedBy")
+  oauthGrants            OAuthGrant[]
+  oauthIdempotencyRecords OAuthIdempotencyRecord[]
 }
 
 model FlightSegment {
@@ -332,6 +349,64 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+}
+
+model OAuthClient {
+  id                 String            @id @default(cuid())
+  clientId           String            @unique
+  name               String
+  description        String?
+  redirectUris       String[]
+  allowedScopes      String[]
+  status             OAuthClientStatus @default(PENDING)
+  consentRequired    Boolean           @default(true)
+  registeredByUserId String
+  reviewedByUserId   String?
+  reviewedAt         DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  registeredBy      User                     @relation("OAuthClientRegisteredBy", fields: [registeredByUserId], references: [id], onDelete: Restrict)
+  reviewedBy        User?                    @relation("OAuthClientReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  grants            OAuthGrant[]
+  idempotencyRecords OAuthIdempotencyRecord[]
+
+  @@index([status, name])
+}
+
+model OAuthGrant {
+  id            String   @id @default(cuid())
+  userId        String
+  oauthClientId String
+  scopes        String[]
+  grantedAt     DateTime @default(now())
+  lastUsedAt    DateTime @default(now())
+  revokedAt     DateTime?
+
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client OAuthClient @relation(fields: [oauthClientId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, oauthClientId])
+  @@index([userId, revokedAt])
+  @@index([oauthClientId, revokedAt])
+}
+
+model OAuthIdempotencyRecord {
+  id             String   @id @default(cuid())
+  oauthClientId  String
+  userId         String
+  key            String
+  requestHash    String
+  responseStatus Int
+  responseBody   Json
+  createdAt      DateTime @default(now())
+  expiresAt      DateTime
+
+  client OAuthClient @relation(fields: [oauthClientId], references: [id], onDelete: Cascade)
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([oauthClientId, userId, key])
+  @@index([expiresAt])
 }
 
 model Session {

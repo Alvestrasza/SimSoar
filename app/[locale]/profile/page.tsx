@@ -13,6 +13,7 @@ import {
   type SimSoarRole
 } from "@/lib/rbac";
 import BadgeGallery from "@/app/components/BadgeGallery";
+import {revokeOAuthGrantAction} from "./oauth-grants-actions";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -71,6 +72,10 @@ const preferencesSavedParam = Array.isArray(queryParams.preferencesSaved)
   ? queryParams.preferencesSaved[0]
   : queryParams.preferencesSaved;
 
+const oauthRevokedParam = Array.isArray(queryParams.oauthRevoked)
+  ? queryParams.oauthRevoked[0]
+  : queryParams.oauthRevoked;
+
 const noticeStatus =
   savedParam === "1"
     ? "saved"
@@ -96,7 +101,7 @@ const noticeStatus =
 
   const highestVisibleRole = getHighestVisibleRole(session.user.roles);
 
-  const [profile, preferences, flights, badges] = await Promise.all([
+  const [profile, preferences, flights, badges, oauthGrants] = await Promise.all([
     prisma.pilotProfile.findUnique({
       where: {
         userId: session.user.id
@@ -120,8 +125,18 @@ const noticeStatus =
       where: {userId: session.user.id, badge: {enabled: true}},
       orderBy: {badge: {sortOrder: "asc"}},
       select: {awardedAt: true, badge: {select: {code: true, icon: true}}}
-    })
+    }),
+    prisma.oAuthGrant.findMany({where: {userId: session.user.id}, orderBy: {lastUsedAt: "desc"}, include: {client: {select: {name: true, clientId: true, status: true}}}})
   ]);
+
+  let identityAccountUrl: string | null = null;
+  try {
+    const issuer = process.env.AUTH_KEYCLOAK_ISSUER;
+    if (issuer) {
+      const accountUrl = new URL(`${issuer.replace(/\/$/, "")}/account`);
+      if (accountUrl.protocol === "https:") identityAccountUrl = accountUrl.toString();
+    }
+  } catch { identityAccountUrl = null; }
 
   return (
     <main className="wrap">
@@ -237,6 +252,10 @@ const noticeStatus =
       </div>
       <div className="card" style={{marginBottom: 20}}>
         <div className="cardBody"><BadgeGallery locale={locale} badges={badges} /></div>
+      </div>
+      <div className="card" style={{marginBottom: 20}}>
+        <div className="cardHead"><div><span className="cardTitle">{t("oauthTitle")}</span><p className="muted">{t("oauthText")}</p></div>{identityAccountUrl ? <a className="btn btnSecondary" href={identityAccountUrl} target="_blank" rel="noreferrer">{t("oauthIdentityAccount")}</a> : null}</div>
+        <div className="cardBody">{oauthRevokedParam === "1" ? <p className="badge">{t("oauthRevoked")}</p> : null}{oauthGrants.length ? <div className="moderationCardGrid">{oauthGrants.map((grant) => <article className="moderationCard" key={grant.id}><div><strong>{grant.client.name}</strong><p className="muted">{grant.client.clientId} · {grant.client.status}</p><p>{grant.scopes.join(", ")}</p><small className="muted">{t("oauthLastUsed", {date: grant.lastUsedAt.toLocaleString(locale)})}</small></div>{grant.revokedAt ? <span className="badge">{t("oauthAlreadyRevoked")}</span> : <form action={revokeOAuthGrantAction}><input type="hidden" name="locale" value={locale} /><input type="hidden" name="grantId" value={grant.id} /><button className="btn btnDanger" type="submit">{t("oauthRevoke")}</button></form>}</article>)}</div> : <p className="muted">{t("oauthEmpty")}</p>}</div>
       </div>
       <div className="card" style={{marginBottom: 20}}>
         <div className="cardHead">
