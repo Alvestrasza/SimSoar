@@ -18,7 +18,11 @@
     "logout": "Sign out",
     "myProfile": "My Profile",
     "admin": "Admin",
-    "notifications": "Notifications: {count} unread"
+    "notifications": "Notifications: {count} unread",
+    "more": "More",
+    "menu": "Menu",
+    "primaryNavigation": "Primary navigation",
+    "skipToContent": "Skip to content"
   },
   "Tasks": {
     "title": "Tasks and routes",

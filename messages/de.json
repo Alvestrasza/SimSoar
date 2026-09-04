@@ -18,7 +18,11 @@
     "logout": "Abmelden",
     "myProfile": "Mein Profil",
     "admin": "Admin",
-    "notifications": "Benachrichtigungen: {count} ungelesen"
+    "notifications": "Benachrichtigungen: {count} ungelesen",
+    "more": "Mehr",
+    "menu": "Menü",
+    "primaryNavigation": "Hauptnavigation",
+    "skipToContent": "Zum Inhalt springen"
   },
   "Tasks": {
     "title": "Aufgaben und Strecken",
