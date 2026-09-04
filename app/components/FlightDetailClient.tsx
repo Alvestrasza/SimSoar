@@ -5,6 +5,7 @@ import {useLocale, useTranslations} from "next-intl";
 import {Link} from "@/i18n/navigation";
 import AltitudeChart from "./AltitudeChart";
 import FlightTrackMap from "./FlightTrackMap";
+import Flight3DView from "./Flight3DView";
 import FlightOwnerActions from "./FlightOwnerActions";
 import {updateScoringWindowAction} from "@/app/[locale]/flights/[id]/scoring-actions";
 import {sortThermals, type ThermalSortMode} from "@/lib/thermal-analysis";
@@ -126,7 +127,7 @@ type Props = {
   preferredMapMode?: MapModePreference;
 };
 
-type Tab = "map" | "altitude" | "thermals" | "info";
+type Tab = "map" | "3d" | "altitude" | "thermals" | "info";
 
 function durationLabel(seconds: number) {
   const safe = Math.max(0, seconds || 0);
@@ -383,6 +384,13 @@ export default function FlightDetailClient({
             </button>
 
             <button
+              className={tabClass("3d", tab)}
+              onClick={() => setTab("3d")}
+            >
+              {t("tab3d")}
+            </button>
+
+            <button
               className={tabClass("altitude", tab)}
               onClick={() => setTab("altitude")}
             >
@@ -431,6 +439,12 @@ export default function FlightDetailClient({
                 </div>
               )}
             </div>
+          </div>
+
+          <div className={tab === "3d" ? "tabPane padded" : "tabPane padded hidden"}>
+            <h3>{t("flight3dTitle")}</h3>
+            <p className="muted">{t("flight3dDescription")}</p>
+            <Flight3DView points={flight.track} activeIndex={replayIndex} active={tab === "3d"} />
           </div>
 
           <div
