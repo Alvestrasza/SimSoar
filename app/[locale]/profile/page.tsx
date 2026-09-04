@@ -12,6 +12,7 @@ import {
   SIMSOAR_ROLE_ORDER,
   type SimSoarRole
 } from "@/lib/rbac";
+import BadgeGallery from "@/app/components/BadgeGallery";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -95,7 +96,7 @@ const noticeStatus =
 
   const highestVisibleRole = getHighestVisibleRole(session.user.roles);
 
-  const [profile, preferences, flights] = await Promise.all([
+  const [profile, preferences, flights, badges] = await Promise.all([
     prisma.pilotProfile.findUnique({
       where: {
         userId: session.user.id
@@ -114,6 +115,11 @@ const noticeStatus =
         createdAt: "desc"
       },
       take: 20
+    }),
+    prisma.userBadge.findMany({
+      where: {userId: session.user.id, badge: {enabled: true}},
+      orderBy: {badge: {sortOrder: "asc"}},
+      select: {awardedAt: true, badge: {select: {code: true, icon: true}}}
     })
   ]);
 
@@ -228,6 +234,9 @@ const noticeStatus =
 
           {noticeStatus ? <ProfileSaveNotice status={noticeStatus} /> : null}
         </form>
+      </div>
+      <div className="card" style={{marginBottom: 20}}>
+        <div className="cardBody"><BadgeGallery locale={locale} badges={badges} /></div>
       </div>
       <div className="card" style={{marginBottom: 20}}>
         <div className="cardHead">

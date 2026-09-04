@@ -494,6 +494,28 @@
     "save": "Save story",
     "removeImage": "Remove image"
   },
+  "Badges": {
+    "title": "Badges and level",
+    "empty": "No badges earned yet.",
+    "level": "Level: {level}",
+    "level_ROOKIE": "Rookie",
+    "level_EXPLORER": "Explorer",
+    "level_ACHIEVER": "Achiever",
+    "level_LEGEND": "Legend",
+    "awarded": "Awarded {date}",
+    "badge_FIRST_FLIGHT_name": "First Flight",
+    "badge_FIRST_FLIGHT_description": "Uploaded the first approved flight.",
+    "badge_DISTANCE_100_name": "100 km",
+    "badge_DISTANCE_100_description": "Completed an approved flight of at least 100 km.",
+    "badge_DISTANCE_300_name": "300 km",
+    "badge_DISTANCE_300_description": "Completed an approved flight of at least 300 km.",
+    "badge_DISTANCE_500_name": "500 km",
+    "badge_DISTANCE_500_description": "Completed an approved flight of at least 500 km.",
+    "badge_BEST_THERMAL_name": "Strong Thermal",
+    "badge_BEST_THERMAL_description": "Recorded a thermal with at least 5 m/s maximum climb.",
+    "badge_WEEKLY_ACTIVITY_name": "Weekly Activity",
+    "badge_WEEKLY_ACTIVITY_description": "Uploaded flights on three different days within one week."
+  },
   "LocaleSwitcher": {
     "label": "Change language"
   },
@@ -522,7 +544,19 @@
     "openIgcBlocks": "Manage IGC hashes",
     "airspacesTitle": "Airspace data",
     "airspacesText": "Imported OpenAir polygons for maps and technical crossing checks.",
-    "openAirspaces": "Manage airspace data"
+    "openAirspaces": "Manage airspace data",
+    "badgesTitle": "Badges",
+    "badgesText": "Automatically awarded achievements and pilot levels.",
+    "openBadges": "Manage badges"
+  },
+  "AdminBadges": {
+    "title": "Manage badges",
+    "subtitle": "Enable or disable automatic achievements.",
+    "back": "Back to Admin Dashboard",
+    "updated": "The badge setting was updated.",
+    "awarded": "{count} awards",
+    "enable": "Enable",
+    "disable": "Disable"
   },
   "AdminAirspaces": {
     "pageTitle": "Airspace data",

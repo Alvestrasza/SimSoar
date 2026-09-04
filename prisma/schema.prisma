@@ -83,6 +83,7 @@ enum AuditAction {
   AIRSPACE_DELETE
   FLIGHT_STORY_UPDATE
   FLIGHT_STORY_IMAGE_DELETE
+  BADGE_SETTINGS_UPDATE
 }
 
 enum HomeFeedMode {
@@ -137,6 +138,7 @@ model User {
   notifications  Notification[]        @relation("NotificationRecipient")
   notificationsSent Notification[]     @relation("NotificationActor")
   uploadBatches     UploadBatch[]
+  badges            UserBadge[]
 }
 
 model Account {
@@ -203,6 +205,35 @@ model PilotProfile {
   updatedAt              DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BadgeDefinition {
+  id          String   @id
+  code        String   @unique
+  name        String
+  description String
+  icon        String
+  enabled     Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       UserBadge[]
+
+  @@index([enabled, sortOrder])
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  awardedAt DateTime @default(now())
+
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge BadgeDefinition @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId, awardedAt])
+  @@index([badgeId])
 }
 
 model Flight {

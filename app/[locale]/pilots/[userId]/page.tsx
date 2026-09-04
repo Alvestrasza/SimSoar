@@ -4,6 +4,7 @@ import {Link} from "@/i18n/navigation";
 import {prisma} from "@/lib/db";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
+import BadgeGallery from "@/app/components/BadgeGallery";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -51,6 +52,11 @@ export default async function PilotProfilePage({params}: PilotProfilePageProps) 
               olcPoints: true,
               createdAt: true
             }
+          },
+          badges: {
+            where: {badge: {enabled: true}},
+            orderBy: {badge: {sortOrder: "asc"}},
+            select: {awardedAt: true, badge: {select: {code: true, icon: true}}}
           }
         }
       }),
@@ -119,6 +125,7 @@ export default async function PilotProfilePage({params}: PilotProfilePageProps) 
               .filter(Boolean)
               .join(" · ") || t("profileDetailsEmpty")}
           </p>
+          <BadgeGallery locale={supportedLocale} badges={pilot.badges} />
         </div>
       </section>
 
