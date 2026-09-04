@@ -8,9 +8,11 @@ type Props = {
   thermalRanges?: Array<{startSeq?: number | null; endSeq?: number | null}>;
   minAlt: number;
   maxAlt: number;
+  activeIndex?: number;
+  activeThermal?: boolean;
 };
 
-export default function AltitudeChart({profile, pointSequences = [], thermalRanges = [], minAlt, maxAlt}: Props) {
+export default function AltitudeChart({profile, pointSequences = [], thermalRanges = [], minAlt, maxAlt, activeIndex = -1, activeThermal = false}: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -81,7 +83,21 @@ export default function AltitudeChart({profile, pointSequences = [], thermalRang
     ctx.font = "11px Inter, sans-serif";
     ctx.fillText(`${maxAlt} m`, pad + 4, 16);
     ctx.fillText(`${minAlt} m`, pad + 4, height - 4);
-  }, [profile, pointSequences, thermalRanges, minAlt, maxAlt]);
+
+    if (activeIndex >= 0 && activeIndex < profile.length) {
+      const activePoint = point(profile[activeIndex], activeIndex);
+      ctx.beginPath();
+      ctx.moveTo(activePoint.x, pad);
+      ctx.lineTo(activePoint.x, height - pad);
+      ctx.strokeStyle = activeThermal ? "#f59e0b" : "#2563eb";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(activePoint.x, activePoint.y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = activeThermal ? "#f59e0b" : "#2563eb";
+      ctx.fill();
+    }
+  }, [profile, pointSequences, thermalRanges, minAlt, maxAlt, activeIndex, activeThermal]);
 
   return <canvas ref={canvasRef} className="altitudeCanvas" />;
 }

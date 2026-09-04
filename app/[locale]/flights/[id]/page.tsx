@@ -218,7 +218,8 @@ export default async function FlightDetailPage({
           lat: p.lat,
           lon: p.lon,
           altM: p.altM,
-          varioMs: p.varioMs
+          varioMs: p.varioMs,
+          time: p.time?.toISOString() ?? null
         })),
         thermals: flight.thermals.map((t: any) => ({
           id: t.id,
