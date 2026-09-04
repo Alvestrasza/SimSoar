@@ -84,6 +84,16 @@ enum AuditAction {
   FLIGHT_STORY_UPDATE
   FLIGHT_STORY_IMAGE_DELETE
   BADGE_SETTINGS_UPDATE
+  CLUB_CREATE
+  CLUB_UPDATE
+  CLUB_DELETE
+  CLUB_MEMBER_ASSIGN
+  CLUB_MEMBER_REMOVE
+}
+
+enum ClubMemberRole {
+  MEMBER
+  MANAGER
 }
 
 enum HomeFeedMode {
@@ -139,6 +149,7 @@ model User {
   notificationsSent Notification[]     @relation("NotificationActor")
   uploadBatches     UploadBatch[]
   badges            UserBadge[]
+  clubMemberships   ClubMembership[]
 }
 
 model Account {
@@ -234,6 +245,33 @@ model UserBadge {
   @@unique([userId, badgeId])
   @@index([userId, awardedAt])
   @@index([badgeId])
+}
+
+model Club {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  memberships ClubMembership[]
+
+  @@index([name])
+}
+
+model ClubMembership {
+  id       String         @id @default(cuid())
+  clubId   String
+  userId   String
+  role     ClubMemberRole @default(MEMBER)
+  joinedAt DateTime       @default(now())
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([clubId, userId])
+  @@index([clubId, role])
+  @@index([userId])
 }
 
 model Flight {
