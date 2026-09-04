@@ -724,7 +724,7 @@
   },
   "Login": {
     "title": "🔐 Anmeldung",
-    "description": "SimSoar nutzt eine OIDC Benutzerverwaltung, MFA und Passwortregeln bleiben zentral.",
+    "description": "Bitte melde dich an, um diese Funktion zu nutzen.",
     "button": "Anmelden"
   },
   "FlightStory": {
