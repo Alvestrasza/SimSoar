@@ -2,6 +2,16 @@
 
 All notable changes to SimSoar are documented in this file.
 
+## [0.6.1] - Unreleased
+
+### Navigation and personal journal
+
+- Retained global actions in the top header and added a per-user left/right flight-data sidebar, with all destinations available in the mobile menu (#75).
+- Consolidated shared widths and reduced oversized card, form, table and hero spacing while retaining local table scrolling and touch-friendly controls (#76).
+- Added an owner-private Pilot Journal combining available recorded activities with dated personal notes and securely processed photographs (#77).
+- Added an additive journal/navigation migration, bounded chronological pagination, owner-scoped image delivery, storage quotas and regression coverage.
+- See [Navigation and layout](docs/navigation-and-layout.md) and [Pilot Journal](docs/pilot-journal.md) for usage and limitations. These changes remain in the existing v0.6.0 milestone; production promotion requires separate authorization.
+
 ## [0.6.0] - 2026-09-04
 
 SimSoar v0.6.0 consolidates the security, trust, integration, and Sim2Real controls assigned to the v0.6.0 milestone. It is deployed to the development environment only and is not a production promotion.

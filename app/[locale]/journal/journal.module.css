@@ -1,0 +1,41 @@
+.journal { min-width: 0; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: .75rem 0 1rem; }
+.header h1 { margin: .2rem 0; font-size: clamp(1.5rem, 2.5vw, 2rem); }
+.header p { margin: .35rem 0 0; }
+.privacy { display: inline-flex; color: var(--text2); font-size: .8rem; }
+.history { padding: .55rem 0; margin-bottom: .75rem; color: var(--text2); font-size: .85rem; }
+.history summary, .deleteSection summary { cursor: pointer; }
+.history p { max-width: 100ch; line-height: 1.5; }
+.timeline { list-style: none; padding: 0; margin: 0; }
+.timelineItem { min-width: 0; }
+.day { margin: 1.35rem 0 .65rem; font-size: .95rem; color: var(--text2); }
+.activity { border-left: 2px solid var(--border); padding: .7rem 1rem; margin: 0 0 .2rem .25rem; min-width: 0; overflow-wrap: anywhere; }
+.manual { background: var(--surface); border-left-color: var(--accent); border-radius: 0 .6rem .6rem 0; margin-bottom: .55rem; }
+.activityHead { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .4rem 1rem; font-size: .78rem; color: var(--text2); }
+.kind { font-weight: 600; }
+.activity h3 { font-size: 1rem; margin: .4rem 0; }
+.body { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.55; margin: .3rem 0; font-size: .92rem; }
+.photos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: .65rem; margin-top: .75rem; max-width: 1100px; }
+.photos img { display: block; width: 100%; max-height: 280px; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: .4rem; }
+.photos a { min-width: 0; }
+.pagination { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-top: 1.25rem; }
+.empty { padding: 1.2rem; }
+.formCard { padding: 1rem; }
+.editor { display: grid; gap: .65rem; }
+.editor label { display: grid; min-width: 0; gap: .4rem; font-weight: 600; font-size: .9rem; }
+.editor input:not([type="checkbox"]), .editor textarea { width: 100%; min-width: 0; box-sizing: border-box; padding: .6rem .7rem; border: 1px solid var(--border); border-radius: .4rem; color: var(--text); background: var(--surface); font: inherit; }
+.editor textarea { resize: vertical; line-height: 1.5; min-height: 200px; }
+.editorTop { display: grid; grid-template-columns: minmax(0, 1fr) minmax(160px, 230px); gap: .8rem; }
+.editor small { font-size: .78rem; line-height: 1.5; color: var(--text2); }
+.existingPhotos { border: 1px solid var(--border); border-radius: .4rem; min-width: 0; padding: .7rem; }
+.photoChoice span { font-size: .8rem; font-weight: 400; }
+.actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .4rem; }
+.deleteSection { margin-top: 1.2rem; padding: .75rem 0; }
+.deleteSection form { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; }
+@media (max-width: 600px) {
+  .header { align-items: flex-start; flex-direction: column; gap: .75rem; }
+  .editorTop { grid-template-columns: 1fr; }
+  .activity { padding: .65rem .7rem; }
+  .formCard { padding: .8rem; }
+  .photos { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .4rem; }
+}

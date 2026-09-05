@@ -267,12 +267,21 @@ const noticeStatus =
 
           <div className="formGrid">
             <div className="formGroup">
-              <label>{t("themePreference")}</label>
-              <select name="theme" defaultValue={preferences?.theme ?? "SYSTEM"}>
+              <label htmlFor="themePreference">{t("themePreference")}</label>
+              <select id="themePreference" name="theme" defaultValue={preferences?.theme ?? "SYSTEM"}>
                 <option value="SYSTEM">{t("themeSystem")}</option>
                 <option value="LIGHT">{t("themeLight")}</option>
                 <option value="DARK">{t("themeDark")}</option>
               </select>
+            </div>
+
+            <div className="formGroup">
+              <label htmlFor="navigationSide">{t("navigationSide")}</label>
+              <select id="navigationSide" name="navigationSide" defaultValue={preferences?.navigationSide ?? "LEFT"} aria-describedby="navigationSideHint">
+                <option value="LEFT">{t("navigationLeft")}</option>
+                <option value="RIGHT">{t("navigationRight")}</option>
+              </select>
+              <p id="navigationSideHint" className="muted navigationPreferenceHint">{t("navigationHint")}</p>
             </div>
 
             <div className="formGroup">

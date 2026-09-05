@@ -37,6 +37,7 @@ The platform is intended to support:
 
 - upload and analysis of IGC flight logs
 - personal pilot profiles and callsigns
+- a private pilot journal with recorded activities, personal notes and photographs
 - individual flight histories
 - public flight listings and leaderboards
 - basic soaring performance analysis
@@ -65,6 +66,8 @@ The project should stay focused, clean, and practical. It should serve the flyin
 ---
 
 ## Core Features
+
+The v0.6.1 update adds [configurable flight-data navigation and a compact layout](docs/navigation-and-layout.md) and a [private Pilot Journal](docs/pilot-journal.md). These additions are tracked in the existing v0.6.0 milestone.
 
 The v0.6.0 development baseline includes:
 

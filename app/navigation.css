@@ -1,0 +1,33 @@
+.workspaceFrame {
+  width: min(100%, 1808px);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 184px minmax(0, 1fr);
+  align-items: start;
+}
+
+.workspaceBody { min-width: 0; grid-column: 2; grid-row: 1; }
+.flightSidebar { grid-column: 1; grid-row: 1; min-width: 0; padding: 18px 8px 16px 12px; position: sticky; top: 74px; max-height: calc(100dvh - 74px); overflow-y: auto; }
+.hasDevBanner .flightSidebar { top: 100px; max-height: calc(100dvh - 100px); }
+.workspaceFrame[data-navigation-side="RIGHT"] { grid-template-columns: minmax(0, 1fr) 184px; }
+.workspaceFrame[data-navigation-side="RIGHT"] .workspaceBody { grid-column: 1; }
+.workspaceFrame[data-navigation-side="RIGHT"] .flightSidebar { grid-column: 2; padding-inline: 8px 12px; }
+.flightNavigation { display: flex; flex-direction: column; gap: 3px; }
+.flightNavigationHeading { color: var(--muted); font-size: .69rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; padding: 4px 10px 10px; }
+.flightNavigationLink { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 10px; border-radius: 7px; color: var(--text2); font-size: .86rem; font-weight: 600; text-decoration: none; }
+.flightNavigationLink svg { width: 21px; height: 21px; flex: 0 0 21px; }
+.flightNavigationLink:hover { color: var(--text); background: color-mix(in srgb, var(--text) 5%, transparent); }
+.flightNavigationLink[aria-current="page"] { color: var(--accent); background: var(--accent-lt); }
+.flightNavigationLink:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.navigationPreferenceHint { font-size: .82rem; margin: 5px 0 0; }
+
+@media (max-width: 1080px) {
+  .workspaceFrame, .workspaceFrame[data-navigation-side="RIGHT"] { display: block; }
+  .flightSidebar { display: none; }
+  .flightNavigationMobile { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--border); }
+  .flightNavigationMobile .flightNavigationLink { min-height: 44px; font-size: .9rem; }
+}
+
+@media (max-width: 360px) {
+  .flightNavigationMobile { grid-template-columns: 1fr; }
+}

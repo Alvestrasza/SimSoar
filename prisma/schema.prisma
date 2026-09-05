@@ -120,6 +120,9 @@ enum AuditAction {
   AUTHENTICITY_EVIDENCE_SUBMIT
   AUTHENTICITY_APPEAL_CREATE
   AUTHENTICITY_APPEAL_REVIEW
+  JOURNAL_ENTRY_CREATE
+  JOURNAL_ENTRY_UPDATE
+  JOURNAL_ENTRY_DELETE
 }
 
 enum ClubMemberRole {
@@ -239,6 +242,40 @@ model User {
   authenticityKeys        AuthenticityKey[]
   authenticitySubmissions FlightAuthenticitySubmission[] @relation("AuthenticitySubmittedBy")
   authenticityReviews     FlightAuthenticitySubmission[] @relation("AuthenticityReviewedBy")
+  journalEntries          JournalEntry[]
+}
+
+model JournalEntry {
+  id         String   @id @default(cuid())
+  userId     String
+  title      String
+  body       String
+  occurredAt DateTime
+  version    Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images JournalImage[]
+
+  @@unique([id, userId])
+  @@index([userId, occurredAt, id])
+}
+
+model JournalImage {
+  id         String   @id @default(cuid())
+  entryId    String
+  userId     String
+  storageKey String   @unique
+  sizeBytes  Int
+  width      Int
+  height     Int
+  createdAt  DateTime @default(now())
+
+  entry JournalEntry @relation(fields: [entryId, userId], references: [id, userId], onDelete: Cascade)
+
+  @@index([entryId, createdAt])
+  @@index([userId])
 }
 
 model FlightSegment {
@@ -298,6 +335,7 @@ model FlightTask {
   waypoints TaskWaypoint[]
 
   @@index([ownerId, updatedAt])
+  @@index([ownerId, createdAt, id])
   @@index([visibility, updatedAt])
   @@index([lineageId, revision])
 }
@@ -552,6 +590,7 @@ model ClubMembership {
   @@unique([clubId, userId])
   @@index([clubId, role])
   @@index([userId])
+  @@index([userId, joinedAt, id])
 }
 
 model Competition {
@@ -596,6 +635,7 @@ model CompetitionEntry {
   @@index([competitionId, score])
   @@index([competitionId, userId])
   @@index([flightId])
+  @@index([userId, assignedAt, id])
 }
 
 model League {
@@ -654,6 +694,7 @@ model LeagueRoundEntry {
   @@index([roundId, score])
   @@index([roundId, userId])
   @@index([flightId])
+  @@index([userId, createdAt, id])
 }
 
 model Flight {
@@ -901,6 +942,7 @@ model UserPreference {
   homeFeedMode             HomeFeedMode              @default(PUBLIC)
   homeFeedSimulator        String?
   homeFeedCompetitionClass String?
+  navigationSide           String                    @default("LEFT")
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
 

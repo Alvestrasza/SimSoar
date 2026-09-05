@@ -14,6 +14,7 @@ import {
 } from "@/lib/site";
 import "leaflet/dist/leaflet.css";
 import "../globals.css";
+import "../navigation.css";
 import {AuthNav} from "@/app/components/AuthNav";
 import LocaleSwitcher from "@/app/components/LocaleSwitcher";
 import {auth} from "@/auth";
@@ -23,6 +24,8 @@ import {hasRole} from "@/lib/rbac";
 import type {Session} from "next-auth";
 import ClosableNavigationMenu from "@/app/components/ClosableNavigationMenu";
 import SortableTables from "@/app/components/SortableTables";
+import FlightNavigation from "@/app/components/FlightNavigation";
+import {navigationSide, type NavigationSide} from "@/lib/navigation";
 
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -96,6 +99,7 @@ export default async function LocaleLayout({
   let themePreference: "system" | "light" | "dark" = "system";
   let session: Session | null = null;
   let unreadNotifications = 0;
+  let preferredNavigationSide: NavigationSide = "LEFT";
 
   try {
     session = await auth();
@@ -104,13 +108,14 @@ export default async function LocaleLayout({
       const [preferences, unreadCount] = await Promise.all([
         prisma.userPreference.findUnique({
           where: {userId: session.user.id},
-          select: {theme: true}
+          select: {theme: true, navigationSide: true}
         }),
         prisma.notification.count({
           where: {userId: session.user.id, readAt: null}
         })
       ]);
       unreadNotifications = unreadCount;
+      preferredNavigationSide = navigationSide(preferences?.navigationSide);
 
       if (preferences?.theme === "LIGHT") themePreference = "light";
       if (preferences?.theme === "DARK") themePreference = "dark";
@@ -124,18 +129,8 @@ export default async function LocaleLayout({
   const isDevelopmentEnvironment = process.env.NEXT_PUBLIC_SIMSOAR_ENV === "dev";
   const primaryItems = [
     {href: "/" as const, label: nav("home")},
-    {href: "/flights" as const, label: nav("flights")},
-    {href: "/upload" as const, label: nav("upload")},
-    {href: "/pilots" as const, label: nav("pilots")},
-    {href: "/clubs" as const, label: nav("clubs")},
-    {href: "/competitions" as const, label: nav("competitions")}
+    {href: "/upload" as const, label: nav("upload")}
   ];
-  const secondaryItems = [
-    {href: "/leagues" as const, label: nav("leagues")},
-    {href: "/tasks" as const, label: nav("tasks")},
-    {href: "/segments" as const, label: nav("segments")}
-  ];
-  const allItems = [...primaryItems, ...secondaryItems];
 
   return (
     <html lang={locale} data-theme={themePreference} suppressHydrationWarning>
@@ -151,23 +146,16 @@ export default async function LocaleLayout({
           ) : null}
 
           <header className="siteHeader">
-            <nav className="nav" aria-label={nav("primaryNavigation")}>
+            <div className="nav">
               <div className="navInner">
                 <Link className="logo" href="/">
                   <span className="logoMark" aria-hidden="true">🛩</span>
                   <span>SimSoar</span>
                 </Link>
 
-                <div className="navLinks">
+                <nav className="navLinks" aria-label={nav("primaryNavigation")}>
                   {primaryItems.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
-                  <ClosableNavigationMenu
-                    className="navMore"
-                    panelClassName="navMorePanel"
-                    summary={nav("more")}
-                  >
-                    {secondaryItems.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
-                  </ClosableNavigationMenu>
-                </div>
+                </nav>
 
                 <div className="navRight">
                   {session?.user?.id ? (
@@ -192,9 +180,10 @@ export default async function LocaleLayout({
                     summaryAriaLabel={nav("menu")}
                     summaryTitle={nav("menu")}
                   >
-                    <div className="mobileMenuLinks">
-                      {allItems.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
-                    </div>
+                    <nav className="mobileMenuLinks" aria-label={nav("primaryNavigation")}>
+                      {primaryItems.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+                    </nav>
+                    <FlightNavigation mobile />
                     <div className="mobileMenuUtilities">
                       <LocaleSwitcher />
                       <Suspense fallback={null}>
@@ -204,9 +193,12 @@ export default async function LocaleLayout({
                   </ClosableNavigationMenu>
                 </div>
               </div>
-            </nav>
+            </div>
           </header>
 
+          <div className="workspaceFrame" data-navigation-side={preferredNavigationSide}>
+            <aside className="flightSidebar"><FlightNavigation /></aside>
+            <div className="workspaceBody">
           <div id="main-content" className="pageShell" tabIndex={-1}>
             {children}
           </div>
@@ -235,6 +227,8 @@ export default async function LocaleLayout({
 
             <span>{footer("version", { version: SITE_VERSION })}</span>
           </footer>
+            </div>
+          </div>
         </NextIntlClientProvider>
       </body>
     </html>

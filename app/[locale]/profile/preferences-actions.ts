@@ -6,10 +6,12 @@ import {z} from "zod";
 import {auth} from "@/auth";
 import {prisma} from "@/lib/db";
 import {writeAuditLog} from "@/lib/audit";
+import {NAVIGATION_SIDES} from "@/lib/navigation";
 
 const preferencesSchema = z.object({
   locale: z.enum(["de", "en"]).default("de"),
   theme: z.enum(["SYSTEM", "LIGHT", "DARK"]),
+  navigationSide: z.enum(NAVIGATION_SIDES),
   preferredSimulator: z.enum([
     "MSFS 2024",
     "MSFS 2020",
@@ -41,6 +43,7 @@ export async function savePreferencesAction(formData: FormData) {
   const fields = preferencesSchema.parse({
     locale: formData.get("locale") || "de",
     theme: formData.get("theme"),
+    navigationSide: formData.get("navigationSide") || "LEFT",
     preferredSimulator: formData.get("preferredSimulator") || "MSFS 2024",
     unitSystem: formData.get("unitSystem") || "METRIC",
     preferredLeaderboardView: formData.get("preferredLeaderboardView") || "ALL",
@@ -57,6 +60,7 @@ export async function savePreferencesAction(formData: FormData) {
     create: {
       userId: session.user.id,
       theme: fields.theme,
+      navigationSide: fields.navigationSide,
       preferredSimulator: fields.preferredSimulator,
       unitSystem: fields.unitSystem,
       preferredLeaderboardView: fields.preferredLeaderboardView,
@@ -67,6 +71,7 @@ export async function savePreferencesAction(formData: FormData) {
     },
     update: {
       theme: fields.theme,
+      navigationSide: fields.navigationSide,
       preferredSimulator: fields.preferredSimulator,
       unitSystem: fields.unitSystem,
       preferredLeaderboardView: fields.preferredLeaderboardView,
@@ -86,6 +91,7 @@ export async function savePreferencesAction(formData: FormData) {
     summary: "User preferences were updated.",
     metadata: {
       theme: fields.theme,
+      navigationSide: fields.navigationSide,
       preferredSimulator: fields.preferredSimulator,
       unitSystem: fields.unitSystem,
       preferredLeaderboardView: fields.preferredLeaderboardView,
@@ -97,7 +103,7 @@ export async function savePreferencesAction(formData: FormData) {
   });
 
   revalidatePath(`/${fields.locale}/profile`);
-  revalidatePath(`/${fields.locale}`);
+  revalidatePath(`/${fields.locale}`, "layout");
 
   redirect(`/${fields.locale}/profile?preferencesSaved=1`);
 }
