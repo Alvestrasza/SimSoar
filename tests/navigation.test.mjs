@@ -36,3 +36,9 @@ test("sidebar preferences are validated and persisted using authenticated identi
   assert.match(action, /revalidatePath\(`\/\$\{fields.locale\}`, "layout"\)/);
   assert.doesNotMatch(action, /formData\.get\("userId"\)/);
 });
+
+test("the document can shrink below the viewport width when a scrollbar occupies space", () => {
+  const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(css, /html\s*\{\s*min-width:\s*0;/);
+  assert.doesNotMatch(css, /html\s*\{[^}]*min-width:\s*320px/);
+});

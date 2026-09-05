@@ -2,7 +2,11 @@
 
 All notable changes to SimSoar are documented in this file.
 
-## [0.6.1] - Unreleased
+## [0.6.2] - Unreleased
+
+- Removed the legacy document minimum width that clipped the right edge at a 320px viewport with a non-overlay scrollbar (#76). Added a regression guard.
+
+## [0.6.1] - 2026-09-05
 
 ### Navigation and personal journal
 
