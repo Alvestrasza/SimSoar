@@ -2,6 +2,13 @@
 
 All notable changes to SimSoar are documented in this file.
 
+## [0.6.3] - 2026-09-05
+
+- Aligned the configurable flight-data rail directly to the left or right viewport edge, with square tiles, larger symbols and smaller labels (#75).
+- Kept the footer visible alongside the top navigation, with measured space for wrapped text, mobile menus and page-end content (#76).
+- Made shared content and top-level page wrappers grow with the viewport from 1900px onward, without large outer margins (#76).
+- Preserved mobile navigation, table-local scrolling and normal document/keyboard scrolling. No authentication, preference persistence or database behavior changes.
+
 ## [0.6.2] - 2026-09-05
 
 - Removed the legacy document minimum width that clipped the right edge at a 320px viewport with a non-overlay scrollbar (#76). Added a regression guard.

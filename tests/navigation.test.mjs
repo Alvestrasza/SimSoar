@@ -42,3 +42,22 @@ test("the document can shrink below the viewport width when a scrollbar occupies
   assert.match(css, /html\s*\{\s*min-width:\s*0;/);
   assert.doesNotMatch(css, /html\s*\{[^}]*min-width:\s*320px/);
 });
+
+test("the edge rail uses square tiles and swaps the reserved content column", () => {
+  const css = readFileSync(new URL("../app/navigation.css", import.meta.url), "utf8");
+  assert.match(css, /\.workspaceFrame\s*\{[^}]*width:\s*100%;/);
+  assert.match(css, /\.flightSidebar\s*\{[^}]*position:\s*fixed;/);
+  assert.match(css, /\.flightSidebar\s*\{[^}]*left:\s*0;/);
+  assert.match(css, /\[data-navigation-side="RIGHT"\] \.flightSidebar\s*\{[^}]*right:\s*0;/);
+  assert.match(css, /\.flightSidebar \.flightNavigationLink\s*\{[^}]*aspect-ratio:\s*1;/);
+});
+
+test("viewport chrome reserves the measured footer and uses fluid wide-screen containers", () => {
+  const css = readFileSync(new URL("../app/navigation.css", import.meta.url), "utf8");
+  const layout = readFileSync(new URL("../app/[locale]/layout.tsx", import.meta.url), "utf8");
+  assert.match(css, /padding-bottom:\s*var\(--shell-footer-height\)/);
+  assert.match(css, /\.appShell \.siteFooter\s*\{[^}]*position:\s*fixed;/);
+  assert.match(css, /\.appShell \.siteFooter\s*\{[^}]*bottom:\s*0;/);
+  assert.match(css, /@media \(min-width: 1900px\)[\s\S]*--content-width:\s*100%;/);
+  assert.match(layout, /<ViewportChrome\s*\/>/);
+});

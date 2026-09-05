@@ -25,6 +25,7 @@ import type {Session} from "next-auth";
 import ClosableNavigationMenu from "@/app/components/ClosableNavigationMenu";
 import SortableTables from "@/app/components/SortableTables";
 import FlightNavigation from "@/app/components/FlightNavigation";
+import ViewportChrome from "@/app/components/ViewportChrome";
 import {navigationSide, type NavigationSide} from "@/lib/navigation";
 
 type LocaleLayoutProps = {
@@ -134,9 +135,10 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} data-theme={themePreference} suppressHydrationWarning>
-      <body className={isDevelopmentEnvironment ? "hasDevBanner" : undefined}>
+      <body className={isDevelopmentEnvironment ? "appShell hasDevBanner" : "appShell"}>
         <NextIntlClientProvider messages={messages}>
           <SortableTables />
+          <ViewportChrome />
           <a className="skipLink" href="#main-content">{nav("skipToContent")}</a>
 
           {isDevelopmentEnvironment ? (
@@ -202,6 +204,8 @@ export default async function LocaleLayout({
           <div id="main-content" className="pageShell" tabIndex={-1}>
             {children}
           </div>
+            </div>
+          </div>
 
           <footer className="siteFooter">
             <span>
@@ -227,8 +231,6 @@ export default async function LocaleLayout({
 
             <span>{footer("version", { version: SITE_VERSION })}</span>
           </footer>
-            </div>
-          </div>
         </NextIntlClientProvider>
       </body>
     </html>

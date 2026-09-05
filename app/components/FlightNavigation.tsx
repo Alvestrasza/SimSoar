@@ -20,9 +20,8 @@ export default function FlightNavigation({mobile = false}: {mobile?: boolean}) {
   const pathname = usePathname();
   return (
     <nav className={mobile ? "flightNavigation flightNavigationMobile" : "flightNavigation"} aria-label={t("flightNavigation")}>
-      {!mobile && <span className="flightNavigationHeading">{t("flightNavigation")}</span>}
       {FLIGHT_NAVIGATION.map((item) => (
-        <Link key={item.href} href={item.href} className="flightNavigationLink" aria-current={isNavigationActive(pathname, item.href) ? "page" : undefined}>
+        <Link key={item.href} href={item.href} className="flightNavigationLink" title={t(item.label)} aria-current={isNavigationActive(pathname, item.href) ? "page" : undefined}>
           <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d={paths[item.icon]} /></svg>
           <span>{t(item.label)}</span>
         </Link>
